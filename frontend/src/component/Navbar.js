@@ -14,8 +14,8 @@ function Navbar() {
           <Link to={"/"}>  <h1  className="text-2xl font-bold text-blue-600 px-3 hidden md:block">CampusConnect</h1></Link>
           
         </div>
-        <div className='hidden md:flex items-center justify-center'>
-            <ul className="flex space-x-4">
+        <div className='hidden md:flex items-center justify-center '>
+            <ul className="flex space-x-4 ">
                 <Link to={"/"} className="hover:text-blue-400 cursor-pointer transition-all duration-200">Home</Link>
                 <Link to={"/notes"} className="hover:text-blue-400 cursor-pointer transition-all duration-200">Notes</Link>
                 <Link to={"/result"} className="hover:text-blue-400 cursor-pointer transition-all duration-200">Results</Link>
@@ -29,7 +29,7 @@ function Navbar() {
         </div>
      </div>
      {isOpen && (
-       <div className='md:hidden'>
+       <div className='md:hidden mt-[80px]'>
          <ul className="flex flex-col space-y-2 px-4 mb-4">
            <Link to={"/"} className="hover:text-white  hover:bg-blue-400 px-[5px] py-[3px] rounded-md cursor-pointer transition-all duration-200  w-full ">Home</Link>
            <Link to={"/notes"} className="hover:text-white hover:bg-blue-400 px-[5px] py-[3px] rounded-md  cursor-pointer transition-all duration-200 w-full m-1">Notes</Link>

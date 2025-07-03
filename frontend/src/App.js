@@ -9,6 +9,7 @@ import Profile from './Profile/Profile.js';
 import Result from './Result/Result.js';
 import Notes from './Notes/Notes.js';
 import JobSection from './Job/JobSection.js';
+import ForgetPassword from './ForgetPassword.js';
 function App() {
   return (
     <div>
@@ -18,6 +19,7 @@ function App() {
       <Route path="/" element={<Hero />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
+      <Route path='/forget' element={<ForgetPassword />} />
       <Route path="/notes" element={<Notes />} />
       <Route path="/jobs" element={<JobSection />} />
       <Route path="/profile" element={<Profile />} />
