@@ -14,7 +14,7 @@ function Navbar() {
         </div>
         <div className='flex items-center justify-center '>
             <ul className="flex space-x-4 ">
-               ram ram
+             <button className='bg-blue-400 '><Link to={"/signup"}>SignUp</Link></button>
             </ul>
         </div>
      </div>
