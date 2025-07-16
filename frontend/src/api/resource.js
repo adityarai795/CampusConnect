@@ -1,3 +1,3 @@
 import API from "./api";
 
-export const community = () => API.post("/resource/viewResource");
+export const viewResource = (inputData) => API.post("/resource/viewResource",inputData);
