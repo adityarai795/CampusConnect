@@ -1,7 +1,7 @@
 import React,{useState} from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
-
+import { forgetPassword,registerUser } from "../src/api/authrization.js";
 function SignUp() {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -15,11 +15,8 @@ function SignUp() {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:3000/auth/signup', {
-        email,
-        username,
-        password
-      });
+      const inputData = { email, username, password };
+      const response = await registerUser(inputData);
       alert(response.data.message);
     } catch (error) {
       console.error("Error signing up:", error);

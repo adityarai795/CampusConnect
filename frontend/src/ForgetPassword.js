@@ -16,15 +16,18 @@ function ForgetPassword() {
       if (password !== confirmPassword) {
         alert("Passwords do not match");
         return;
+      } else {
+          try {
+            const inputdata = { email, newPassword: password };
+            const { data } = await forgetPassword(inputdata);
+            alert(data.message);
+            navigator("/login");
+          } catch (error) {
+            alert(error.message);
+            console.error("Error signing up:", error);
+          }
       }
-      try {
-        const inputdata = { email, password };
-        const { data } = await forgetPassword(inputdata);
-        alert(data.message);
-        navigator('/login')
-      } catch (error) {
-        console.error("Error signing up:", error);
-      }
+    
     };
    return (
     <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-purple-100 px-4">

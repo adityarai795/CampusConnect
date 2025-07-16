@@ -2,7 +2,7 @@ import React,{useState} from 'react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom'
-
+import { loginUser } from './api/authrization';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -10,15 +10,15 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/auth/login', {
-        email,
-        password
-      });
-      alert(response.data.message);
-      navigator("/"); 
+      const inputData = { email, password };
+      const response = await loginUser(inputData);
+      alert(response?.data?.message || "Login successful");
+      navigator("/");
     } catch (error) {
-      if (error.response && error.response.status === 404) {
+      if (error.response?.status === 404) {
         alert("User not found. Please check your email or sign up.");
+      } else {
+        alert("Login failed. Please try again.");
       }
       console.error("Error logging in:", error);
     }
