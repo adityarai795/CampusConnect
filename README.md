@@ -24,7 +24,7 @@ Campus Connect is a web-based platform designed to streamline academic collabora
 -Others: CORS
 
 ##Installation
-```bash
+
 ### 1. Clone the Repository
       git clone ```https://github.com/adityarai795/campusConnect.git```
 
