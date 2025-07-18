@@ -1,7 +1,7 @@
 # CampusConnect
 
 Campus Connect is a web-based platform designed to streamline academic collaboration and access to study resources across university campuses. Built with a student-first approach, it helps users find, filter, and download academic materials based on university, branch, year, semester, and subject.
-
+frontend demo url("https://campusconnect-7xdq.onrender.com");
 
 ## 🚀 Features
 
@@ -33,21 +33,18 @@ Campus Connect is a web-based platform designed to streamline academic collabora
 ### 1. Clone the Repository
       git clone ```https://github.com/adityarai795/campusConnect.git```
 
-Bookmark Resources
-1. Frontend
-      frontend demo url("https://campusconnect-7xdq.onrender.com");
 
 ### 2. Go to api directory and install dependencies:
 
-```     cd Easy Estate Finder 
-        cd api 
+```    cd CampusConnect
+       cd Backend
        npm install
  ```
       
 ### 3 .Go to client directory and install dependencies:
 
-   ```    cd Easy Estate Finder 
-         cd client 
+   ```   cd CampusConnect
+         cd Frontend 
          npm install 
    ```
 
@@ -59,18 +56,21 @@ Bookmark Resources
 
 ### 5. Set up Prisma:
 
- ```     cd api   
-    npx prisma db push 
+ ```     cd backend  
+      npm run dev
       Run the application:
 ```
+### 6. Run the application:
 
-### Start the client
-```  cd client 
+-   **Start the client**
+      ```  cd client 
+            npm run dev 
+      ```
+
+      
+-  **Start the API server**
+``` cd api  
    npm run dev 
 ```
 
-      
-### Start the API server
-```  cd api  
-   node app.js 
-```
+
