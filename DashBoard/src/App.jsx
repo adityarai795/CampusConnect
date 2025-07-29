@@ -10,7 +10,12 @@ import Community from './Community/Community.jsx';
 import PageNotFound from './component/PageNotFound.jsx'
 import Login from './Auth/Login.jsx';
 import SignUp from './Auth/Signup.jsx';
+import Jobs from './Jobs/Jobs.jsx';
+import CreateJob from './Jobs/CreateJob.jsx';
+import JobView from './Jobs/JobView.jsx';
 import ForgetPassword from './Auth/ForgetPassword.jsx';
+import CreateResult from './Result/CreateResult.jsx';
+import ShowallResult from './Result/ShowallResult.jsx';
 const App = () => (
   <Router>
     <Navbar />
@@ -25,10 +30,14 @@ const App = () => (
           <Route path="/community" element={<Community />} />
           <Route path='/login' element={<Login />} />
           <Route path='/signup' element={<SignUp />} />
-          <Route path='/forget' element={<ForgetPassword/> }/>
+          <Route path='/forget' element={<ForgetPassword />} />
+          <Route path="/jobs" element={<Jobs />} />
+          <Route path='/viewalljobs' element={<JobView/> } />
+          <Route path="/createJob" element={<CreateJob />} />
+          <Route path='/createResult' element={<CreateResult />} />
+          <Route path='/showallResult' element={<ShowallResult />} />
           <Route path="*" element={<PageNotFound />} />
           {/* future route example */}
-          {/* <Route path="/jobs" element={<Jobs />} /> */}
         </Routes>
       </main>
     </div>

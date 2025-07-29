@@ -18,7 +18,7 @@ function Footer() {
      <div className='md:w-1/3  md:text-center my-4 md:my-0'>
       <h3 className='font-bold'>Quick Links</h3>
        <ul className=''>
-         <Link to={"/"} className='hover:text-blue-400 cursor-pointer transition-all duration-200 p-1'> <span><FontAwesomeIcon icon={faHouse} /> 
+         <Link to={"/profile"} className='hover:text-blue-400 cursor-pointer transition-all duration-200 p-1'> <span><FontAwesomeIcon icon={faHouse} /> 
           </span> Home</Link>
          <li className='hover:text-blue-400 cursor-pointer transition-all duration-200 p-1'> <span><FontAwesomeIcon icon={faNoteSticky} /></span> Notes</li>
          <li className='hover:text-blue-400 cursor-pointer transition-all duration-200 p-1'><span><FontAwesomeIcon icon={faSquarePollVertical} /></span>Results</li>

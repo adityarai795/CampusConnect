@@ -72,5 +72,3 @@ frontend demo url("https://campusconnect-7xdq.onrender.com");
 ``` cd api  
    npm run dev 
 ```
-
-

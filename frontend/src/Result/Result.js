@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
 import axios from 'axios'
-
+import {viewResultLink} from '../api/result.js'
 function Result() {
   const [University, setUniversity] = useState("")
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-     const response= await axios.post("http://localhost:3000/result/viewResultLink", {
-        University,
-      });
+    //  const response= await axios.post("http://localhost:3000/result/viewResultLink", {
+    //     University,
+    //  });
+      const response = await viewResultLink(University)
+      
       const resultLink = response.data.message;
       if (resultLink) {
         window.location.href = resultLink; // This will redirect the user

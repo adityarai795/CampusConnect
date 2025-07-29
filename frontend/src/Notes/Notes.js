@@ -1,4 +1,4 @@
-import React,{useEffect, useState} from "react";
+import React,{ useState} from "react";
 import ResourceSection from "../component/ResourceSection";
 import { viewResource } from "../api/resource";
 function Notes() {
