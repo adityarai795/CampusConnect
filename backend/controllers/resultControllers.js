@@ -2,9 +2,9 @@
 const Result = require("../models/ResultSchema");
 
 module.exports.viewResult=async (req, res) => {
-  const { University, Branch, Semester } = req.body;
+  const { University } = req.body;
   try {
-    const isFind = await Result.findOne({ University });
+    const isFind = await Result.findOne({University: University });
     if (!isFind) {
       return res.status(400).json({ message: "Sorry for that Not Avilable" });
     }
@@ -34,5 +34,22 @@ module.exports.showall = async (req, res) => {
     res.status(200).json({ showall });
   } catch (error) {
     res.status(400).json({ message: "Not found", error });
+  }
+};
+
+
+module.exports.deleteLink = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await Result.findById(id);
+    if (!result) {
+      return res.status(404).json({ message: "Result not found" });
+    }
+
+    await Result.findByIdAndDelete(id);
+    res.status(200).json({ message: "Deleted Successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

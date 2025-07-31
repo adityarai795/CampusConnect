@@ -15,6 +15,8 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 mongoose
   .connect(process.env.mongoose_url, { useNewUrlParser: true })
   .then(() => {

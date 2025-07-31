@@ -7,19 +7,16 @@ function Result() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-    //  const response= await axios.post("http://localhost:3000/result/viewResultLink", {
-    //     University,
-    //  });
-      const response = await viewResultLink(University)
-      
+     const response = await viewResultLink({University})
       const resultLink = response.data.message;
+
       if (resultLink) {
-        window.location.href = resultLink; // This will redirect the user
+        window.location.href = resultLink; 
       } else {
         alert("No result link found.");
       }
     } catch (error) {
-      console.log("Error", error);
+      console.log("this is Error", error);
     }
   }
 
@@ -39,7 +36,7 @@ function Result() {
               <label className="block text-sm font-semibold text-gray-700 mb-1">
                 University
               </label>
-              <select 
+              <select
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 value={University}
                 onChange={e => setUniversity(e.target.value)}
