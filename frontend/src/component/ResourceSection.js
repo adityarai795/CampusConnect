@@ -3,7 +3,7 @@ import React from "react";
 
 const ResourceSection = ({ item }) => {
   return (
-    <div className="bg-white shadow-md rounded-2xl p-5 hover:shadow-lg transition duration-300 flex flex-col justify-between h-full mb-4">
+    <div className="bg-white shadow-md rounded-2xl p-5 hover:shadow-lg transition duration-300 flex flex-col justify-between h-full mb-4 pb-10">
       {/* Title */}
       <h3 className="text-xl font-bold text-gray-800 mb-2">{item.title}</h3>
 

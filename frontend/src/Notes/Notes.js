@@ -1,33 +1,39 @@
-import React,{ useState} from "react";
+import React,{ useEffect, useState} from "react";
 import ResourceSection from "../component/ResourceSection";
-import { viewResource } from "../api/resource";
+import { viewResource,showall } from "../api/resource";
+import axios from "axios";
 function Notes() {
   const SelectResouces = [
     "Select Resource Type",
     "Notes",
     "Question Paper",
-    "Youtube Channel",
+    "Youtube",
     "Important Courses",
   ];
 
   const [title, setTitle] = useState("");
-  const [Resource, setResource] = useState("");
+  const [Resource, setResource] = useState("Show all");
    const [resources, setResources] = useState([]);
-
+  const [allresources, setAllResources] = useState([]);
   const handleSubmit = async(e) => {
     e.preventDefault();
     try {
       const inputData = { title: title, type: Resource };
       const response = await viewResource(inputData);
-      setResources(response.data);
+      setResources(response.data.message);
     } catch (error) {
       console.error("Error fetching resource:", error);
     }
   }
-
-
+  const fetchData = async () => {
+    const res = await showall();
+    setAllResources(res.data.message)
+  }
+  useEffect(() => {
+    fetchData();
+  },[])
   return (
-    <div className="bg-gray-100 pt-10">
+    <div className="bg-gray-100 pt-10 pb-10">
       <div className=" p-4 flex flex-col items-center justify-start mt-[80px] mb-[100px]">
         <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl p-8">
           {/* Header */}
@@ -86,13 +92,16 @@ function Notes() {
           {Resource}
         </h2>
       </div>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-6 mb-10">
+        {(resources.length > 0 ? resources : allresources).map((item) => (
+          <ResourceSection key={item._id} item={item} />
+        ))}
+      </div>
 
-      {resources.length > 0 && (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-6 mb-4">
-          {resources.map((item) => (
-            <ResourceSection key={item._id} item={item} />
-          ))}
-        </div>
+      {resources.length === 0 && allresources.length === 0 && (
+        <p className="text-center text-gray-500 mt-10">
+          No resources available.
+        </p>
       )}
     </div>
   );

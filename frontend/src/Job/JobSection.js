@@ -111,8 +111,6 @@ function JobSection() {
     location: "",
   });
 
-  const handleChange = (e) => {
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
