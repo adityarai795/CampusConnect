@@ -8,7 +8,7 @@ function Result() {
     e.preventDefault();
     try {
      const response = await viewResultLink({University})
-      const resultLink = response.data.message;
+     const resultLink = response?.data?.message || "";
 
       if (resultLink) {
         window.location.href = resultLink; 
