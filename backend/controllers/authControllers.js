@@ -7,8 +7,8 @@ module.exports.signUp = async (req, res) => {
   try {
     const { email, username, password } = req.body;
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+    if (!existingUser) { 
+      return res.status(400).json({ message: "User already exists 4" });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
@@ -17,9 +17,9 @@ module.exports.signUp = async (req, res) => {
       password: hashedPassword
     });
     await newUser.save();
-    res.status(201).json({ message: "User created successfully" });
+    res.status(200).json({ message: "User created successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ error: error.message });
   }
 };
 
@@ -42,7 +42,7 @@ module.exports.login = async (req, res) => {
     res.status(200).json({ message: "Login successful", token });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ error: error.message });
   }
 };
 
@@ -51,7 +51,7 @@ module.exports.logOut = async (req, res) => {
     res.clearCookie("token");
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ error: error.message });
   }
 };
 
@@ -67,7 +67,7 @@ module.exports.forgetPassword = async (req, res) => {
     await user.save();
     res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ error: error.message });
   }
 };
 
@@ -81,6 +81,6 @@ module.exports.getuser = async (req, res) => {
     }
     return res.status(200).json({user });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ error: error.message });
   }
 }

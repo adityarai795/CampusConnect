@@ -1,7 +1,7 @@
 import React,{useState} from 'react'
-import axios from 'axios'
 import { Link } from 'react-router-dom'
-import { forgetPassword,registerUser } from "../src/api/authrization.js";
+import {registerUser } from "../src/api/authrization.js";
+import { toast } from 'react-toastify';
 function SignUp() {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -11,14 +11,15 @@ function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
     try {
       const inputData = { email, username, password };
       const response = await registerUser(inputData);
-      alert(response.data.message);
+      toast.success(response.data.message);
     } catch (error) {
+      toast.error(error?.response?.data?.message || "Something Went Wrong");
       console.error("Error signing up:", error);
     }
   };

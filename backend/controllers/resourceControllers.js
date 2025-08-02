@@ -40,8 +40,8 @@ module.exports.viewResource = async (req, res) => {
     if (resources.length <= 0) {
       return res.status(400).json({ message: "Not available" });
     }
+res.status(200).json({ message: foundResources });
 
-    res.status(200).json(resources);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

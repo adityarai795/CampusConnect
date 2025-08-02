@@ -3,6 +3,8 @@ import Card from '../component/Card'
 import { Link } from 'react-router-dom';
 import TrendingSkills from '../component/TrendingSkills';
 import QuotesSlider from "../component/QuotesSlider";
+import { FaUniversity, FaFileAlt, FaUserGraduate, FaLaptopCode, FaBrain, FaBook } from 'react-icons/fa';
+
 function Hero() {
   return (
     <div className="bg-gray-100">
@@ -72,21 +74,7 @@ function Hero() {
         </Link>
       </div>
 
-      <div className="w-full flex flex-wrap justify-center items-center mt-10 ">
-        <Card title=" University Result" />
-        <Card title="Notes & Question Papers" />
-        <Card title="Resume Builder" />
-        <Card title="Internships & Jobs" />
-        <Card title="Quize/Coding" />
-        <Card title="Resources" />
-      </div>
-
-      <div>
-        <TrendingSkills />
-      </div>
-      <div>
-        <QuotesSlider/>
-      </div>
+      
     </div>
   );
 }

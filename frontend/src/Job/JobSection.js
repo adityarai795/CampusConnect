@@ -1,15 +1,17 @@
 import React,{useEffect, useState} from 'react';
 import JobCardSection from '../component/JobCardSection';
 import {showall} from '../api/job.js';
-
+import { toast } from 'react-toastify';
 function JobSection() {
   const [jobs, setJobs] = useState([]);
  const getBackendData = async () => {
    try {
-     const response = await showall();// call to API function
+     const response = await showall();
+     toast.success("Data Fetch Successfully")
      setJobs(response.data.message);
      console.log(response.data.message); // log the actual data
    } catch (error) {
+     toast.error(error || "Something went Wrong");
      console.error("Error fetching posts:", error); // handle errors
    }
  };
@@ -18,98 +20,7 @@ function JobSection() {
   useEffect(() => {
     getBackendData();
     },[])
-// const internships = [
-//   {
-//     id: 1,
-//     position: "Frontend Intern",
-//     company: "PixelSoft Pvt. Ltd.",
-//     location: "Remote",
-//     stipend: "₹7,000/month",
-//     type: "Internship",
-//     department: "Web Development",
-//     link: "https://example.com/apply/frontend",
-//   },
-//   {
-//     id: 2,
-//     position: "Data Analyst Intern",
-//     company: "DataVibes Analytics",
-//     location: "Delhi",
-//     stipend: "₹10,000/month",
-//     type: "Internship",
-//     department: "Data Science",
-//     link: "https://example.com/apply/data-analyst",
-//   },
-//   {
-//     id: 3,
-//     position: "Cyber Security Intern",
-//     company: "SecureNet Ltd.",
-//     location: "Bangalore",
-//     stipend: "₹8,000/month",
-//     type: "Internship",
-//     department: "Cyber Security",
-//     link: "https://example.com/apply/security",
-//   },
-//   {
-//     id: 4,
-//     position: "UI/UX Design Intern",
-//     company: "Creatify Studio",
-//     location: "Remote",
-//     stipend: "₹6,000/month",
-//     type: "Internship",
-//     department: "UI/UX",
-//     link: "https://example.com/apply/uiux",
-//   },
-// ];
 
-// const jobs = [
-//   {
-//     id: 101,
-//     position: "Full Stack Developer",
-//     company: "TechNova Inc.",
-//     location: "Pune",
-//     salary: "₹8.5 LPA",
-//     type: "Full-Time",
-//     department: "Web Development",
-//     link: "https://example.com/apply/fullstack",
-//   },
-//   {
-//     id: 102,
-//     position: "Machine Learning Engineer",
-//     company: "AI Matrix",
-//     location: "Hyderabad",
-//     salary: "₹10.2 LPA",
-//     type: "Full-Time",
-//     department: "Data Science",
-//     link: "https://example.com/apply/ml-engineer",
-//   },
-//   {
-//     id: 103,
-//     position: "Cloud DevOps Engineer",
-//     company: "CloudSky Technologies",
-//     location: "Remote",
-//     salary: "₹9.8 LPA",
-//     type: "Full-Time",
-//     department: "Cloud",
-//     link: "https://example.com/apply/cloud-devops",
-//   },
-//   {
-//     id: 104,
-//     position: "UI/UX Designer",
-//     company: "DesignHub",
-//     location: "Noida",
-//     salary: "₹7.2 LPA",
-//     type: "Full-Time",
-//     department: "UI/UX",
-//     link: "https://example.com/apply/uiux-designer",
-//   },
-// ];
-
-    const [filters, setFilters] = useState({
-    search: "",
-    jobType: "",
-    department: "",
-    location: "",
-  });
 
 
   const handleSubmit = (e) => {
@@ -123,7 +34,7 @@ function JobSection() {
           {" "}
           Jobs & Internships
         </h2>
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <form className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" onSubmit={handleSubmit}>
           <input
             type="text"
             name="search"

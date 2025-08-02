@@ -1,6 +1,8 @@
 import React from 'react'
-import { BrowserRouter , Routes, Route } from 'react-router-dom';
-import Hero from './Home/Hero.js';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Home from './Home/Home.js';
 import Navbar from './component/Navbar';
 import Footer from './component/Footer';
 import Login from './Login';
@@ -16,8 +18,10 @@ function App() {
     <div>
       <BrowserRouter>
         <Navbar />
+        <ToastContainer position="top-right" autoClose={3000} />
+
         <Routes>
-          <Route path="/" element={<Hero />} />
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forget" element={<ForgetPassword />} />

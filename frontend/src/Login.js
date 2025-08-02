@@ -1,8 +1,8 @@
 import React,{useState} from 'react';
-import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom'
 import { loginUser } from './api/authrization';
+import { toast } from 'react-toastify';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,14 +12,10 @@ function Login() {
     try {
       const inputData = { email, password };
       const response = await loginUser(inputData);
-      alert(response?.data?.message || "Login successful");
+      toast.success(response?.data?.message || "Login successful");
       navigator("/");
     } catch (error) {
-      if (error.response?.status === 404) {
-        alert("User not found. Please check your email or sign up.");
-      } else {
-        alert("Login failed. Please try again.");
-      }
+      toast.error(error?.response?.data?.message)
       console.error("Error logging in:", error);
     }
   };

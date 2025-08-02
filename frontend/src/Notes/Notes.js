@@ -1,7 +1,7 @@
 import React,{ useEffect, useState} from "react";
 import ResourceSection from "../component/ResourceSection";
-import { viewResource,showall } from "../api/resource";
-import axios from "axios";
+import { viewResource, showall } from "../api/resource";
+import { toast } from "react-toastify";
 function Notes() {
   const SelectResouces = [
     "Select Resource Type",
@@ -20,11 +20,35 @@ function Notes() {
     try {
       const inputData = { title: title, type: Resource };
       const response = await viewResource(inputData);
-      setResources(response.data.message);
+      // toast.success("This is good");
+      // toast.success("This is good");
+      toast.success("Fetched resources!");
+      console.log("This is the notes page data:",response.data)
+      setResources(response.data);
     } catch (error) {
+     toast.error(error?.response?.data?.message || "Failed to fetch resources");
       console.error("Error fetching resource:", error);
     }
   }
+    // const handleSubmit = async (e) => {
+    //   e.preventDefault();
+    //   try {
+    //     const inputData = { title, type: Resource };
+    //     const data = await viewResource(inputData); // data is already res.data
+    //   console.log("✅ FULL API RESPONSE:", data.data); // 🔍 log this!
+
+    //   if (data?.message && Array.isArray(data.data)) {
+    //     setResources(data.data);
+    //   } else {
+    //     console.warn("⚠️ No message array in response");
+    //     setResources([]);
+    //   }  console.log("This is the notes page data:", data.message);
+    //     setResources(Array.isArray(data.message) ? data.message : []);
+    //   } catch (error) {
+    //     console.error("Error fetching resource:", error);
+    //   }
+    // };
+
   const fetchData = async () => {
     const res = await showall();
     setAllResources(res.data.message)
@@ -87,11 +111,13 @@ function Notes() {
           </form>
         </div>
       </div>
+
       <div className="flex justify-center mt-10 mb-5">
         <h2 className="text-3xl font-bold text-blue-600 bg-blue-100 py-3 px-6 rounded-lg shadow text-center">
           {Resource}
         </h2>
       </div>
+      
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-6 mb-10">
         {(resources.length > 0 ? resources : allresources).map((item) => (
           <ResourceSection key={item._id} item={item} />

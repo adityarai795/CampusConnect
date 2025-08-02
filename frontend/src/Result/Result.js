@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import axios from 'axios'
+import React, { useState } from 'react';
 import {viewResultLink} from '../api/result.js'
+import { toast } from 'react-toastify'
 function Result() {
   const [University, setUniversity] = useState("")
 
@@ -9,13 +9,13 @@ function Result() {
     try {
      const response = await viewResultLink({University})
      const resultLink = response?.data?.message || "";
-
       if (resultLink) {
         window.location.href = resultLink; 
       } else {
-        alert("No result link found.");
+        toast.error("No result link found.");
       }
     } catch (error) {
+      toast.error(error.message || "Something went Wrong");
       console.log("this is Error", error);
     }
   }
