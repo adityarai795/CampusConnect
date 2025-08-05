@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
 }); 
 const uploads = multer({ storage: storage });
 
-router.post("/post/addPost", auth, uploads.single('image'), AddPost);
+router.post("/post/addPost", uploads.single('image'), AddPost);
 
 router.get("/post/viewall", ViewAllPost);
 
@@ -23,7 +23,7 @@ router.get("/post/:id", ViewOnePost);
 
 router.patch("/post/:id/update", auth, uploads.single("image"), UpdatePost);
 
-router.delete("/post/:id/delete",auth,DeletePost );
+router.delete("/post/:id/delete",DeletePost );
 
 
 module.exports = router;

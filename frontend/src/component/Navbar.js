@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 import Logo from "../assets/logo.png";
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useUser();
+
+  console.log("this is user",user)
   return (
     <>
       <div className="w-full flex justify-between items-center bg-white px-6 py-3 shadow-md border-b border-gray-200 fixed top-1 z-50">
@@ -48,12 +52,31 @@ function Navbar() {
             >
               Jobs
             </Link>
-            <Link
+
+            {/* <Link
               to={"/login"}
               className=" bg-blue-400 px-[5px] py-[3px] rounded-md text-white cursor-pointer transition-all duration-2000110 "
             >
               Login
             </Link>
+             */}
+            {user ? (
+              <>
+                <button
+                  onClick={logout}
+                  className="bg-red-400 px-2 py-1 rounded-md text-white"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                to={"/login"}
+                className="bg-blue-400 px-[5px] py-[3px] rounded-md text-white"
+              >
+                Login
+              </Link>
+            )}
           </ul>
         </div>
         <div className="text-3xl font-bold md:hidden">
@@ -95,12 +118,28 @@ function Navbar() {
             >
               Jobs
             </Link>
-            <Link
-              to={"/login"}
-              className=" bg-blue-400 px-[5px] py-[3px] rounded-md text-white cursor-pointer transition-all duration-200 "
-            >
-              Login
-            </Link>
+            {user ? (
+              <>
+                <span className="px-2">Hi, {user.name}</span>
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsOpen(false);
+                  }}
+                  className="bg-red-400 px-2 py-1 rounded-md text-white"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                to={"/login"}
+                className="bg-blue-400 px-2 py-1 rounded-md text-white"
+                onClick={() => setIsOpen(false)}
+              >
+                Login
+              </Link>
+            )}
           </ul>
         </div>
       )}

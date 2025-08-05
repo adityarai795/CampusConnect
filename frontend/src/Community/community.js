@@ -8,9 +8,6 @@ function Community() {
   // Component names should be PascalCase
   const getDatatobackend = async () => {
     try {
-      // const response = await axios.get(
-      //   "http://localhost:3000/community/post/viewall"
-      // );
       const response = await viewAllPost();
       setPosts(response.data.posts);
       // console.log(response.data.posts);

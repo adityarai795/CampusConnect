@@ -14,7 +14,7 @@ module.exports.AddPost=async (req, res) => {
          filename: file.originalname,
        },
        college,
-       owner: req.user._id,
+      //  owner: req.user._id,
      });
 
      const savedPost = await newPost.save();

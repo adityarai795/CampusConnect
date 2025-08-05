@@ -15,7 +15,7 @@ router.post('/signup', signUp)
 router.post('/login', login)
 
 //logout 
-router.post("/logout", authMiddleware, logOut);
+router.post("/logout", logOut);
 
 router.patch("/forget-password", forgetPassword);
 

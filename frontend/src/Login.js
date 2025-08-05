@@ -3,14 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom'
 import { loginUser } from './api/authrization';
 import { toast } from 'react-toastify';
+import { useUser } from "./context/UserContext";
+
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigator = useNavigate();
+  const { login } = useUser();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const inputData = { email, password };
+      login(inputData);
       const response = await loginUser(inputData);
       toast.success(response?.data?.message || "Login successful");
       navigator("/");

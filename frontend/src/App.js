@@ -13,9 +13,14 @@ import Notes from './Notes/Notes.js';
 import JobSection from './Job/JobSection.js';
 import Community from './Community/community.js';
 import ForgetPassword from './ForgetPassword.js';
+import CreatePost from './Community/CreatePost.js';
+import MyPost from './Community/myPost.js';
+import OpenPost from './Community/OpenPost.js';
+import { AppProvider } from "./context"; 
 function App() {
   return (
     <div>
+      <AppProvider> 
       <BrowserRouter>
         <Navbar />
         <ToastContainer position="top-right" autoClose={3000} />
@@ -30,9 +35,13 @@ function App() {
           <Route path="/community" element={<Community />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/result" element={<Result />} />
+          <Route path='/createPost' element={<CreatePost />} />
+          <Route path='/myPost' element={<MyPost />} />
+          <Route path='/openPost/:id' element={<OpenPost />} />
         </Routes>
         <Footer />
-      </BrowserRouter>
+        </BrowserRouter>
+      </AppProvider> 
     </div>
   );
 }
