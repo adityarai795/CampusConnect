@@ -47,11 +47,15 @@ function OpenPost() {
            }
            alt={post.title || "Post Image"}
          />
+         <span className="font-semibold text-blue-600">
+           Owner: {post.owner?.name || "Anonymous"}
+         </span>
 
          {/* Description */}
          <p className="mt-4 text-gray-700 leading-relaxed">
            {post.description}
          </p>
+         <hr className='mt-4' />
          {/* Action Buttons */}
          <div className="flex items-center space-x-6 mt-4 text-2xl">
            <button className="text-red-500">
@@ -64,7 +68,17 @@ function OpenPost() {
              <FaShareAlt />
            </button>
          </div>
-
+         {/* Add New Comment */}
+         <div className="mt-6 flex space-x-2">
+           <input
+             type="text"
+             placeholder="Add a comment..."
+             className="flex-1 border border-gray-300 rounded px-3 py-1"
+           />
+           <button className="bg-blue-500 text-white px-4 py-1 rounded">
+             Post
+           </button>
+         </div>
          {/* Comments Section */}
          <div className="mt-6">
            <h4 className="font-semibold text-lg mb-2">Comments</h4>
@@ -83,18 +97,6 @@ function OpenPost() {
                ))}
              </ul>
            )}
-         </div>
-
-         {/* Add New Comment */}
-         <div className="mt-4 flex space-x-2">
-           <input
-             type="text"
-             placeholder="Add a comment..."
-             className="flex-1 border border-gray-300 rounded px-3 py-1"
-           />
-           <button className="bg-blue-500 text-white px-4 py-1 rounded">
-             Post
-           </button>
          </div>
        </div>
      </div>
