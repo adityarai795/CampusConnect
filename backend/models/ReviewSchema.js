@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
-const reviewSchema = new mongoose.Schema({
+const ReviewSchema = new mongoose.Schema({
+  comment: String,
   like: {
     type: Number,
     default: 1,
   },
-  comment: String,
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -14,7 +14,11 @@ const reviewSchema = new mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
-const Review = mongoose.model("Review", reviewSchema);
+const Review = mongoose.model("Review", ReviewSchema);
 module.exports = Review;

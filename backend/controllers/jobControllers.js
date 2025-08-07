@@ -20,7 +20,7 @@ module.exports.addJob = async (req, res) => {
 
 module.exports.showllPost = async (req, res) => {
   try {
-    const showall = await Job.find();
+    const showall = await Job.find().sort({ createdAt: -1 });
     if (!showall) {
       return res.status(404).json({message:"Sorry for this not fount"})
     }

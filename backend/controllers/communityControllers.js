@@ -1,8 +1,9 @@
-const express = require("express");
 const Post = require("../models/PostsSchema");
+const Review = require("../models/ReviewSchema");
+// const Review = require("../models/reviewSchema");
 
 
-module.exports.AddPost=async (req, res) => {
+module.exports.AddPost = async (req, res) => {
    const { title, description, college } = req.body;
   const file = req.file;
    try {
@@ -27,6 +28,7 @@ module.exports.AddPost=async (req, res) => {
 module.exports.ViewAllPost=async (req, res) => {
   try {
     const posts = await Post.find({})
+      .sort({ _id: -1 });
 
     if (!posts || posts.length === 0) {
       return res.status(404).json({ message: "No posts found" });
@@ -93,3 +95,45 @@ module.exports.DeletePost = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+// Add a comment to a post
+// module.exports.addComment = async (req, res) => {
+//   try {
+//     console.log("req.body:", req.body);
+//     const { comment } = req.body;
+//     console.log("this is comment", comment);
+//     if (!comment)
+//       return res.status(400).json({ message: "Comment is required" });
+
+//     const newReview = new Review({ comment });
+//     await newReview.save();
+//     res.status(201).json(savedReview);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
+// export const getallComment = async (req, res) => {
+  
+// }
+
+// // Like a post (increments like count of a review)
+// module.exports.likeReview = async (req, res) => {
+//   try {
+//     const { reviewId } = req.params;
+
+//     const updatedReview = await Review.findByIdAndUpdate(
+//       reviewId,
+//       { $inc: { like: 1 } },
+//       { new: true }
+//     );
+
+//     if (!updatedReview)
+//       return res.status(404).json({ message: "Review not found" });
+
+//     res.status(200).json(updatedReview);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+

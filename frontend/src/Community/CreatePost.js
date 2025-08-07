@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import CommunityHeader from "./communityHeader";
 import { useNavigate } from "react-router-dom";
+import axios  from "axios";
 import {addPost} from '../api/community.js'
 const CreatePost = () => {
 
@@ -11,7 +12,7 @@ const [formData, setFormData] = useState({
   title: "",
   description: "",
   image: null,
-  collage: "",
+  college: "",
 });
 
 const handleChange = (e) => {
@@ -36,16 +37,14 @@ const handleSubmit = async (e) => {
   data.append("title", formData.title);
   data.append("description", formData.description);
   data.append("image", formData.image);
-  data.append("collage", formData.collage);
-
+  data.append("college", formData.college);
   try {
-    const res=await addPost(data)
-    console.log(res);
+    const res = await addPost(data);
     toast.success("Post uploaded successfully!");
     navigate("/community");
   } catch (err) {
     console.error(err);
-    toast.error("Something went wrong!");
+    toast.error(err.message);
   }
 };
 
@@ -103,8 +102,8 @@ const handleSubmit = async (e) => {
             <label className="block font-medium">College</label>
             <input
               type="text"
-              name="collage"
-              value={formData.collage}
+              name="college"
+              value={formData.college}
               onChange={handleChange}
               className="w-full border p-2 rounded-lg"
               placeholder="e.g. Bansal Institute"

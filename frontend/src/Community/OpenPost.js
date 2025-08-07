@@ -1,107 +1,157 @@
-import React, { useEffect, useState } from 'react'
-import { viewOne } from '../api/community.js'
+import React, { useEffect, useState } from "react";
+import { viewOne } from "../api/community.js";
 import { useParams } from "react-router-dom";
-import CommunityHeader from './communityHeader.js';
+import CommunityHeader from "./communityHeader.js";
 import { FaHeart, FaRegHeart, FaComment, FaShareAlt } from "react-icons/fa";
 import { BASE_URL } from "../api/api.js";
+import axios from "axios";
+import {
+  addComment,
+  showallComments,
+  deleteComment,
+} from "../api/community.js";
+import { toast } from "react-toastify";
+
 function OpenPost() {
   const { id } = useParams();
-  const [post,setPost]=useState("")
+  const [post, setPost] = useState("");
   const fetchData = async () => {
     const response = await viewOne(id);
-    setPost(response.data.post)
-    console.log(response.data);
-  }
+    setPost(response.data.post);
+  };
+
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState("");
+  const fetchComments = async () => {
+    try {
+       const response = await showallComments(id);
+      if (response.data.data) {
+        setComments(response.data.data.reviews);
+      }
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
 
   const handleShare = () => {
-  const url = `${BASE_URL}openPost/${id}`;
-    navigator.clipboard
-      .writeText(url)
-      .catch((err) => {
-        console.error("Failed to copy link: ", err);
+    const url = `${BASE_URL}openPost/${id}`;
+    navigator.clipboard.writeText(url).catch((err) => {
+      console.error("Failed to copy link: ", err);
     });
-  }
+  };
   const [liked, setLiked] = useState(false);
-  const [comments, setComments] = useState([
-     { user: "Ravi", text: "Nice post! 🎉" },
-     { user: "Simran", text: "Loved it! ❤️" },
-   ]);
+  const isliked = () => {
+    setLiked(true);
+  };
 
+  const AddComment = async () => {
+    if (newComment.trim() === "") return;
+    try {
+      const res = await addComment(post._id, { comment: newComment });
+      toast.success(res.data.message);
+      setComments([...comments, newComment]);
+      setNewComment("");
+      await fetchComments();
+    } catch (error) {
+      toast.error(error.message || "Something went wrong")
+      console.error("Failed to add comment:", error);
+    }
+  };
+
+  const commentDeleted = async (id) => {
+    const response = await deleteComment(id);
+    toast.success(response.message);
+    await fetchComments();
+  };
   useEffect(() => {
     fetchData();
-  },[])
- return (
-   <>
-     <div className="mt-20 ml-10">
-       <CommunityHeader />
+    fetchComments();
+  }, []);
+  return (
+    <>
+      <div className="mt-20 ml-10">
+        <CommunityHeader />
 
-       <div>
-         {/* Title */}
-         <h3 className="font-extrabold text-2xl mb-4">{post.title}</h3>
+        <div>
+          {/* Title */}
+          <h3 className="font-extrabold text-2xl mb-4">{post.title}</h3>
 
-         {/* Image */}
-         <img
-           className="h-[300px] w-[80%] object-cover rounded-md shadow-md"
-           src={
-             "https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D"
-           }
-           alt={post.title || "Post Image"}
-         />
-         <span className="font-semibold text-blue-600">
-           Owner: {post.owner?.name || "Anonymous"}
-         </span>
+          {/* Image */}
+          <img
+            className="h-[300px] w-[80%] object-cover rounded-md shadow-md"
+            src={
+              "https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D"
+            }
+            alt={post.title || "Post Image"}
+          />
+          <span className="font-semibold text-blue-600">
+            Owner: {post.owner?.name || "Anonymous"}
+          </span>
 
-         {/* Description */}
-         <p className="mt-4 text-gray-700 leading-relaxed">
-           {post.description}
-         </p>
-         <hr className='mt-4' />
-         {/* Action Buttons */}
-         <div className="flex items-center space-x-6 mt-4 text-2xl">
-           <button className="text-red-500">
-             {liked ? <FaHeart /> : <FaRegHeart />}
-           </button>
-           <button className="text-blue-500">
-             <FaComment />
-           </button>
-           <button className="text-green-500" onClick={handleShare}>
-             <FaShareAlt />
-           </button>
-         </div>
-         {/* Add New Comment */}
-         <div className="mt-6 flex space-x-2">
-           <input
-             type="text"
-             placeholder="Add a comment..."
-             className="flex-1 border border-gray-300 rounded px-3 py-1"
-           />
-           <button className="bg-blue-500 text-white px-4 py-1 rounded">
-             Post
-           </button>
-         </div>
-         {/* Comments Section */}
-         <div className="mt-6">
-           <h4 className="font-semibold text-lg mb-2">Comments</h4>
-           {comments.length === 0 ? (
-             <p className="text-gray-500">No comments yet.</p>
-           ) : (
-             <ul className="space-y-2">
-               {comments.map((c, index) => (
-                 <li
-                   key={index}
-                   className="border border-gray-200 rounded p-2 bg-gray-50"
-                 >
-                   <span className="font-bold">{c.user}: </span>
-                   {c.text}
-                 </li>
-               ))}
-             </ul>
-           )}
-         </div>
-       </div>
-     </div>
-   </>
- );
+          {/* Description */}
+          <p className="mt-4 text-gray-700 leading-relaxed">
+            {post.description}
+          </p>
+          <hr className="mt-4" />
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-6 mt-4 text-2xl">
+            <button className="text-red-500" onClick={isliked}>
+              {liked ? <FaHeart /> : <FaRegHeart />}
+            </button>
+            <button className="text-blue-500">
+              <FaComment />
+            </button>
+            <button className="text-green-500" onClick={handleShare}>
+              <FaShareAlt />
+            </button>
+          </div>
+          {/* Add New Comment */}
+          <div className="mt-6 flex space-x-2">
+            <input
+              type="text"
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Add a comment..."
+              className="flex-1 border border-gray-300 rounded px-3 py-1"
+            />
+            <button
+              className="bg-blue-500 text-white px-4 py-1 rounded"
+              onClick={AddComment}
+            >
+              Post
+            </button>
+          </div>
+          {/* Comments Section */}
+          <div className="mt-6">
+            <h4 className="font-semibold text-lg mb-2">Comments</h4>
+            { comments.length === 0 ? (
+              <p className="text-gray-500">No comments yet.</p>
+            ) : (
+              <ul className="space-y-2">
+                {
+                  comments.map((c, index) => (
+                    <li
+                      key={c._id || index}
+                      className="border border-gray-200 rounded p-2 bg-gray-50 flex justify-between items-center"
+                    >
+                      <div>
+                        <span className="font-bold">{c.user}You: </span>
+                        {c.comment}
+                      </div>
+                      <button
+                        onClick={() => commentDeleted(c._id)}
+                        className="bg-red-600 text-white px-2 py-1 rounded-lg hover:bg-red-700 text-sm"
+                      >
+                        Delete
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }
 
-export default OpenPost
+export default OpenPost;
