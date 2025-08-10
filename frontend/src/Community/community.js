@@ -23,13 +23,13 @@ function Community() {
   }, []);
 
   return (
-    <div className="bg-gray-100 pt-20 pb-10">
+    <div className="bg-gray-100 pt-20 pb-10 ">
       <CommunityHeader />
       <div>
         {posts.length === 0 ? (
           <p>No posts available</p>
         ) : (
-          <ul className="flex flex-wrap">
+          <ul className="flex flex-wrap items-center justify-center">
             {posts.map((post, index) => (
               <li key={index}>
                 <CardComponent post={post} />

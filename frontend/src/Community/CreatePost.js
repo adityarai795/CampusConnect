@@ -40,9 +40,14 @@ const handleSubmit = async (e) => {
   data.append("college", formData.college);
   try {
     const token = localStorage.getItem("token");
+    console.log(token)
     const res = await addPost(data, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
     });
+
     toast.success("Post uploaded successfully!");
     navigate("/community");
   } catch (err) {
