@@ -4,14 +4,15 @@ export const viewAllPost = () =>API.get("/community/post/viewall");
 
 export const viewOne = (inputData) => API.get(`/community/post/${inputData}`);
 
-export const deletePost = (inputData) => API.delete(`/community/post/${inputData}/delete`);
+export const deletePost = (inputData,config) => API.delete(`/community/post/${inputData}/delete`,config);
 
-export const updatePost = (inputData) => API.patch(`/community/post/${inputData}/update`);
+export const updatePost = (inputData ,config) => API.patch(`/community/post/${inputData}/update`,config);
 
-export const addPost = () => API.post("/community/post/addPost");
+export const addPost = (config) => API.post("/community/post/addPost",config);
 
-export const addComment = (id, inputData) =>API.post(`/community/addcomment/6891ab28aa8b3b13ca4ced50`, inputData);
+export const addComment = (id, inputData, config) =>
+  API.post(`/community/addcomment/${id}`, inputData, config);
 
 export const showallComments = (id) => API.get(`/community/showallPostComments/${id}`);
 
-export const deleteComment = (inputData) =>API.delete(`/community/deleteComment/${inputData}`);
+export const deleteComment = (inputData,config) =>API.delete(`/community/deleteComment/${inputData}`,config);

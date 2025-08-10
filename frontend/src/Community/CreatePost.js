@@ -39,12 +39,15 @@ const handleSubmit = async (e) => {
   data.append("image", formData.image);
   data.append("college", formData.college);
   try {
-    const res = await addPost(data);
+    const token = localStorage.getItem("token");
+    const res = await addPost(data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     toast.success("Post uploaded successfully!");
     navigate("/community");
   } catch (err) {
     console.error(err);
-    toast.error(err.message);
+    toast.error(err.response.data.message);
   }
 };
 

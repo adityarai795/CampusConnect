@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { getuser } from '../api/authrization.js';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 function CardComponent({ post }) {
   const [owner, setOwner] = useState();
   const finduser = async () => {
@@ -8,30 +9,45 @@ function CardComponent({ post }) {
       const response = await getuser(post.owner);
       setOwner(response.data.user.username);
     } catch (error) {
-    console.log(error)  
+      console.log(error) 
+      toast.error(error.response.data.message);  
     }
-  
   }
   useEffect(() => {
    finduser(); 
   },[])
   return (
     <>
-      <Link to={`/openPost/${post._id}`}>
-        <div className="w-64 border border-black p-4 rounded shadow m-3 bg-white cursor-pointer">
-          <div h-20>
+     
+        <div className="w-64 h-[350px] border border-gray-300 p-4 rounded-lg shadow-md m-3 bg-white cursor-pointer flex flex-col justify-between">
+          <Link to={`/openPost/${post._id}`}> {/* Image Section */}
+          <div className="h-[150px] w-full overflow-hidden rounded-md shadow-md">
             <img
-              className="h-[100px] w-[100%] rounded-md shadow-md"
-              src="https://images.unsplash.com/photo-1682687221006-b7fd60cf9dd0?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxfHx8ZW58MHx8fHx8"
-              alt="thsis is image"
-            ></img>
-            {/* <img src={post.image.url}></img> */}
+              className="h-full w-full object-cover"
+              src={post?.image?.url}
+              alt="Post"
+            />
           </div>
-          <span className="font-semibold text-blue-600">Owner: {post.owner?.name || "Anonymous"}</span>
-          <h2 className="text-lg font-semibold"> {post.title}</h2>
-          <p className="text-sm text-gray-600">{post.description}</p>
+
+          <div className="mt-3 flex-1">
+            <span className="block font-semibold text-blue-600 text-sm mb-1">
+              Owner: {post.owner?.name || "Anonymous"}
+            </span>
+            <h2 className="text-lg font-bold leading-snug">{post.title}</h2>
+            <p className="text-sm text-gray-600 line-clamp-3">
+              {post.description}
+            </p>
+          </div>
+           </Link>
+          <div className="mt-4 flex justify-between items-center">
+            <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-1 rounded-full shadow">
+              👍 Like
+            </button>
+            <button className="bg-gray-200 hover:bg-gray-300 text-sm px-3 py-1 rounded-full shadow">
+              💬 Comment
+            </button>
+          </div>
         </div>
-      </Link>
     </>
   );
 }

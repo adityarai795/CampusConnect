@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import {toast} from 'react-toastify'
+import {addResult} from '../api/result'
 const CreateResult = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    University: "AKTU",
+    University: "",
     link: "",
   });
 
@@ -24,13 +25,13 @@ const CreateResult = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:3000/result/uploadResultLink", payload); // adjust API path
-      alert("Result link submitted successfully!");
+      const res=await addResult(payload)
+      toast.success("Result link submitted successfully!");
       console.log(res.data);
       navigate("/result")
     } catch (err) {
       console.error("Error:", err);
-      alert("Failed to submit result!");
+      toast.error("Failed to submit result!");
     }
   };
 
@@ -47,6 +48,7 @@ const CreateResult = () => {
             className="w-full border rounded px-3 py-2"
             required
           >
+            <option value="">Select the University</option>
             <option value="AKTU">AKTU</option>
             <option value="BBD">BBD</option>
             <option value="DDU">DDU</option>

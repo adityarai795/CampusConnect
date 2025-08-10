@@ -1,28 +1,37 @@
-import React,{useState} from 'react';
+import React,{useEffect, useState} from 'react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom'
-
+import { toast } from  'react-toastify'
+import { useDispatch, useSelector } from 'react-redux';
+import  {loginUser}  from '../redux/action/authAction.js';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigator = useNavigate();
+  const dispatch = useDispatch();
+  const authState = useSelector((state) => state.auth);
+  console.log("this is authstate for login",authState)
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/auth/login', {
-        email,
-        password
-      });
-      alert(response.data.message);
-      navigator("/"); 
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        alert("User not found. Please check your email or sign up.");
-      }
-      console.error("Error logging in:", error);
+        const result = await dispatch(loginUser({ email, password }));
+        console.log("this is result", result);
+        if (result) {
+          toast.success("Login successful");
+          // navigator("/");
+        } else {
+          toast.error("Invalid credentials or login failed");
+        }
+    } catch (err) {
+      console.log(err);
+      toast.error("Login failed");
     }
   };
+  useEffect(() => {
+    
+  }, [authState]);
+
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-purple-100 px-4">

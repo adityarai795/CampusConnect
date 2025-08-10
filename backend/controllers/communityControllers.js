@@ -1,5 +1,5 @@
 const Post = require("../models/PostsSchema");
-const Review = require("../models/ReviewSchema");
+const {Like ,Comment} = require("../models/ReviewSchema");
 // const Review = require("../models/reviewSchema");
 
 
@@ -11,11 +11,11 @@ module.exports.AddPost = async (req, res) => {
        title,
        description,
        image: {
-         url: `/uploads/${file.filename}`,
-         filename: file.originalname,
+         url: file.path, // Cloudinary's URL
+         filename: file.filename, // Cloudinary's public_id
        },
        college,
-      //  owner: req.user._id,
+       //  owner: req.user._id,
      });
 
      const savedPost = await newPost.save();
@@ -97,43 +97,75 @@ module.exports.DeletePost = async (req, res) => {
 };
 
 // Add a comment to a post
-// module.exports.addComment = async (req, res) => {
-//   try {
-//     console.log("req.body:", req.body);
-//     const { comment } = req.body;
-//     console.log("this is comment", comment);
-//     if (!comment)
-//       return res.status(400).json({ message: "Comment is required" });
+module.exports.addComment = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { comment ,userId } = req.body;
+    if (!comment) {
+      return res.status(400).json({ message: "Comment is required" });
+    }
+    const newReview = new Comment({ comment });
+    await newReview.save();
+    const post = await Post.findById(id);
+    post.comment.push(newReview._id);
+    await post.save();
+    res.status(201).json({ message: "Comment Can Created" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+} 
 
-//     const newReview = new Review({ comment });
-//     await newReview.save();
-//     res.status(201).json(savedReview);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
+module.exports.showComments = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const post = await Post.findById(id).populate({
+      path: "comment",
+      options: { sort: { _id: -1 } },
+    });
 
-// export const getallComment = async (req, res) => {
-  
-// }
 
-// // Like a post (increments like count of a review)
-// module.exports.likeReview = async (req, res) => {
-//   try {
-//     const { reviewId } = req.params;
+    if (!post) {
+      return res.status(400).json({ message: "Data not found" });
+    }
+    res
+      .status(200)
+      .json({ data: post, message: "Fetch all Data successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}; 
 
-//     const updatedReview = await Review.findByIdAndUpdate(
-//       reviewId,
-//       { $inc: { like: 1 } },
-//       { new: true }
-//     );
+module.exports.deleteComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedComment = await Comment.findByIdAndDelete(id);
+    if (!deletedComment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+    res.status(200).json({ message: "Comment Deleted Successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}; 
 
-//     if (!updatedReview)
-//       return res.status(404).json({ message: "Review not found" });
+// // // Like a post (increments like count of a review)
+module.exports.likeReview = async (req, res) => {
+  try {
+    const { postId } = req.params;
+     const newLike = await Like.create({
+       like: 1,
+       post: postId, 
+     });
 
-//     res.status(200).json(updatedReview);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
+     post.like.push(newLike._id);
+     await post.save();
+
+     res.json({ message: "Post liked" });
+    const post = await Like.findOne
+    post.like.push(like+1)
+    res.status(200).json(updatedReview);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 

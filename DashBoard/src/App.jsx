@@ -1,5 +1,7 @@
 import React from 'react'
-import {BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Navbar from './component/Navbar.jsx';
 import Footer from './component/footer.jsx';
 import Home from './Home/Home.jsx';
@@ -16,9 +18,13 @@ import JobView from './Jobs/JobView.jsx';
 import ForgetPassword from './Auth/ForgetPassword.jsx';
 import CreateResult from './Result/CreateResult.jsx';
 import ShowallResult from './Result/ShowallResult.jsx';
+import ResourceTable from './Notes/ResourceTable.jsx';
+import UploadResource from './Notes/UploadResource.jsx';
+import ShowallPost from './Community/ShowallPost.jsx';
 const App = () => (
   <Router>
     <Navbar />
+    <ToastContainer position="top-right" autoClose={3000} />
     <div className="flex min-h-screen">
       <Sidebar />
 
@@ -26,6 +32,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/notes" element={<Notes />} />
+          <Route path='/uploadnotes' element={<UploadResource />} />
+          <Route path='/showallNotes' element={<ResourceTable />} />
           <Route path="/result" element={<Result />} />
           <Route path="/community" element={<Community />} />
           <Route path='/login' element={<Login />} />
@@ -36,6 +44,7 @@ const App = () => (
           <Route path="/createJob" element={<CreateJob />} />
           <Route path='/createResult' element={<CreateResult />} />
           <Route path='/showallResult' element={<ShowallResult />} />
+          <Route path='/showallPost' element={<ShowallPost /> } />
           <Route path="*" element={<PageNotFound />} />
           {/* future route example */}
         </Routes>

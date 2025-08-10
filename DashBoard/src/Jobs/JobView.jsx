@@ -1,24 +1,30 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { showall, deleteJob } from '../api/job'
+import {toast} from 'react-toastify'
 
 const JobView = () => {
   const [jobs, setJobs] = useState([]);
 
   const fetchJobs = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/job/showall"); // 🔁 Update with your actual GET endpoint
+      const res = await showall();
       setJobs(res.data.message || []);
+      toast.success("fetch all Successfully")
     } catch (err) {
+      toast.error("Error fetching Jobs")
       console.error("Error fetching jobs:", err);
     }
   };
 
-  const deleteJob = async (id) => {
+  const deleteJobfunction = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/jobs/delete/${id}`); // 🔁 Update with your DELETE endpoint
-      alert("Job deleted successfully");
+      // await axios.delete(`http://localhost:3000/job/deletePost/${id}`); // 🔁 Update with your DELETE endpoint
+      await deleteJob(id);
+      toast.success("Job deleted successfully");
       fetchJobs(); // Refresh jobs list
     } catch (err) {
+      toast.error("Error Deleting Job")
       console.error("Error deleting job:", err);
     }
   };
@@ -62,7 +68,7 @@ const JobView = () => {
                   <td className="px-4 py-2 border">
                     <button
                       className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                      onClick={() => deleteJob(job._id)}
+                      onClick={() => deleteJobfunction(job._id)}
                     >
                       Delete
                     </button>

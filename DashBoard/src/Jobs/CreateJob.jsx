@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { createJob } from '../api/job';
+import {toast} from 'react-toastify'
 
 const CreateJob = () => {
   const navigate = useNavigate();
@@ -21,8 +23,9 @@ const CreateJob = () => {
 const handleSubmit = async (e) => {
   e.preventDefault();
   try {
-    const res = await axios.post("http://localhost:3000/job/addJob", formData);
-    alert("Job created successfully!");
+    const res = await createJob(formData);
+    // const res = await axios.post("https://campusconnectbackend-q596.onrender.com/job/addJob", formData);
+    toast.success("Job created successfully!");
     console.log(res.data);
     // Optionally reset the form
     setFormData({
@@ -34,10 +37,10 @@ const handleSubmit = async (e) => {
       JobType: "Full Time",
     });
     
-    navigate("/jobs")
+    navigate("/viewalljobsjobs")
   } catch (err) {
     console.error("Error creating job:", err);
-    alert("Something went wrong!");
+    toast.error("Something went wrong!");
   }
 };
 

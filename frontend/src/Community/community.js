@@ -3,6 +3,7 @@ import { viewAllPost } from "../api/community.js";
 import axios from "axios";
 import CardComponent from "./CardComponent";
 import CommunityHeader from "./communityHeader.js";
+import { toast } from "react-toastify";
 function Community() {
   const [posts, setPosts] = useState([]);
   // Component names should be PascalCase
@@ -13,6 +14,7 @@ function Community() {
       // console.log(response.data.posts);
     } catch (error) {
       console.error("Error fetching posts:", error);
+      toast.error(error.response.data.message);
     }
   };
 

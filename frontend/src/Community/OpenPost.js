@@ -20,13 +20,13 @@ function OpenPost() {
     setPost(response.data.post);
   };
 
-    const [comments, setComments] = useState([]);
-    const [newComment, setNewComment] = useState("");
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
   const fetchComments = async () => {
     try {
-       const response = await showallComments(id);
+      const response = await showallComments(id);
       if (response.data.data) {
-        setComments(response.data.data.reviews);
+        setComments(response.data.data.comment);
       }
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -47,21 +47,39 @@ function OpenPost() {
   const AddComment = async () => {
     if (newComment.trim() === "") return;
     try {
-      const res = await addComment(post._id, { comment: newComment });
+      const token = localStorage.getItem("token"); // Login ke baad store kiya tha
+      const res = await addComment(
+        post._id,
+        { comment: newComment },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       toast.success(res.data.message);
       setComments([...comments, newComment]);
       setNewComment("");
+      setComments(" ");
       await fetchComments();
     } catch (error) {
-      toast.error(error.message || "Something went wrong")
+      toast.error(error.response.data.message || "Something went wrong");
       console.error("Failed to add comment:", error);
     }
   };
 
   const commentDeleted = async (id) => {
-    const response = await deleteComment(id);
-    toast.success(response.message);
-    await fetchComments();
+    try {
+         const token = localStorage.getItem("token"); // Login ke baad store kiya tha
+
+         const response = await deleteComment(id, {
+           headers: {
+             Authorization: `Bearer ${token}`,
+           },
+         });
+         toast.success(response.message || "Comment Deleted");
+         await fetchComments();
+    } catch (error) {
+      toast.error(error.response.data.message || "Something went wrong");
+      console.error("Failed to add comment:", error);
+    }
+ 
   };
   useEffect(() => {
     fetchData();
@@ -77,13 +95,17 @@ function OpenPost() {
           <h3 className="font-extrabold text-2xl mb-4">{post.title}</h3>
 
           {/* Image */}
-          <img
+          {/* <img
             className="h-[300px] w-[80%] object-cover rounded-md shadow-md"
-            src={
-              "https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D"
-            }
+            src={post.image.url}
             alt={post.title || "Post Image"}
+          /> */}
+          <img
+            src={post?.image?.url}
+            alt="Post"
+            className="h-[300px] w-[80%] object-cover rounded-md shadow-md"
           />
+
           <span className="font-semibold text-blue-600">
             Owner: {post.owner?.name || "Anonymous"}
           </span>
@@ -123,11 +145,11 @@ function OpenPost() {
           {/* Comments Section */}
           <div className="mt-6">
             <h4 className="font-semibold text-lg mb-2">Comments</h4>
-            { comments.length === 0 ? (
+            {comments.length === 0 ? (
               <p className="text-gray-500">No comments yet.</p>
             ) : (
               <ul className="space-y-2">
-                {
+                {Array.isArray(comments) &&
                   comments.map((c, index) => (
                     <li
                       key={c._id || index}

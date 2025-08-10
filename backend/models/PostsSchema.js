@@ -15,10 +15,16 @@ const PostsSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-  reviews: [
+  comment: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Review",
+      ref: "Comment",
+    },
+  ],
+  like: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Like",
     },
   ],
 });

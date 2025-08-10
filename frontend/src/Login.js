@@ -15,8 +15,14 @@ function Login() {
     e.preventDefault();
     try {
       const inputData = { email, password };
-      login(inputData);
       const response = await loginUser(inputData);
+      const token = response?.data?.token;
+      console.log( response)
+      const userData = response?.data?.user;
+      if (token) {
+        localStorage.setItem("token", token);
+        login(userData)
+      }
       toast.success(response?.data?.message || "Login successful");
       navigator("/");
     } catch (error) {

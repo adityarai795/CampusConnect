@@ -1,18 +1,14 @@
 const mongoose = require("mongoose");
 
-const ReviewSchema = new mongoose.Schema({
+const CommentSchema = new mongoose.Schema({
   comment: String,
-  like: {
-    type: Number,
-    default: 1,
-  },
-  author: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  },
   createAt: {
     type: Date,
     default: Date.now(),
+  },
+  post: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Post",
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -20,5 +16,31 @@ const ReviewSchema = new mongoose.Schema({
   },
 });
 
-const Review = mongoose.model("Review", ReviewSchema);
-module.exports = Review;
+const Comment = mongoose.model("Comment", CommentSchema);
+
+const likeReview = new mongoose.Schema({
+  like: {
+    type: Number,
+  },
+  createAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  post: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Post",
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+});
+
+const Like = mongoose.model("Like", likeReview);
+
+
+
+
+
+
+module.exports = {Like ,Comment};

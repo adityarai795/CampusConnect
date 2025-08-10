@@ -1,7 +1,8 @@
 import React from 'react';
 import Sidebar from '../component/Sidebar';
-
+import { useSelector } from 'react-redux';
 function Home() {
+  const authState = useSelector((state) => state.auth);
   return (
     <div className="grid grid-cols-12 min-h-screen mt-[70px]">
       {/* Sidebar - takes 3 out of 12 columns */}
