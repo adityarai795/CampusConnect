@@ -9,7 +9,8 @@ const resultRouter = require("./routers/resultRouters");
 const resourceRouter = require("./routers/resourceRouters");
 const postRouter = require("./routers/communityRouters");
 const profileRouter = require("./routers/profileRouter");
-const jobRouter=require("./routers/jobRouters")
+const jobRouter = require("./routers/jobRouters");
+const codingProblemRouter = require("./routers/codingProblem.js");
 const cookieParser = require('cookie-parser');
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -40,7 +41,7 @@ app.use("/resource", resourceRouter);
 app.use("/community",postRouter)
 app.use("/profile", profileRouter);
 app.use("/job", jobRouter);
-
+app.use("/problem",codingProblemRouter)
 
 app.get("/",(req,res)=>{
   res.send("This is home ");

@@ -11,7 +11,6 @@ const jobSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    // required: [true, "Category is required"],
     enum: ["IT", "Marketing", "Finance", "HR", "Sales", "Other"],
     default: "IT",
   },
@@ -35,6 +34,9 @@ const jobSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  link: {
+    type: String,
+  }
 });
 
 const JobSchema = mongoose.model("Job", jobSchema);

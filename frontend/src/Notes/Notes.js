@@ -2,6 +2,7 @@ import React,{ useEffect, useState} from "react";
 import ResourceSection from "../component/ResourceSection";
 import { viewResource, showall } from "../api/resource";
 import { toast } from "react-toastify";
+import axios from "axios";
 function Notes() {
   const SelectResouces = [
     "Select Resource Type",
@@ -19,14 +20,14 @@ function Notes() {
     e.preventDefault();
     try {
       const inputData = { title: title, type: Resource };
-      const response = await viewResource(inputData);
-      // toast.success("This is good");
-      // toast.success("This is good");
+      // const response = await viewResource(inputData);
+      const response = await axios.post(
+        "http://localhost:3000/resource/viewResource",inputData
+      );
       toast.success("Fetched resources!");
-      console.log("This is the notes page data:",response.data)
-      setResources(response.data);
+      setResources(response.data.message);
     } catch (error) {
-     toast.error(error?.response?.data?.message || "Failed to fetch resources");
+     toast.error(error.response.data.error);
       console.error("Error fetching resource:", error);
     }
   }

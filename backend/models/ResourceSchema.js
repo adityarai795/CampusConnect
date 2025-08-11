@@ -27,6 +27,9 @@ const ResourceSchema = new mongoose.Schema(
     university: {
       type: String,
     },
+    link: {
+      type:String,
+    }
   },
   { timestamps: true }
 );

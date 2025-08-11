@@ -24,7 +24,6 @@ module.exports.uploadResource = async (req, res) => {
   }
 };
 
-
 module.exports.viewResource = async (req, res) => {
   const { type, title } = req.body;
 
@@ -40,8 +39,7 @@ module.exports.viewResource = async (req, res) => {
     if (resources.length <= 0) {
       return res.status(400).json({ message: "Not available" });
     }
-res.status(200).json({ message: foundResources });
-
+    res.status(200).json({ message: resources });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
