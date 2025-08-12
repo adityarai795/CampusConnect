@@ -8,7 +8,7 @@ const ShowallPost = () => {
   useEffect(() => {
     fetchPosts();
   }, []);
-
+  
   const fetchPosts = async () => {
     try {
       const res = await axios.get('http://localhost:3000/community/post/viewall');
@@ -72,10 +72,11 @@ const ShowallPost = () => {
                   )}
                 </td>
                 <td className="p-2 border">{post.likes?.length || 0}</td>
-                <td className="p-2 border">{post.reviews?.length || 0}</td>
-                <td className="p-2 border">
-                  {post.owner?.name || 'Anonymous'}
-                </td>
+                <td className="p-2 border">{post.comment?.length || 0}</td>
+<td className="p-2 border">
+  {post.owner?.username || 'Anonymous'}
+</td>
+
                 <td className="p-2 border">
                   <button
                     onClick={() => handleDelete(post._id)}

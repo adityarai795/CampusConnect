@@ -21,6 +21,8 @@ import ShowallResult from './Result/ShowallResult.jsx';
 import ResourceTable from './Notes/ResourceTable.jsx';
 import UploadResource from './Notes/UploadResource.jsx';
 import ShowallPost from './Community/ShowallPost.jsx';
+import ShowAllProblem from './coding/showallProblems.jsx'
+import AddProblem from './coding/AddProblem.jsx';
 const App = () => (
   <Router>
     <Navbar />
@@ -44,7 +46,9 @@ const App = () => (
           <Route path="/createJob" element={<CreateJob />} />
           <Route path='/createResult' element={<CreateResult />} />
           <Route path='/showallResult' element={<ShowallResult />} />
-          <Route path='/showallPost' element={<ShowallPost /> } />
+          <Route path='/showallPost' element={<ShowallPost />} />
+          <Route path="/showallProblems" element={<ShowAllProblem />} />
+          <Route path="/addProblems" element={<AddProblem />} />
           <Route path="*" element={<PageNotFound />} />
           {/* future route example */}
         </Routes>

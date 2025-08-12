@@ -7,9 +7,12 @@ const {
   logOut,
   forgetPassword,
   getuser,
+  showalluser,
 } = require("../controllers/authControllers");
 
 router.get("/getuser/:id", getuser);
+router.get("/showalluser", showalluser);
+
 router.post('/signup', signUp)
 
 router.post('/login', login)

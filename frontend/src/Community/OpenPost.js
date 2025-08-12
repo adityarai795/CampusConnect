@@ -2,7 +2,16 @@ import React, { useEffect, useState } from "react";
 import { viewOne } from "../api/community.js";
 import { useParams } from "react-router-dom";
 import CommunityHeader from "./communityHeader.js";
-import { FaHeart, FaRegHeart, FaComment, FaShareAlt } from "react-icons/fa";
+import {
+  FaHeart,
+  FaRegHeart,
+  FaComment,
+  FaShareAlt,
+  
+} from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+
 import { BASE_URL } from "../api/api.js";
 import axios from "axios";
 import {
@@ -11,6 +20,7 @@ import {
   deleteComment,
 } from "../api/community.js";
 import { toast } from "react-toastify";
+import { useUser } from "../context/UserContext";
 
 function OpenPost() {
   const { id } = useParams();
@@ -19,6 +29,9 @@ function OpenPost() {
     const response = await viewOne(id);
     setPost(response.data.post);
   };
+  const { user } = useUser();
+
+  const navigate = useNavigate();
 
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -32,7 +45,18 @@ function OpenPost() {
       console.error("Error fetching comments:", error);
     }
   };
-
+  const handleDelete = async (postId) => {
+    try {
+      // const res = await fetch(`http://localhost:3000/community/post/${postId}/delete`, {
+      //   method: 'DELETE',
+      // });
+      toast.success("please check not deleted");
+      navigate("/community");
+    } catch (err) {
+      toast.error("Something error")
+      console.error(err.message);
+    }
+  };
   const handleShare = () => {
     const url = `${BASE_URL}openPost/${id}`;
     navigator.clipboard.writeText(url).catch((err) => {
@@ -94,12 +118,6 @@ function OpenPost() {
           {/* Title */}
           <h3 className="font-extrabold text-2xl mb-4">{post.title}</h3>
 
-          {/* Image */}
-          {/* <img
-            className="h-[300px] w-[80%] object-cover rounded-md shadow-md"
-            src={post.image.url}
-            alt={post.title || "Post Image"}
-          /> */}
           <img
             src={post?.image?.url}
             alt="Post"
@@ -107,7 +125,7 @@ function OpenPost() {
           />
 
           <span className="font-semibold text-blue-600">
-            Owner: {post.owner?.name || "Anonymous"}
+            Owner: {post.owner?.username || "Anonymous"}
           </span>
 
           {/* Description */}
@@ -126,6 +144,18 @@ function OpenPost() {
             <button className="text-green-500" onClick={handleShare}>
               <FaShareAlt />
             </button>
+            <button
+              onClick={() => handleDelete(post._id)}
+              className="text-red-500"
+            >
+              <MdDelete />
+            </button>
+
+            {/* {String(post.owner?._id) === String(user._id) && (
+              <button onClick={() => handleDelete(post._id)}>
+                <MdDelete />
+              </button>
+            )} */}
           </div>
           {/* Add New Comment */}
           <div className="mt-6 flex space-x-2">

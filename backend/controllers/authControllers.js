@@ -7,7 +7,7 @@ module.exports.signUp = async (req, res) => {
   try {
     const { email, username, password } = req.body;
     const existingUser = await User.findOne({ email });
-    if (!existingUser) { 
+    if (existingUser) { 
       return res.status(400).json({ message: "User already exists 4" });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -37,7 +37,7 @@ module.exports.login = async (req, res) => {
     };
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid password" });
     }
 
     // Here you would typically generate a JWT token and send it back to the client
@@ -90,5 +90,16 @@ module.exports.getuser = async (req, res) => {
     return res.status(200).json({user });
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+}
+
+module.exports.showalluser = async (req, res) => {
+  try {
+    const users = await User.find();
+    return res.status(200).json({ users});
+
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+    
   }
 }

@@ -27,14 +27,27 @@ const JobCardSection = ({ title, jobs = [] }) => {
               </p>
               <span>{job.description}</span>
 
-              <a
-                href={job.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm"
-              >
-                Apply Now
-              </a>
+              <div className="flex gap-3 mt-3">
+                {/* Upload Details Button */}
+                <a
+                  // href={job.uploadLink} // uncomment and replace when ready
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm transition-colors duration-300"
+                >
+                  Upload Details
+                </a>
+
+                {/* Apply Now Button */}
+                <a
+                  href={job.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white border border-black text-black px-4 py-2 rounded-md text-sm hover:bg-gray-100 transition-colors duration-300"
+                >
+                  Apply Now
+                </a>
+              </div>
             </div>
           ))
         ) : (

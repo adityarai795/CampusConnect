@@ -34,7 +34,7 @@ const storage = new CloudinaryStorage({
 });
 const uploads = multer({ storage: storage });
 
-router.post("/post/addPost", uploads.single("image"), AddPost);
+router.post("/post/addPost", auth,uploads.single("image"), AddPost);
 
 router.get("/post/viewall", ViewAllPost);
 

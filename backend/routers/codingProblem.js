@@ -29,4 +29,22 @@ router.get("/getallProblem", async (req, res) => {
   }
 })
 
+
+router.delete("/deleteProblem/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const problem = await Problem.findById(id);
+    if(!problem){
+            return res
+              .status(404)
+              .json({ message: "Problem not find Something went wrong" });
+
+    }
+    await Problem.findByIdAndDelete(id);
+    res.status(200).json({message:"Coding Problem successfully Deleted"})
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+})
+
 module.exports = router;

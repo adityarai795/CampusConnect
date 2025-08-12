@@ -87,7 +87,7 @@ const UploadResource = () => {
           name="link"
           value={formData.link}
           onChange={handleChange}
-          placeholder="Optional: https://example.com"
+          placeholder=" https://example.com"
           className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
 
@@ -117,6 +117,7 @@ const UploadResource = () => {
           placeholder="University Name"
           className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
+
 
         <button
           type="submit"

@@ -15,7 +15,7 @@ module.exports.AddPost = async (req, res) => {
          filename: file.filename, // Cloudinary's public_id
        },
        college,
-       //  owner: req.user._id,
+        owner: req.user._id,
      });
 
      const savedPost = await newPost.save();
@@ -25,10 +25,11 @@ module.exports.AddPost = async (req, res) => {
    }
 }
 
-module.exports.ViewAllPost=async (req, res) => {
+module.exports.ViewAllPost = async (req, res) => {
   try {
     const posts = await Post.find({})
-      .sort({ _id: -1 });
+      .sort({ _id: -1 })
+      .populate({ path: "owner", select: "username" });
 
     if (!posts || posts.length === 0) {
       return res.status(404).json({ message: "No posts found" });
@@ -38,12 +39,17 @@ module.exports.ViewAllPost=async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}
+};
+
+
 
 module.exports.ViewOnePost=async (req, res) => {
   try {
     const id = req.params.id;
-    const post = await Post.findById(id);
+    const post = await Post.findById(id).populate({
+      path: "owner",
+      select: "username",
+    });
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }

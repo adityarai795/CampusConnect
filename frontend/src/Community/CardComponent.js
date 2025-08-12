@@ -19,7 +19,7 @@ function CardComponent({ post }) {
   return (
     <>
      
-        <div className="w-64 h-[350px] border border-gray-300 p-4 rounded-lg shadow-md m-3 bg-white cursor-pointer flex flex-col justify-between">
+        <div className="border border-gray-300 p-4 rounded-lg shadow-md m-3 bg-white cursor-pointer flex flex-col justify-between">
           <Link to={`/openPost/${post._id}`}> {/* Image Section */}
           <div className="h-[150px] w-full overflow-hidden rounded-md shadow-md">
             <img
@@ -31,7 +31,7 @@ function CardComponent({ post }) {
 
           <div className="mt-3 flex-1">
             <span className="block font-semibold text-blue-600 text-sm mb-1">
-              Owner: {post.owner?.name || "Anonymous"}
+              Owner: {post.owner?.username || "Anonymous"}
             </span>
             <h2 className="text-lg font-bold leading-snug">{post.title}</h2>
             <p className="text-sm text-gray-600 line-clamp-3">

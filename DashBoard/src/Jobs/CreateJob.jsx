@@ -13,6 +13,7 @@ const CreateJob = () => {
     city: "",
     location: "",
     JobType: "Full Time",
+    link:"",
   });
 
  const handleChange = (e) => {
@@ -35,6 +36,7 @@ const handleSubmit = async (e) => {
       city: "",
       location: "",
       JobType: "Full Time",
+      link:"",
     });
     
     navigate("/viewalljobsjobs")
@@ -113,7 +115,8 @@ const handleSubmit = async (e) => {
           </div>
         </div>
 
-        <div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
           <label className="block mb-1 font-medium">Job Type</label>
           <select
             name="JobType"
@@ -126,9 +129,21 @@ const handleSubmit = async (e) => {
             <option value="InternShip">Internship</option>
             <option value="Remote">Remote</option>
             <option value="Virtual">Virtual</option>
-          </select>
+            </select>
+          </div>
+           <div>
+          <label className="block mb-1 font-medium">Link</label>
+          <input
+            type="text"
+            name="link"
+            value={formData.link}
+            onChange={handleChange}
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
         </div>
 
+        
         <button
           type="submit"
           className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700"
