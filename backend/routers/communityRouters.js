@@ -44,7 +44,7 @@ router.patch("/post/:id/update", auth, uploads.single("image"), UpdatePost);
 
 router.delete("/post/:id/delete", DeletePost);
 
-router.post("/addcomment/:id",auth, addComment);
+router.post("/addcomment/:postId", auth, addComment);
 
 router.get("/showallPostComments/:id", showComments);
 

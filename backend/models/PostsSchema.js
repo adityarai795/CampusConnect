@@ -10,7 +10,7 @@ const PostsSchema = new mongoose.Schema({
     url: String,
     filename: String,
   },
-  Collage: String,
+  collage: String,
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -27,6 +27,12 @@ const PostsSchema = new mongoose.Schema({
       ref: "Like",
     },
   ],
+});
+
+PostsSchema.post("findOneAndDelete", async (post) => {
+  if (post) {
+    await mongoose.model("Comment").deleteMany({ _id: { $in: post.comment } });
+  }
 });
 
 const Post = mongoose.model("Post", PostsSchema);

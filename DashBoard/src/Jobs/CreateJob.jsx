@@ -25,10 +25,7 @@ const handleSubmit = async (e) => {
   e.preventDefault();
   try {
     const res = await createJob(formData);
-    // const res = await axios.post("https://campusconnectbackend-q596.onrender.com/job/addJob", formData);
     toast.success("Job created successfully!");
-    console.log(res.data);
-    // Optionally reset the form
     setFormData({
       title: "",
       description: "",
@@ -39,7 +36,7 @@ const handleSubmit = async (e) => {
       link:"",
     });
     
-    navigate("/viewalljobsjobs")
+    navigate("/viewalljobs")
   } catch (err) {
     console.error("Error creating job:", err);
     toast.error("Something went wrong!");

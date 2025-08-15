@@ -18,6 +18,7 @@ import MyPost from "./Community/myPost.js";
 import OpenPost from "./Community/OpenPost.js";
 import ResumeBuilder from "./resumeBuilder/resumeBuilder.js";
 import ShowCoding from "./Coding/showcoding.js";
+import PageNotFound from './component/PageNotFound.js'
 import { AppProvider } from "./context";
 function App() {
   return (
@@ -42,6 +43,10 @@ function App() {
             <Route path="/openPost/:id" element={<OpenPost />} />
             <Route path="/resumeBuilder" element={<ResumeBuilder />} />
             <Route path="/showCoding" element={<ShowCoding />} />
+
+
+
+            <Route path="*" element={<PageNotFound />} />
           </Routes>
           <Footer />
         </BrowserRouter>

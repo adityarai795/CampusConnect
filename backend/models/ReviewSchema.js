@@ -15,7 +15,16 @@ const CommentSchema = new mongoose.Schema({
     ref: "User",
   },
 });
-
+CommentSchema.post("findOneAndDelete", async (comment) => {
+  if (comment) {
+    await mongoose
+      .model("Post")
+      .updateMany(
+        { comment: comment._id },
+        { $pull: { comment: comment._id } }
+      );
+  }
+});
 const Comment = mongoose.model("Comment", CommentSchema);
 
 const likeReview = new mongoose.Schema({

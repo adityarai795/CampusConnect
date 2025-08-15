@@ -54,7 +54,9 @@ const JobView = () => {
                 <tr key={job._id} className="text-center">
                   <td className="px-4 py-2 border">{index + 1}</td>
                   <td className="px-4 py-2 border text-left">{job.title}</td>
-                  <td className="px-4 py-2 border"></td>
+                  <td className="px-4 py-2 border">
+                    <a href={job.link}>click here</a>
+                  </td>
                   <td className="px-4 py-2 border">
                     <button
                       className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"

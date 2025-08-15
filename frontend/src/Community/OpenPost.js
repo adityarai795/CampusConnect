@@ -30,7 +30,6 @@ function OpenPost() {
     setPost(response.data.post);
   };
   const { user } = useUser();
-
   const navigate = useNavigate();
 
   const [comments, setComments] = useState([]);
@@ -38,6 +37,7 @@ function OpenPost() {
   const fetchComments = async () => {
     try {
       const response = await showallComments(id);
+      console.log(response.data.data);
       if (response.data.data) {
         setComments(response.data.data.comment);
       }
@@ -47,10 +47,11 @@ function OpenPost() {
   };
   const handleDelete = async (postId) => {
     try {
-      // const res = await fetch(`http://localhost:3000/community/post/${postId}/delete`, {
-      //   method: 'DELETE',
-      // });
-      toast.success("please check not deleted");
+      const res = await fetch(`http://localhost:3000/community/post/${postId}/delete`, {
+        method: 'DELETE',
+      });
+      console.log(res.data);
+      toast.success("Post Successfully Deleted !");
       navigate("/community");
     } catch (err) {
       toast.error("Something error")
@@ -90,7 +91,7 @@ function OpenPost() {
 
   const commentDeleted = async (id) => {
     try {
-         const token = localStorage.getItem("token"); // Login ke baad store kiya tha
+         const token = localStorage.getItem("token");
 
          const response = await deleteComment(id, {
            headers: {
@@ -117,21 +118,25 @@ function OpenPost() {
         <div>
           {/* Title */}
           <h3 className="font-extrabold text-2xl mb-4">{post.title}</h3>
-
-          <img
-            src={post?.image?.url}
-            alt="Post"
-            className="h-[300px] w-[80%] object-cover rounded-md shadow-md"
-          />
+          {post?.image?.url && (
+            <img
+              src={post?.image?.url}
+              alt="Post"
+              className="h-[300px] w-[80%] object-cover rounded-md shadow-md"
+            />
+          )}
 
           <span className="font-semibold text-blue-600">
             Owner: {post.owner?.username || "Anonymous"}
+            {" | "} {post.collage || "N/A"}
           </span>
 
           {/* Description */}
           <p className="mt-4 text-gray-700 leading-relaxed">
             {post.description}
           </p>
+
+          <span>{}</span>
           <hr className="mt-4" />
           {/* Action Buttons */}
           <div className="flex items-center space-x-6 mt-4 text-2xl">
@@ -144,18 +149,14 @@ function OpenPost() {
             <button className="text-green-500" onClick={handleShare}>
               <FaShareAlt />
             </button>
-            <button
-              onClick={() => handleDelete(post._id)}
-              className="text-red-500"
-            >
-              <MdDelete />
-            </button>
-
-            {/* {String(post.owner?._id) === String(user._id) && (
-              <button onClick={() => handleDelete(post._id)}>
+            {post.owner?._id === user?._id && (
+              <button
+                onClick={() => handleDelete(post._id)}
+                className="text-red-500"
+              >
                 <MdDelete />
               </button>
-            )} */}
+            )}
           </div>
           {/* Add New Comment */}
           <div className="mt-6 flex space-x-2">
@@ -185,16 +186,22 @@ function OpenPost() {
                       key={c._id || index}
                       className="border border-gray-200 rounded p-2 bg-gray-50 flex justify-between items-center"
                     >
-                      <div>
+                      {/* <div>
                         <span className="font-bold">{c.user}You: </span>
                         {c.comment}
+                      </div> */}
+                      <div key={c._id}>
+                        <p>{c.comment}</p>
+                        <small>By: {c.user?.username}</small>
                       </div>
-                      <button
-                        onClick={() => commentDeleted(c._id)}
-                        className="bg-red-600 text-white px-2 py-1 rounded-lg hover:bg-red-700 text-sm"
-                      >
-                        Delete
-                      </button>
+                      {c.user?._id === user?.id && (
+                        <button
+                          onClick={() => commentDeleted(c._id)}
+                          className="bg-red-600 text-white px-2 py-1 rounded-lg hover:bg-red-700 text-sm"
+                        >
+                          Delete
+                        </button>
+                      )}
                     </li>
                   ))}
               </ul>

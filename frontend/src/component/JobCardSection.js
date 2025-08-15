@@ -3,7 +3,7 @@ import React from "react";
 
 const JobCardSection = ({ title, jobs = [] }) => {
 // 🎓 Internships
-
+console.log(jobs)
 
   return (
     <div className="mt-[200px]">

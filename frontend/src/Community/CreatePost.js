@@ -12,7 +12,7 @@ const [formData, setFormData] = useState({
   title: "",
   description: "",
   image: null,
-  college: "",
+  collage: "",
 });
 
 const handleChange = (e) => {
@@ -37,17 +37,18 @@ const handleSubmit = async (e) => {
   data.append("title", formData.title);
   data.append("description", formData.description);
   data.append("image", formData.image);
-  data.append("college", formData.college);
+  data.append("collage", formData.collage);
   try {
     const token = localStorage.getItem("token");
     console.log(token)
     const res = await addPost(data, {
+
       headers: {
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,
       },
     });
-
+    console.log(res);
     toast.success("Post uploaded successfully!");
     navigate("/community");
   } catch (err) {
@@ -110,8 +111,8 @@ const handleSubmit = async (e) => {
             <label className="block font-medium">College</label>
             <input
               type="text"
-              name="college"
-              value={formData.college}
+              name="collage"
+              value={formData.collage}
               onChange={handleChange}
               className="w-full border p-2 rounded-lg"
               placeholder="e.g. Bansal Institute"

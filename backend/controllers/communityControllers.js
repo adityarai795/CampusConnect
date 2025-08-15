@@ -4,26 +4,30 @@ const {Like ,Comment} = require("../models/ReviewSchema");
 
 
 module.exports.AddPost = async (req, res) => {
-   const { title, description, college } = req.body;
-  const file = req.file;
-   try {
-     const newPost = new Post({
-       title,
-       description,
-       image: {
-         url: file.path, // Cloudinary's URL
-         filename: file.filename, // Cloudinary's public_id
-       },
-       college,
-        owner: req.user._id,
-     });
+  const { title, description, collage } = req.body;
+  const file = req.file; // Optional
 
-     const savedPost = await newPost.save();
-     res.status(201).json(savedPost);
-   } catch (error) {
-     res.status(400).json({ message: error.message });
-   }
-}
+  try {
+    const newPost = new Post({
+      title,
+      description,
+      collage,
+      owner: req.user._id,
+    });
+
+    if (file) {
+      newPost.image = {
+        url: file.path, 
+        filename: file.filename,
+      };
+    }
+
+    const savedPost = await newPost.save();
+    res.status(201).json(savedPost);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
 module.exports.ViewAllPost = async (req, res) => {
   try {
@@ -104,32 +108,49 @@ module.exports.DeletePost = async (req, res) => {
 
 // Add a comment to a post
 module.exports.addComment = async (req, res) => {
-  const { id } = req.params;
+  const { postId } = req.params; // better naming
+  const { comment } = req.body;
+  const userId = req.user._id;// assuming auth middleware adds this
+
   try {
-    const { comment ,userId } = req.body;
     if (!comment) {
       return res.status(400).json({ message: "Comment is required" });
     }
-    const newReview = new Comment({ comment });
+
+    // Create new comment
+    const newReview = new Comment({
+      comment,
+      post: postId,
+      user: userId,
+    });
     await newReview.save();
-    const post = await Post.findById(id);
+
+    // Add comment to post's comments array
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
     post.comment.push(newReview._id);
     await post.save();
-    res.status(201).json({ message: "Comment Can Created" });
+
+    res.status(201).json({ message: "Comment created successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-} 
+};
+
 
 module.exports.showComments = async (req, res) => {
   const { id } = req.params;
   try {
     const post = await Post.findById(id).populate({
       path: "comment",
+      populate: {
+        path: "user",
+      },
       options: { sort: { _id: -1 } },
     });
-
-
     if (!post) {
       return res.status(400).json({ message: "Data not found" });
     }

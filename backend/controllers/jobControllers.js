@@ -1,7 +1,7 @@
 // const Job = require("../models/JobSchema.js");
 const Job = require("../models/JobSchema.js")
 module.exports.addJob = async (req, res) => {
-  const { title, description, category, city, location, JobType } = req.body;
+  const { title, description, category, city, location, JobType,link } = req.body;
   try {
     const job = await Job({
       title,
@@ -10,9 +10,10 @@ module.exports.addJob = async (req, res) => {
       city,
       location,
       JobType,
+      link,
     });
     await job.save();
-    res.status(200).json({ message: "Job post successfully created" });
+    res.status(200).json({ message: "Job post successfully created",job });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -20,7 +21,7 @@ module.exports.addJob = async (req, res) => {
 
 module.exports.showllPost = async (req, res) => {
   try {
-    const showall = await Job.find().sort({ createdAt: -1 });
+    const showall = await Job.find().sort({ _id: -1 });
     if (!showall) {
       return res.status(404).json({message:"Sorry for this not found"})
     }

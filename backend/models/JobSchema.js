@@ -36,6 +36,7 @@ const jobSchema = new mongoose.Schema({
   },
   link: {
     type: String,
+    default:"https://ad.com"
   }
 });
 
