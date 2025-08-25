@@ -59,17 +59,41 @@ export default function ResumeBuilder() {
       certificates: [{ title: "", link: "" }],
     });
   }
-  const downloadPDF = () => {
-    const resume = document.getElementById("resume");
-    html2canvas(resume, { scale: 2 }).then((canvas) => {
+const downloadPDF = () => {
+  const resume = document.getElementById("resume");
+  const originalWidth = resume.offsetWidth;
+
+  // Temporarily set a fixed width for better scaling
+  resume.style.width = "800px";
+
+  html2canvas(resume, { scale: 3, useCORS: true, scrollY: -window.scrollY })
+    .then((canvas) => {
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      // Add multiple pages if content overflows
+      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pdf.internal.pageSize.getHeight();
+
+      while (heightLeft > 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pdf.internal.pageSize.getHeight();
+      }
+
       pdf.save(`${data.name || "my"}_resume.pdf`);
+    })
+    .finally(() => {
+      resume.style.width = `${originalWidth}px`;
     });
-  };
+};
+
 
 
   return (
