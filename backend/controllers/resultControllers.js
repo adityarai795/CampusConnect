@@ -1,6 +1,17 @@
 
 const Result = require("../models/ResultSchema");
-
+module.exports.searchResultQuery = async (req, res) => {
+  try {
+    const { query } = req.query;
+    const results = await Result.find({ University :{ $regex: query, $options: "i" } });
+    if (results.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+    res.status(200).json({ results });
+  } catch (error) {
+    res.status(400).json({ message: "Something went wrong", error });
+  }
+ }
 module.exports.viewResult=async (req, res) => {
   const { University } = req.body;
   try {
