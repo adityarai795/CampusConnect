@@ -51,6 +51,7 @@ const App = () => (
           <Route path="/addProblems" element={<AddProblem />} />
           <Route path="*" element={<PageNotFound />} />
           {/* future route example */}
+          
         </Routes>
       </main>
     </div>

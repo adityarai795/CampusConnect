@@ -8,7 +8,7 @@ const NotFound = () => {
       
 
       <h1 className="text-2xl md:text-3xl font-semibold mb-2">
-        Oops! Page not found
+        Oops! Page not found 
       </h1>
 
       <p className="mb-6 text-center text-gray-600 max-w-md">
@@ -19,7 +19,7 @@ const NotFound = () => {
         to="/"
         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition duration-300 shadow-md"
       >
-        ⬅ Go back Home
+        <ArrowBigLeft /> Go back Home
       </Link>
     </div>
   );

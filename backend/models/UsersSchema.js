@@ -42,6 +42,27 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "This is my bio",
     },
+    usedResources: {
+      type: [String],
+      default: [],
+    },
+    totalBlogPosts: {
+      type: Number,
+      default: 0,
+    },
+    leetcodeUsername: {
+      type: String,
+      default: "",
+    },
+    totalAciveDays: {
+      type: Number,
+      default: 0,
+    },
+    activitylog: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Activity",
+      default: [],
+    }
   },
   {
     timestamps: true,
