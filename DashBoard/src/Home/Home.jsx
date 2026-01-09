@@ -10,7 +10,7 @@ function Home() {
       {/* Welcome Section */}
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold text-indigo-700">
-          Welcome {authState?.user?.name || 'Guest'} 👋
+          Welcome CampusConnect Admin page
         </h1>
         <p className="text-gray-600 mt-2">
           Manage your coding problems with ease.
