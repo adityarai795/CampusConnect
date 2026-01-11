@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { createJob } from '../api/job';
+import { createJob } from '../../api/job';
 import {toast} from 'react-toastify'
 
 const CreateJob = () => {

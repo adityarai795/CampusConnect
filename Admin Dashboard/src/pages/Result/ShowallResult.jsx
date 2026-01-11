@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {showall,deleteLink} from '../api/result.jsx'
+import {showall,deleteLink} from '../../api/result.jsx'
 import axios from "axios";
 import {toast} from 'react-toastify'
 

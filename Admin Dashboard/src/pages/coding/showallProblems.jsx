@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { showallProblem ,deleteProblem} from '../api/codingProblem';
+import { showallProblem ,deleteProblem} from '../../api/codingProblem';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 

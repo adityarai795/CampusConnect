@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import {addProblem, showallProblem ,deleteProblem} from '../api/codingProblem';
+import {addProblem, showallProblem ,deleteProblem} from '../../api/codingProblem';
 import { toast } from "react-toastify";
 
 function AddProblem() {

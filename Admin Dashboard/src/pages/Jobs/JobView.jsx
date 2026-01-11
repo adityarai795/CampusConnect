@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { showall, deleteJob } from '../api/job'
+import { showall, deleteJob } from '../../api/job'
 import {toast} from 'react-toastify'
 
 const JobView = () => {

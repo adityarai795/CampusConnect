@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {toast} from 'react-toastify'
-import {addResult} from '../api/result'
+import {addResult} from '../../api/result'
 const CreateResult = () => {
   const navigate = useNavigate();
 

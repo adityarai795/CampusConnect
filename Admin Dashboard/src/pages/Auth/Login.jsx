@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom'
 import { toast } from  'react-toastify'
 import { useDispatch, useSelector } from 'react-redux';
-import  {loginUser}  from '../redux/action/authAction.js';
+import  {loginUser}  from '../../redux/action/authAction.js';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
