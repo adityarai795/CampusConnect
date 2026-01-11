@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-
+const mongoose = require("mongoose");
 const teacherSchema = new mongoose.Schema(
   {
     role: {
@@ -45,11 +44,16 @@ const teacherSchema = new mongoose.Schema(
     category: {
       type: String,
       enum: ["school", "college", "university"],
-      required: true,
+      // required: true,
     },
 
     // Identification
-    employeeId: { type: String, unique: true },
+    employeeId: {
+
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     designation: { type: String }, // e.g., "Senior Coordinator", "Assistant Professor"
     department: { type: String }, // e.g., "Mathematics", "Department of Physics"
 
@@ -128,4 +132,4 @@ const teacherSchema = new mongoose.Schema(
 );
 
 const Teacher = mongoose.model("Teacher", teacherSchema);
-export default Teacher;
+ module.exports = Teacher;

@@ -1,59 +1,64 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const organizationSchema = new mongoose.Schema(
   {
     role: {
       type: String,
+      enum: ["organization"],
       default: "organization",
     },
+
     orgType: {
       type: String,
       enum: ["School", "College", "University", "Coaching_Center"],
       required: true,
     },
+
     name: {
       type: String,
       required: true,
       trim: true,
     },
+
     registrationNumber: {
       type: String,
       unique: true,
-      description: "Government or Board registration ID",
+      sparse: true, // ✅ allows multiple null values
+      trim: true,
     },
 
-    // Branding & Assets
+    // Branding
     logo: {
       type: String,
       default: "https://via.placeholder.com/150?text=Org+Logo",
     },
-    bannerImage: { type: String },
+    bannerImage: {
+      type: String,
+    },
 
-    // Contact & Location
+    // Contact
     email: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
+      trim: true,
     },
+
     password: {
       type: String,
       required: true,
-      uppercase: true,
-      lowercase: true,
-      number: true,
-      specialchar: true,
+      minlength: 8,
+      select: false, // ✅ never return password
     },
+
     mobileno: {
       type: String,
       required: true,
-      validate: {
-        validator: function (v) {
-          return /^\S+@\S+\.\S+$/.test(v); // Email format check
-        },
-        message: (props) => `${props.value} valid email nahi hai!`,
-      },
+      match: [/^[6-9]\d{9}$/, "Invalid mobile number"],
     },
+
     address: {
       street: String,
       city: String,
@@ -61,26 +66,28 @@ const organizationSchema = new mongoose.Schema(
       zipCode: String,
       country: { type: String, default: "India" },
     },
-    website: { type: String },
 
-    // Administrative Structure
+    website: {
+      type: String,
+      trim: true,
+    },
+
+    // Admin structure
     departments: [
       {
-        name: { type: String }, // e.g., "Department of IT", "Primary Wing"
-        head: { type: String }, // Name or Reference to a Teacher
+        name: { type: String, trim: true },
+        head: { type: String, trim: true },
       },
     ],
 
-    affiliations: [String], // e.g., ["CBSE", "UGC", "AICTE"]
+    affiliations: [{ type: String, trim: true }],
 
-    // Future Scope: Resource Management
     subscriptionPlan: {
       type: String,
       enum: ["free", "basic", "premium", "enterprise"],
       default: "free",
     },
 
-    // Analytics/Counts (Optional but helpful for fast queries)
     stats: {
       totalStudents: { type: Number, default: 0 },
       totalTeachers: { type: Number, default: 0 },
@@ -90,34 +97,50 @@ const organizationSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
     verified: {
       type: Boolean,
       default: false,
-      description: "Whether the institution has been verified by your platform",
     },
   },
   { timestamps: true }
 );
-organizationSchema.pre("findOneAndDelete", async function (next) {
-  const orgId = this.getQuery()._id;
 
-  try {
-    // 1. Sabhi Teachers ka experience update karein ya unhe delete karein
-    const Teacher = mongoose.model("Teacher");
-    await Teacher.deleteMany({ "experience.organizationId": orgId });
 
-    // 2. Sabhi Students ko delete karein jo is Org se jude hain
-    const User = mongoose.model("User");
-    await User.deleteMany({ "academicDetails.organizationId": orgId });
 
-    // 3. Activity log clean karein
-    const Activity = mongoose.model("Activity");
-    await Activity.deleteMany({ organizationId: orgId });
+// 🔐 Hash password before save
+// organizationSchema.pre("save", async function (next) {
+//   if (!this.isModified("password")) return next();
 
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
+//   this.password = await bcrypt.hash(this.password, 10);
+//   next();
+// });
 
-export default mongoose.model("Organization", organizationSchema);
+
+
+// 🧹 Cascade delete on organization delete
+// organizationSchema.pre("findOneAndDelete", async function (next) {
+//   const orgId = this.getQuery()._id;
+
+//   try {
+//     await mongoose.model("Teacher").deleteMany({
+//       "experience.organizationId": orgId,
+//     });
+
+//     await mongoose.model("User").deleteMany({
+//       "academicDetails.organizationId": orgId,
+//     });
+
+//     await mongoose.model("Activity").deleteMany({
+//       organizationId: orgId,
+//     });
+
+//     next();
+//   } catch (error) {
+//     next(error);
+//   }
+// });
+
+
+
+module.exports = mongoose.model("Organization", organizationSchema);

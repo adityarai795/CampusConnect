@@ -12,6 +12,8 @@ const jobRouter = require("./routers/jobRouters");
 const codingProblemRouter = require("./routers/codingProblem.js");
 const cookieParser = require('cookie-parser');
 const cloudinary = require("cloudinary").v2;
+const organizationRouter = require('./routers/orginazationRouter');
+const teacherRouter = require('./routers/teacherRouter');
 const dbConnect = require('./config/db');
 
 
@@ -34,7 +36,9 @@ app.use("/resource", resourceRouter);
 app.use("/community",postRouter)
 app.use("/profile", profileRouter);
 app.use("/job", jobRouter);
-app.use("/problem",codingProblemRouter)
+app.use("/problem", codingProblemRouter);
+app.use("/teacher", teacherRouter);
+app.use("/organization",organizationRouter);
 
 app.get("/",(req,res)=>{
   res.send("This is home ");
