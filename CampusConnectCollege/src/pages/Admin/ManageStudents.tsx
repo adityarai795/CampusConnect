@@ -134,8 +134,14 @@ const ManageStudents = () => {
             <tbody className="divide-y divide-gray-200">
               {students.map((student) => (
                 <tr key={student.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4">
-                    <p className="font-medium text-gray-900">
+                  <td
+                    className="px-6 py-4"
+                    onClick={() => {
+                      // navigate(`/students/${student.id}`);
+                      navigate(`/students/123`)
+                    }}
+                  >
+                    <p className="font-medium text-gray-900 cursor-pointer">
                       {student.username}
                     </p>
                   </td>

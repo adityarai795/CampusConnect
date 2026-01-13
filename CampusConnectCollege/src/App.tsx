@@ -33,6 +33,8 @@ import ManageResults from "./pages/Teacher/ManageResults";
 import ManageTeachers from "./pages/Admin/ManageTeachers";
 import ManageDepartments from "./pages/Admin/ManageDepartments";
 import EditStudentModal from "./components/EditStudentModal";
+import Student from "./components/Student";
+import EditTeacher from "./components/EditTeacherModal";
 
 const AppContent = () => {
   const { isAuthenticated } = useAuth();
@@ -92,6 +94,15 @@ const AppContent = () => {
               }
             />
 
+            <Route
+              path="/admin/editTeacher/:id"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <EditTeacher />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Teacher Routes */}
             <Route
               path="/teacher/dashboard"
@@ -127,10 +138,19 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             /> */}
-            <Route path="//students/editStudent/:id"
+            <Route
+              path="/students/editStudent/:id"
               element={
                 <ProtectedRoute allowedRoles={["admin", "teacher"]}>
                   <EditStudentModal />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/students/:id"
+              element={
+                <ProtectedRoute allowedRoles={["admin", "teacher"]}>
+                  <Student />
                 </ProtectedRoute>
               }
             />

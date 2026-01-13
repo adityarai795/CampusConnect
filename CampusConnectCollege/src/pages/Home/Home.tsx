@@ -92,7 +92,7 @@ function Home() {
           {[
             { name: "Jobs", link: "/jobs" },
             { name: "Community", link: "/community" },
-            { name: "Settings", link: "/settings" },
+            // { name: "Settings", link: "/settings" },
             {
               name: user?.role === "admin" ? "Dashboard" : "My Classes",
               link:
