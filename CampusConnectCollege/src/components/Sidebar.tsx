@@ -24,33 +24,33 @@ function Sidebar() {
       name: "Home",
       path: "/",
       icon: "home",
-      roles: ["admin", "teacher"],
+      roles: ["admin", "teacher","organization"],
     },
     {
       name: "Dashboard",
-      path: user?.role === "admin" ? "/admin/dashboard" : "/teacher/dashboard",
+      path: (user?.role === "admin" || user?.role === "organization") ? "/admin/dashboard" : "/teacher/dashboard",
       icon: "dashboard",
-      roles: ["admin", "teacher"],
+      roles: ["admin", "teacher","organization"],
     },
     {
       name: "Manage Students",
       path: "/admin/students",
       icon: "students",
-      roles: ["admin","teacher"],
+      roles: ["admin","teacher","organization"],
     },
-    ...(user?.role === "admin"
+    ...(( user?.role === "admin" || user?.role === "organization") 
       ? ([
           {
             name: "Manage Teachers",
             path: "/admin/teachers",
             icon: "teachers",
-            roles: ["admin"] as const,
+            roles: ["admin","organization"] as const,
           },
           {
             name: "Departments / Classes",
             path: "/admin/departments",
             icon: "departments",
-            roles: ["admin"] as const,
+            roles: ["admin","organization"] as const,
           },
         ] as const)
       : ([] as const)),

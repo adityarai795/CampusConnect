@@ -21,7 +21,9 @@ import ShowallResult from "./pages/Result/ShowallResult";
 import ShowallPost from "./pages/Community/ShowallPost";
 import ShowAllProblem from "./pages/coding/showallProblems";
 import AddProblem from "./pages/coding/AddProblem";
+import ManageCollege from "./pages/College/manageCollege";
 import PageNotFound from "./component/PageNotFound";
+
 
 const App = () => (
   <Router>
@@ -49,6 +51,7 @@ const App = () => (
           <Route path="/showallPost" element={<ShowallPost />} />
           <Route path="/showallProblems" element={<ShowAllProblem />} />
           <Route path="/addProblems" element={<AddProblem />} />
+          <Route path="/managecollege" element={<ManageCollege />} />
           <Route path="*" element={<PageNotFound />} />
           {/* future route example */}
         </Routes>

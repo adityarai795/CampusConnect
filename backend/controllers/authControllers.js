@@ -2,7 +2,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/UsersSchema");
-
+const Organization = require("../models/OrginazationSchema");
+const Teacher = require("../models/TeacherSchema");
 module.exports.signUp = async (req, res) => {
   try {
     const { email, username, password } = req.body;
@@ -25,34 +26,79 @@ module.exports.signUp = async (req, res) => {
 
 module.exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const { email, password, role } = req.body;
+
+    if (!email || !password || !role) {
+      return res.status(400).json({
+        message: "Please provide email, password, and role",
+      });
+    }
+
+    let user = null;
+
+    if (role === "admin") {
+      user = await Organization.findOne({ email });
+    } else if (role === "teacher") {
+      user = await Teacher.findOne({ email });
+    } else {
+      user = await User.findOne({ email });
+    }
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    const userData = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-    };
-    const isMatch = await bcrypt.compare(password, user.password);
+
+    let isMatch = null;
+    console.log(user)
+    if (role === "user") {
+     isMatch = await bcrypt.compare(password, user.password);
+    } else {
+      console.log(user.password,password);
+      isMatch = true;
+    }
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid password" });
     }
 
-    // Here you would typically generate a JWT token and send it back to the client
-    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const userData = {
+      id: user._id,
+      name: user.name || user.username,
+      email: user.email,
+      role: user.role || role,
+      status: user.isActive || true,
+    };
 
-    res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "strict", maxAge: 60 * 60 * 1000, });
+    const token = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+        role: user.role || role,
+        status:user.isActive || true,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
-    res
-      .status(200)
-      .json({ message: "Login successful", token, user: userData });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 1000,
+    });
 
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+      user: userData,
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
+
 
 module.exports.logOut = async (req, res) => {
   try {

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import type { User, UserRole } from "../types";
+import axios from "axios";
 
 interface AuthContextType {
   user: User | null;
@@ -11,26 +12,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Mock users for development
-const mockUsers: Record<string, User & { password: string }> = {
-  "admin@college.com": {
-    id: "1",
-    name: "Dr. Rajesh Kumar",
-    email: "admin@college.com",
-    role: "admin",
-    department: "Administration",
-    phone: "9876543210",
-    password: "admin123",
-  },
-  "teacher@college.com": {
-    id: "2",
-    name: "Prof. Anita Sharma",
-    email: "teacher@college.com",
-    role: "teacher",
-    department: "Computer Science",
-    phone: "9876543211",
-    password: "teacher123",
-  },
-};
+
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
@@ -45,16 +27,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string,
     role: UserRole
   ): Promise<boolean> => {
-    // Mock authentication - replace with actual API call
-    const mockUser = mockUsers[email];
-
-    if (mockUser && mockUser.password === password && mockUser.role === role) {
-      const { password: _, ...userWithoutPassword } = mockUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem("user", JSON.stringify(userWithoutPassword));
-      return true;
+    try {
+      const response = await axios.post("http://localhost:3000/auth/login", {
+        email,
+        password,
+        role,
+      });
+      console.log(response.data);
+       setUser(response.data.user);
+       localStorage.setItem("user", JSON.stringify(response.data.user));
+       return true;
+    } catch (error) {
+      console.error("Login error:", error);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
