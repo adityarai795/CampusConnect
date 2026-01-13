@@ -14,7 +14,7 @@ export interface User {
 // Student Type (managed by admin/teacher)
 export interface Student {
   id: string;
-  name: string;
+  username: string;
   email: string;
   rollNumber: string;
   class: string;

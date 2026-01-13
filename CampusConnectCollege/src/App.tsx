@@ -32,6 +32,7 @@ import TeacherDashboard from "./pages/Teacher/Dashboard";
 import ManageResults from "./pages/Teacher/ManageResults";
 import ManageTeachers from "./pages/Admin/ManageTeachers";
 import ManageDepartments from "./pages/Admin/ManageDepartments";
+import EditStudentModal from "./components/EditStudentModal";
 
 const AppContent = () => {
   const { isAuthenticated } = useAuth();
@@ -126,6 +127,13 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             /> */}
+            <Route path="//students/editStudent/:id"
+              element={
+                <ProtectedRoute allowedRoles={["admin", "teacher"]}>
+                  <EditStudentModal />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/results"
               element={
