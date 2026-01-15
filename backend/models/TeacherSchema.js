@@ -39,35 +39,22 @@ const teacherSchema = new mongoose.Schema(
         message: (props) => `${props.value} valid mobile number nahi hai!`,
       },
     },
-
-    // Categorization for School vs College
     category: {
       type: String,
       enum: ["school", "college", "university"],
-      // required: true,
     },
-
-    // Identification
     employeeId: {
-
       type: String,
       unique: true,
       sparse: true,
     },
-    designation: { type: String }, // e.g., "Senior Coordinator", "Assistant Professor"
     department: { type: String }, // e.g., "Mathematics", "Department of Physics"
-
     subjects: [
       {
         name: { type: String },
         level: { type: String }, // e.g., "Advanced", "10th Grade", "Post-Graduate"
       },
     ],
-
-    profilePicture: {
-      type: String,
-      default: "https://www.w3schools.com/howto/img_avatar.png",
-    },
     bio: {
       type: String,
       default: "Teacher at [Institution Name]",

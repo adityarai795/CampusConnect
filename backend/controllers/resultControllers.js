@@ -2,8 +2,8 @@
 const Result = require("../models/ResultSchema");
 module.exports.searchResultQuery = async (req, res) => {
   try {
-    const { query } = req.query;
-    const results = await Result.find({ University :{ $regex: query, $options: "i" } });
+    const { university } = req.query;
+    const results = await Result.find({ University :{ $regex: university, $options: "i" } });
     if (results.length === 0) {
       return res.status(404).json({ message: "No results found" });
     }

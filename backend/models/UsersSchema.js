@@ -66,9 +66,12 @@ const userSchema = new mongoose.Schema(
         message: (props) => `${props.value} valid mobile number nahi hai!`,
       },
     },
-    username: {
+    dob: {
+      type: Date,
+    },
+    gender: {
       type: String,
-      required: true,
+      enum: ["male", "female", "other"],
     },
     password: {
       type: String,
@@ -78,10 +81,6 @@ const userSchema = new mongoose.Schema(
       number: true,
       specialchar: true,
     },
-    profilePicture: {
-      type: String,
-      default: "https://www.w3schools.com/howto/img_avatar.png",
-    },
     academicDetails: {
       type: [academicSchema],
       default: [],
@@ -90,10 +89,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["school", "college"],
       required: true,
-    },
-    usedResources: {
-      type: [String],
-      default: [],
     },
     socialLinks: {
       leetcode: { type: String },

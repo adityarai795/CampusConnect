@@ -1,11 +1,12 @@
-import React,{ useEffect, useState} from "react";
-import ResourceSection from "../component/ResourceSection";
-import { viewResource, showall } from "../api/resource";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import axios from "axios";
-function Notes() {
-  const SelectResouces = [
-    "Select Resource Type",
+import { viewResource, showall } from "../api/resource";
+import { ResourceCard } from "./ResourceCard";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import TopicBar from "./TopicBar";
+export default function Notes() {
+  const RESOURCE_TYPES = [
+    "Show all",
     "Notes",
     "Question Paper",
     "Youtube",
@@ -13,125 +14,159 @@ function Notes() {
   ];
 
   const [title, setTitle] = useState("");
-  const [Resource, setResource] = useState("Show all");
-   const [resources, setResources] = useState([]);
-  const [allresources, setAllResources] = useState([]);
-  const handleSubmit = async(e) => {
-    e.preventDefault();
+  const [type, setType] = useState("Show all");
+  const [subject, setSubject] = useState("");
+  const [resources, setResources] = useState([]);
+  const [allResources, setAllResources] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  const fetchAll = async () => {
     try {
-      const inputData = { title: title, type: Resource };
-      // const response = await viewResource(inputData);
-      const response = await axios.post(
-        "http://localhost:3000/resource/viewResource",inputData
-      );
-      toast.success("Fetched resources!");
-      setResources(response.data.message);
-    } catch (error) {
-     toast.error(error.response.data.error);
-      console.error("Error fetching resource:", error);
+      setInitialLoading(true);
+      const res = await showall();
+      setAllResources(res.data.message || []);
+    } catch {
+      toast.error("Failed to load resources");
+    } finally {
+      setInitialLoading(false);
     }
-  }
-    // const handleSubmit = async (e) => {
-    //   e.preventDefault();
-    //   try {
-    //     const inputData = { title, type: Resource };
-    //     const data = await viewResource(inputData); // data is already res.data
-    //   console.log("✅ FULL API RESPONSE:", data.data); // 🔍 log this!
+  };
 
-    //   if (data?.message && Array.isArray(data.data)) {
-    //     setResources(data.data);
-    //   } else {
-    //     console.warn("⚠️ No message array in response");
-    //     setResources([]);
-    //   }  console.log("This is the notes page data:", data.message);
-    //     setResources(Array.isArray(data.message) ? data.message : []);
-    //   } catch (error) {
-    //     console.error("Error fetching resource:", error);
-    //   }
-    // };
-
-  const fetchData = async () => {
-    const res = await showall();
-    setAllResources(res.data.message)
-  }
   useEffect(() => {
-    fetchData();
-  },[])
+    fetchAll();
+  }, []);
+
+  const handleSearch = async () => {
+    if (!title.trim()) {
+      toast.warning("Enter a search term");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const payload = {
+        title: title.trim(),
+        type: type === "Show all" ? "" : type,
+        subject: subject.trim(),
+      };
+
+      const res = await viewResource(payload);
+      setResources(res.data.message || []);
+    } catch {
+      toast.error("Search failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setTitle("");
+    setType("Show all");
+    setSubject("");
+    setResources([]);
+  };
+
+  const display =
+    resources.length > 0
+      ? resources
+      : type === "Show all"
+      ? allResources
+      : allResources.filter((r) => r.type === type);
+
   return (
-    <div className="bg-gray-100 pt-10 pb-10">
-      <div className=" p-4 flex flex-col items-center justify-start mt-[80px] mb-[100px]">
-        <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl p-8">
+    <>
+      <div className="min-h-screen bg-gray-50 pt-24 pb-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <TopicBar />
           {/* Header */}
-          <h2 className="text-4xl font-bold text-blue-600 text-center mb-2">
-            {" "}
-            Study Material Hub
-          </h2>
-          <p className="text-center text-gray-600 mb-6">
-            Find and download notes, previous papers, important questions, and
-            books.
-          </p>
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Study Resources
+            </h1>
+            <p className="text-gray-500 mt-1">
+              Search notes, papers, courses and learning links
+            </p>
+          </div>
 
-          {/* Search and Filters */}
-          <form
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            onSubmit={handleSubmit}
-          >
-            <input
-              onChange={(e) => {
-                setTitle(e.target.value);
-              }}
-              required
-              value={title}
-              type="text"
-              placeholder="Search notes, books, papers..."
-              className="col-span-1 md:col-span-2 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400"
-            />
-            <select
-              value={Resource}
-              onChange={(e) => setResource(e.target.value)}
-              required
-              className="col-span-1 md:col-span-2 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400"
-            >
-              {SelectResouces.map((item, index) => (
-                <option key={index}>{item}</option>
-              ))}
-            </select>
+          {/* Search Bar */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-8 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="relative">
+                <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Search by title or topic"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
 
-            <input
-              type="text"
-              placeholder="Subject (Optional)"
-              className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400"
-            />
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              >
+                {RESOURCE_TYPES.map((t) => (
+                  <option key={t}>{t}</option>
+                ))}
+              </select>
 
-            <button
-              type="submit"
-              className="col-span-1 md:col-span-2 bg-blue-500 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-600 transition"
-            >
-              🔍 Search Materials
-            </button>
-          </form>
+              <input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="Subject (optional)"
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={handleReset}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100"
+              >
+                Reset
+              </button>
+              <button
+                onClick={handleSearch}
+                disabled={loading}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? "Searching..." : "Search"}
+              </button>
+            </div>
+          </div>
+
+          {/* Results */}
+          {initialLoading ? (
+            <div className="text-center py-20 text-gray-500">
+              Loading resources...
+            </div>
+          ) : display.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-xl border">
+              <h3 className="font-semibold text-gray-700 mb-1">
+                No resources found
+              </h3>
+              <p className="text-sm text-gray-500">
+                Try adjusting your filters or keywords
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between items-center mb-4 text-sm text-gray-500">
+                <span>{display.length} results</span>
+                <span>Showing: {type}</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {display.map((item) => (
+                  <ResourceCard key={item._id} item={item} />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
-
-      <div className="flex justify-center mt-10 mb-5">
-        <h2 className="text-3xl font-bold text-blue-600 bg-blue-100 py-3 px-6 rounded-lg shadow text-center">
-          {Resource}
-        </h2>
-      </div>
-      
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-6 mb-10">
-        {(resources.length > 0 ? resources : allresources).map((item) => (
-          <ResourceSection key={item._id} item={item} />
-        ))}
-      </div>
-
-      {resources.length === 0 && allresources.length === 0 && (
-        <p className="text-center text-gray-500 mt-10">
-          No resources available.
-        </p>
-      )}
-    </div>
+    </>
   );
 }
-
-export default Notes;
