@@ -1,150 +1,178 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  Menu,
+  X,
+  Home,
+  BookOpen,
+  Award,
+  Users,
+  Briefcase,
+  LogOut,
+  LogIn,
+  User,
+} from "lucide-react";
 import { useUser } from "../context/UserContext";
 import Logo from "../assets/logo.png";
+
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useUser();
 
-  console.log("this is user",user)
+  const navLinks = [
+    { name: "Home", path: "/", icon: Home },
+    { name: "Notes", path: "/notes", icon: BookOpen },
+    { name: "Results", path: "/result", icon: Award },
+    { name: "Community", path: "/community", icon: Users },
+    { name: "Jobs", path: "/jobs", icon: Briefcase },
+  ];
+
+  const closeMenu = () => setIsOpen(false);
+
   return (
     <>
-      <div className="w-full flex justify-between items-center bg-white px-6 py-3 shadow-md border-b border-gray-200 fixed top-1 z-50">
-        <div className="flex items-center">
-          <Link to={"/"}>
-            <img src={Logo} alt="Logo" className="h-10 w-10 rounded-full " />
-          </Link>
-          <Link to={"/"}>
-            <h1 className="text-2xl font-bold text-blue-600 px-3 hidden md:block">
-              CampusConnect
-            </h1>
-          </Link>
-        </div>
-        <div className="hidden md:flex items-center justify-center ">
-          <ul className="flex space-x-4 ">
-            <Link
-              to={"/"}
-              className="hover:text-blue-400 cursor-pointer transition-all duration-200"
-            >
-              Home
-            </Link>
-            <Link
-              to={"/notes"}
-              className="hover:text-blue-400 cursor-pointer transition-all duration-200"
-            >
-              Notes
-            </Link>
-            <Link
-              to={"/result"}
-              className="hover:text-blue-400 cursor-pointer transition-all duration-200"
-            >
-              Results
-            </Link>
-            <Link
-              to={"/community"}
-              className="hover:text-blue-400 cursor-pointer transition-all duration-200"
-            >
-              Community
-            </Link>
-            <Link
-              to={"/jobs"}
-              className="hover:text-blue-400 cursor-pointer transition-all duration-200"
-            >
-              Jobs
-            </Link>
-
-            {/* <Link
-              to={"/login"}
-              className=" bg-blue-400 px-[5px] py-[3px] rounded-md text-white cursor-pointer transition-all duration-2000110 "
-            >
-              Login
-            </Link>
-             */}
-            {user ? (
-              <>
-                <button
-                  onClick={logout}
-                  className="bg-red-400 px-2 py-1 rounded-md text-white"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <Link
-                to={"/login"}
-                className="bg-blue-400 px-[5px] py-[3px] rounded-md text-white"
-              >
-                Login
+      <nav className="w-full bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200 fixed top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo Section */}
+            <div className="flex items-center space-x-3">
+              <Link to="/" className="flex items-center space-x-3 group">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                  <img
+                    src={Logo}
+                    alt="CampusConnect Logo"
+                    className="h-10 w-10 rounded-full relative z-10 ring-2 ring-white shadow-lg"
+                  />
+                </div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hidden sm:block">
+                  CampusConnect
+                </h1>
               </Link>
-            )}
-          </ul>
-        </div>
-        <div className="text-3xl font-bold md:hidden">
-          <h1 onClick={() => setIsOpen(!isOpen)}>&#8801;</h1>
-        </div>
-      </div>
+            </div>
 
-      {/* Responsive Navbar that show in onClick in the  mobile view*/}
-      {isOpen && (
-        <div className="md:hidden mt-[80px]">
-          <ul className="flex flex-col space-y-2 px-4 mb-4">
-            <Link
-              to={"/"}
-              className="hover:text-white  hover:bg-blue-400 px-[5px] py-[3px] rounded-md cursor-pointer transition-all duration-200  w-full "
-            >
-              Home
-            </Link>
-            <Link
-              to={"/notes"}
-              className="hover:text-white hover:bg-blue-400 px-[5px] py-[3px] rounded-md  cursor-pointer transition-all duration-200 w-full m-1"
-            >
-              Notes
-            </Link>
-            <Link
-              to={"/result"}
-              className="hover:text-white hover:bg-blue-400 px-[5px] py-[3px] rounded-md cursor-pointer transition-all duration-200 w-full m-1"
-            >
-              Results
-            </Link>
-            <Link
-              to={"/community"}
-              className="hover:text-white hover:bg-blue-400 px-[5px] py-[3px] rounded-md cursor-pointer transition-all duration-200 w-full m-1"
-            >
-              Community
-            </Link>
-            <Link
-              to={"/jobs"}
-              className="hover:text-white hover:bg-blue-400 px-[5px] py-[3px] rounded-md cursor-pointer transition-all duration-200 w-full m-1"
-            >
-              Jobs
-            </Link>
-            {user ? (
-              <>
-                <span className="px-2">Hi, {user.name}</span>
-                <button
-                  onClick={() => {
-                    logout();
-                    setIsOpen(false);
-                  }}
-                  className="bg-red-400 px-2 py-1 rounded-md text-white"
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-1">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 font-medium group"
+                  >
+                    <Icon
+                      size={18}
+                      className="group-hover:scale-110 transition-transform"
+                    />
+                    <span>{link.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Desktop Auth Section */}
+            <div className="hidden md:flex items-center space-x-3">
+              {user ? (
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                    <User size={18} className="text-blue-600" />
+                    <span className="text-sm font-medium text-gray-700">
+                      {user.name || user.username}
+                    </span>
+                  </div>
+                  <button
+                    onClick={logout}
+                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium"
+                  >
+                    <LogOut size={18} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 font-medium"
                 >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <Link
-                to={"/login"}
-                className="bg-blue-400 px-2 py-1 rounded-md text-white"
-                onClick={() => setIsOpen(false)}
-              >
-                Login
-              </Link>
-            )}
-          </ul>
+                  <LogIn size={18} />
+                  <span>Login</span>
+                </Link>
+              )}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
-      )}
+
+        {/* Mobile Menu */}
+        <div
+          className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+            isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="px-4 pt-2 pb-4 space-y-2 bg-gradient-to-b from-white to-gray-50">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={closeMenu}
+                  className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 font-medium"
+                >
+                  <Icon size={20} />
+                  <span>{link.name}</span>
+                </Link>
+              );
+            })}
+
+            {/* Mobile Auth Section */}
+            <div className="pt-4 border-t border-gray-200">
+              {user ? (
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                    <User size={20} className="text-blue-600" />
+                    <span className="font-medium text-gray-700">
+                      Hi, {user.name || user.username}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      closeMenu();
+                    }}
+                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                  >
+                    <LogOut size={20} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={closeMenu}
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
+                >
+                  <LogIn size={20} />
+                  <span>Login</span>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Spacer to prevent content from hiding under fixed navbar */}
+      <div className="h-16"></div>
     </>
   );
 }
 
 export default Navbar;
+  
