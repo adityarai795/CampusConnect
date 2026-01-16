@@ -26,9 +26,12 @@ module.exports.signUp = async (req, res) => {
 
 module.exports.login = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
-
-    if (!email || !password || !role) {
+    const { email, password } = req.body;
+    let { role } = req.body;
+    if (!role) {
+      role = "user";
+    }
+    if (!email || !password) {
       return res.status(400).json({
         message: "Please provide email, password, and role",
       });
@@ -94,7 +97,7 @@ module.exports.login = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      message: "Internal server error",
+      message: "Internal server error", error:   error.message,
     });
   }
 };

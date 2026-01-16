@@ -25,6 +25,7 @@ function Navbar() {
     { name: "Results", path: "/result", icon: Award },
     { name: "Community", path: "/community", icon: Users },
     { name: "Jobs", path: "/jobs", icon: Briefcase },
+    { name: "Profile", path: "/profile", icon: User },
   ];
 
   const closeMenu = () => setIsOpen(false);
@@ -175,4 +176,3 @@ function Navbar() {
 }
 
 export default Navbar;
-  

@@ -1,69 +1,82 @@
-import React, { useState } from 'react';
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight, CheckCircle2 } from 'lucide-react';
-
+import React, { useState } from "react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "./api/authrization.js";
 // Simulated API functions (replace with your actual API)
-const loginUser = async (data) => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  return { data: { token: 'mock-token', user: { name: 'User' }, message: 'Login successful' } };
-};
 
 const registerUser = async (data) => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  return { data: { message: 'Account created successfully' } };
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  return { data: { message: "Account created successfully" } };
 };
 
 const forgetPassword = async (data) => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  return { data: { message: 'Password reset successful' } };
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  return { data: { message: "Password reset successful" } };
 };
 
 // Toast notification component
 const Toast = ({ message, type, onClose }) => (
-  <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-slideIn ${
-    type === 'success' ? 'bg-green-500' : 'bg-red-500'
-  } text-white`}>
-    {type === 'success' && <CheckCircle2 size={20} />}
+  <div
+    className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-slideIn ${
+      type === "success" ? "bg-green-500" : "bg-red-500"
+    } text-white`}
+  >
+    {type === "success" && <CheckCircle2 size={20} />}
     <span className="font-medium">{message}</span>
   </div>
 );
 
 // Main Auth Component
 export default function AuthSystem() {
-  const [view, setView] = useState('login'); // login, signup, forgot
+  const navigation = useNavigate();
+  const [view, setView] = useState("login"); // login, signup, forgot
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
-  
-  // Form states
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const showToast = (message, type = 'success') => {
+  // Form states
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
   const resetForm = () => {
-    setEmail('');
-    setUsername('');
-    setPassword('');
-    setConfirmPassword('');
+    setEmail("");
+    setUsername("");
+    setPassword("");
+    setConfirmPassword("");
     setShowPassword(false);
     setShowConfirmPassword(false);
   };
 
   const handleLogin = async (e) => {
+    console.log("Login attempt");
     e.preventDefault();
     setLoading(true);
     try {
+      console.log("come in try");
+
       const response = await loginUser({ email, password });
+      console.log(response);
       showToast(response.data.message);
+      navigation("/");
       resetForm();
     } catch (error) {
-      showToast(error?.response?.data?.message || 'Login failed', 'error');
+      showToast(error?.response?.data?.message || "Login failed", "error");
     } finally {
       setLoading(false);
     }
@@ -72,7 +85,7 @@ export default function AuthSystem() {
   const handleSignup = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      showToast('Passwords do not match', 'error');
+      showToast("Passwords do not match", "error");
       return;
     }
     setLoading(true);
@@ -80,9 +93,9 @@ export default function AuthSystem() {
       const response = await registerUser({ email, username, password });
       showToast(response.data.message);
       resetForm();
-      setView('login');
+      setView("login");
     } catch (error) {
-      showToast(error?.response?.data?.message || 'Signup failed', 'error');
+      showToast(error?.response?.data?.message || "Signup failed", "error");
     } finally {
       setLoading(false);
     }
@@ -91,7 +104,7 @@ export default function AuthSystem() {
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      showToast('Passwords do not match', 'error');
+      showToast("Passwords do not match", "error");
       return;
     }
     setLoading(true);
@@ -99,9 +112,12 @@ export default function AuthSystem() {
       const response = await forgetPassword({ email, newPassword: password });
       showToast(response.data.message);
       resetForm();
-      setView('login');
+      setView("login");
     } catch (error) {
-      showToast(error?.response?.data?.message || 'Password reset failed', 'error');
+      showToast(
+        error?.response?.data?.message || "Password reset failed",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
@@ -134,26 +150,31 @@ export default function AuthSystem() {
           {/* Header with gradient */}
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
             <h1 className="text-3xl font-bold mb-2">
-              {view === 'login' && 'Welcome Back'}
-              {view === 'signup' && 'Create Account'}
-              {view === 'forgot' && 'Reset Password'}
+              {view === "login" && "Welcome Back"}
+              {view === "signup" && "Create Account"}
+              {view === "forgot" && "Reset Password"}
             </h1>
             <p className="text-blue-100 text-sm">
-              {view === 'login' && 'Sign in to continue your journey'}
-              {view === 'signup' && 'Join us and start your adventure'}
-              {view === 'forgot' && 'No worries, we\'ll help you reset it'}
+              {view === "login" && "Sign in to continue your journey"}
+              {view === "signup" && "Join us and start your adventure"}
+              {view === "forgot" && "No worries, we'll help you reset it"}
             </p>
           </div>
 
           {/* Form Container */}
           <div className="p-8">
             {/* Login Form */}
-            {view === 'login' && (
+            {view === "login" && (
               <form onSubmit={handleLogin} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Mail
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
+                    />
                     <input
                       type="email"
                       value={email}
@@ -166,11 +187,16 @@ export default function AuthSystem() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Lock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
+                    />
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
@@ -190,7 +216,7 @@ export default function AuthSystem() {
                 <div className="flex items-center justify-between text-sm">
                   <button
                     type="button"
-                    onClick={() => switchView('forgot')}
+                    onClick={() => switchView("forgot")}
                     className="text-blue-600 hover:text-blue-700 font-medium transition"
                   >
                     Forgot password?
@@ -202,15 +228,15 @@ export default function AuthSystem() {
                   disabled={loading}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {loading ? 'Signing in...' : 'Sign In'}
+                  {loading ? "Signing in..." : "Sign In"}
                   {!loading && <ArrowRight size={20} />}
                 </button>
 
                 <div className="text-center text-sm text-gray-600">
-                  Don't have an account?{' '}
+                  Don't have an account?{" "}
                   <button
                     type="button"
-                    onClick={() => switchView('signup')}
+                    onClick={() => switchView("signup")}
                     className="text-blue-600 font-semibold hover:text-blue-700 transition"
                   >
                     Sign up
@@ -220,12 +246,17 @@ export default function AuthSystem() {
             )}
 
             {/* Signup Form */}
-            {view === 'signup' && (
+            {view === "signup" && (
               <form onSubmit={handleSignup} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Mail
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
+                    />
                     <input
                       type="email"
                       value={email}
@@ -238,9 +269,14 @@ export default function AuthSystem() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Username
+                  </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <User
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
+                    />
                     <input
                       type="text"
                       value={username}
@@ -253,11 +289,16 @@ export default function AuthSystem() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Lock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
+                    />
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Create a password"
@@ -275,11 +316,16 @@ export default function AuthSystem() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Confirm Password
+                  </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Lock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
+                    />
                     <input
-                      type={showConfirmPassword ? 'text' : 'password'}
+                      type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Confirm your password"
@@ -288,10 +334,16 @@ export default function AuthSystem() {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
                     >
-                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showConfirmPassword ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -301,15 +353,15 @@ export default function AuthSystem() {
                   disabled={loading}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {loading ? 'Creating account...' : 'Create Account'}
+                  {loading ? "Creating account..." : "Create Account"}
                   {!loading && <ArrowRight size={20} />}
                 </button>
 
                 <div className="text-center text-sm text-gray-600">
-                  Already have an account?{' '}
+                  Already have an account?{" "}
                   <button
                     type="button"
-                    onClick={() => switchView('login')}
+                    onClick={() => switchView("login")}
                     className="text-blue-600 font-semibold hover:text-blue-700 transition"
                   >
                     Sign in
@@ -319,12 +371,17 @@ export default function AuthSystem() {
             )}
 
             {/* Forgot Password Form */}
-            {view === 'forgot' && (
+            {view === "forgot" && (
               <form onSubmit={handleForgotPassword} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Mail
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
+                    />
                     <input
                       type="email"
                       value={email}
@@ -337,11 +394,16 @@ export default function AuthSystem() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    New Password
+                  </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Lock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
+                    />
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter new password"
@@ -359,11 +421,16 @@ export default function AuthSystem() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Confirm New Password
+                  </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Lock
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
+                    />
                     <input
-                      type={showConfirmPassword ? 'text' : 'password'}
+                      type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Confirm new password"
@@ -372,10 +439,16 @@ export default function AuthSystem() {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
                     >
-                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showConfirmPassword ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -385,15 +458,15 @@ export default function AuthSystem() {
                   disabled={loading}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {loading ? 'Resetting password...' : 'Reset Password'}
+                  {loading ? "Resetting password..." : "Reset Password"}
                   {!loading && <ArrowRight size={20} />}
                 </button>
 
                 <div className="text-center text-sm text-gray-600">
-                  Remember your password?{' '}
+                  Remember your password?{" "}
                   <button
                     type="button"
-                    onClick={() => switchView('login')}
+                    onClick={() => switchView("login")}
                     className="text-blue-600 font-semibold hover:text-blue-700 transition"
                   >
                     Sign in
