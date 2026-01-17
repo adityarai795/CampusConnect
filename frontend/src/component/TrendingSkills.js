@@ -1,3 +1,4 @@
+import {Link} from "react-router-dom";
 function TrendingSkills() {
   const trendingSkills = [
     { name: "React.js", color: "from-cyan-500 to-blue-500" },
@@ -42,9 +43,11 @@ function TrendingSkills() {
           <p className="text-gray-500 mb-4">
             Click a skill to explore jobs, courses, and resources!
           </p>
-          <button className="bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors shadow-lg">
-            View All Skills
-          </button>
+          <Link to="roadmap">
+            <button className="bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors shadow-lg">
+              View All Skills
+            </button>
+          </Link>
         </div>
       </div>
     </div>

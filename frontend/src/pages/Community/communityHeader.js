@@ -25,9 +25,9 @@ function CommunityHeader() {
               <span>All Posts</span>
             </Link>
             <Link
-              to="/myPost"
+              to="/community/myposts"
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                isActive("/myPost")
+                isActive("/community/myposts")
                   ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md"
                   : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
               }`}

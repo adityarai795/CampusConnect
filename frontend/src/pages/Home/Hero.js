@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+import { Link } from "react-router-dom";
 function Hero() {
   const [currentStat, setCurrentStat] = useState(0);
 
@@ -106,7 +106,6 @@ function Hero() {
 
   const handleNavigation = (link) => {
     console.log(`Navigating to: ${link}`);
-    // In actual implementation, use: window.location.href = link or router navigation
   };
 
   return (
@@ -138,37 +137,43 @@ function Hero() {
 
               {/* CTA Buttons */}
               <div className="flex flex-wrap gap-4">
-                <button
-                  onClick={() => handleNavigation("/result")}
-                  className="group relative bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-full font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
-                >
-                  <span>Explore Results</span>
-                  <svg
-                    className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                <Link to="/result">
+                  <button
+                    onClick={() => handleNavigation("/result")}
+                    className="group relative bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-full font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => handleNavigation("/community")}
-                  className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold border-2 border-blue-600 shadow-lg hover:bg-blue-50 transition-all duration-300 transform hover:scale-105"
-                >
-                  Join Community
-                </button>
-                <button
-                  onClick={() => handleNavigation("/jobs")}
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-full font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-                >
-                  Browse Jobs
-                </button>
+                    <span>Explore Results</span>
+                    <svg
+                      className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  </button>
+                </Link>
+                <Link to="/community">
+                  <button
+                    onClick={() => handleNavigation("/community")}
+                    className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold border-2 border-blue-600 shadow-lg hover:bg-blue-50 transition-all duration-300 transform hover:scale-105"
+                  >
+                    Join Community
+                  </button>
+                </Link>
+                <Link to="/jobs">
+                  <button
+                    onClick={() => handleNavigation("/jobs")}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-full font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                  >
+                    Browse Jobs
+                  </button>
+                </Link>
               </div>
 
               {/* Animated Stats */}

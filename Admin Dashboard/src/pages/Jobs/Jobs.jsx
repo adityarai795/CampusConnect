@@ -1,20 +1,3 @@
-// import React from 'react'
-// import CreateJob from './CreateJob'
-// import { Link } from 'react-router-dom'
-// function Jobs() {
-//   return (
-//       <div className="col-span-9 p-6 mt-10">
-//       <h2 className="text-2xl font-semibold">This is the Job Page</h2>
-//       <Link to={"/createJob"}>createJob</Link>
-//       <br />
-//       <Link to={"/viewalljobs"}>viewall</Link>
-//     </div>
-//   )
-// }
-
-// export default Jobs
-
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { viewResource, showall } from "../api/resource";
 import { ResourceCard } from "./ResourceCard";
+import { viewResource, showall } from "../../api/resource.js";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import TopicBar from "./TopicBar";
 export default function Notes() {

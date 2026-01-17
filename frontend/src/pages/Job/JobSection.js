@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { showall } from "../api/job.js";
+import { showall } from "../../api/job.js";
 
 // Mock API - Replace with your actual API
 // const showall = async () => {

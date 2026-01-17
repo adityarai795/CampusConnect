@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { viewOne } from "../api/community.js";
+import { viewOne } from "../../api/community.js";
 import { useParams, useNavigate } from "react-router-dom";
 import CommunityHeader from "./communityHeader.js";
 import {
@@ -13,14 +13,14 @@ import {
   Loader2,
   CheckCircle2,
 } from "lucide-react";
-import { BASE_URL } from "../api/api.js";
+import { BASE_URL } from "../../api/api.js";
 import {
   addComment,
   showallComments,
   deleteComment,
-} from "../api/community.js";
+} from "../../api/community.js";
 import { toast } from "react-toastify";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../../context/UserContext";
 
 function OpenPost() {
   const { id } = useParams();

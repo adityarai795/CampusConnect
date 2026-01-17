@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { viewAllPost } from "../api/community.js";
+import { viewAllPost } from "../../api/community.js"
 import CardComponent from "./CardComponent";
 import CommunityHeader from "./communityHeader.js";
 import { toast } from "react-toastify";

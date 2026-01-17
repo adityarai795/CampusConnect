@@ -1,8 +1,8 @@
 import React from 'react'
-import Card from "../component/Card";
-import TrendingSkills from "../component/TrendingSkills";
+import Card from '../../component/Card';
+import TrendingSkills from '../../component/TrendingSkills';
 import { Link } from "react-router-dom";
-import QuotesSlider from "../component/QuotesSlider";
+import QuotesSlider from '../../component/QuotesSlider';
 import {
   FaUniversity,
   FaFileAlt,
@@ -31,6 +31,7 @@ function Home() {
           />
         </svg>
       ),
+      link: "/resume",
     },
     {
       title: "Quiz/Coding",
@@ -49,6 +50,7 @@ function Home() {
           />
         </svg>
       ),
+      link: "/showcoding",
     },
     {
       title: "University Result",
@@ -67,6 +69,7 @@ function Home() {
           />
         </svg>
       ),
+      link: "/result",
     },
     {
       title: "Notes & Question Papers",
@@ -85,6 +88,7 @@ function Home() {
           />
         </svg>
       ),
+      link: "/notes",
     },
     {
       title: "Internships & Jobs",
@@ -103,9 +107,10 @@ function Home() {
           />
         </svg>
       ),
+      link: "/jobs",
     },
     {
-      title: "Resources",
+      title: "Roadmap",
       icon: (
         <svg
           className="w-10 h-10"
@@ -121,6 +126,7 @@ function Home() {
           />
         </svg>
       ),
+      link: "/roadmap",
     },
   ];
   return (
@@ -138,7 +144,7 @@ function Home() {
 
         <div className="flex flex-wrap justify-center items-center">
           {features.map((feature, index) => (
-            <Card key={index} title={feature.title} icon={feature.icon} />
+            <Card key={index} title={feature.title} icon={feature.icon} link={feature.link} />
           ))}
         </div>
       </div>

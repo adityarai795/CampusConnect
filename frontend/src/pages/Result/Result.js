@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import API from "../api/api.js";
 import { toast } from "react-toastify";
+import API from "../../api/api";
 
 function Result() {
   const [query, setQuery] = useState("");

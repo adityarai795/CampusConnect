@@ -9,7 +9,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "./api/authrization.js";
+import { loginUser } from "../../api/authrization";
 // Simulated API functions (replace with your actual API)
 
 const registerUser = async (data) => {

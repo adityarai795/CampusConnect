@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { showallProblem } from "../api/codingProblem.js";
+import { showallProblem } from "../../api/codingProblem.js";
 import {
   Code,
   Building2,

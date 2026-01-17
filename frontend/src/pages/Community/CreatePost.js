@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import CommunityHeader from "./communityHeader";
 import { useNavigate } from "react-router-dom";
-import { addPost } from "../api/community.js";
+import { addPost } from "../../api/community.js";
 import { Image, Upload, FileText, Building2, X, Loader2 } from "lucide-react";
 
 const CreatePost = () => {

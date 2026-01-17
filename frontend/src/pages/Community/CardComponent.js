@@ -19,7 +19,7 @@ function CardComponent({ post }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link to={`/openPost/${post._id}`} className="block">
+      <Link to={`/community/openPost/${post._id}`} className="block">
         {/* Image Section */}
         {post?.image?.url ? (
           <div className="relative h-56 w-full overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100">

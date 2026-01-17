@@ -2,24 +2,22 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Home from "./Home/Home.js";
-import Navbar from "./component/Navbar";
-import Footer from "./component/Footer";
-import Login from "./Login";
-import SignUp from "./SignUp";
-import Profile from "./Profile/Profile.js";
-import Result from "./Result/Result.js";
-import Notes from "./Notes/Notes.js";
-import JobSection from "./Job/JobSection.js";
-import Community from "./Community/community.js";
-import ForgetPassword from "./ForgetPassword.js";
-import CreatePost from "./Community/CreatePost.js";
-import MyPost from "./Community/myPost.js";
-import OpenPost from "./Community/OpenPost.js";
-import ResumeBuilder from "./resumeBuilder/resumeBuilder.js";
-import ShowCoding from "./Coding/showcoding.js";
-import PageNotFound from './component/PageNotFound.js'
-import RoadmapPage from "./Coding/roadmapPage.js";
+import Home from "./pages/Home/Home.js";
+import Navbar from "./component/Navbar.js";
+import Footer from "./component/Footer.js";
+import Login from "./pages/authPage/Login.js";
+import Notes from "./pages/Notes/Notes.js";
+import Result from "./pages/Result/Result.js";
+import JobSection from "./pages/Job/JobSection.js";
+import Community from "./pages/Community/community.js";
+import Mypost from "./pages/Community/myPost.js";
+import OpenPost from "./pages/Community/OpenPost.js";
+import CreatPost from "./pages/Community/CreatePost.js";
+import Profile from "./pages/Profile/Profile.js";
+import Roadmap from "./pages/Practice/roadmapPage.js";
+import ShowCoding from './pages/Practice/showcoding.js'
+import ResumeBuilder from "./pages/resumeBuilder/resumeBuilder.js";
+import PageNotFound from "./component/PageNotFound.js";
 import { AppProvider } from "./context";
 function App() {
   return (
@@ -31,21 +29,19 @@ function App() {
 
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/forget" element={<ForgetPassword />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/roadmap" element={<Roadmap />} />
+            <Route path="/showcoding" element={<ShowCoding />} />
+            <Route path="/result" element={<Result />} />
             <Route path="/notes" element={<Notes />} />
             <Route path="/jobs" element={<JobSection />} />
             <Route path="/community" element={<Community />} />
+            <Route path="/community/myposts" element={<Mypost />} />
+            <Route path="/community/openPost/:id" element={<OpenPost />} />
+            <Route path="/createPost" element={<CreatPost />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/result" element={<Result />} />
-            <Route path="/createPost" element={<CreatePost />} />
-            <Route path="/myPost" element={<MyPost />} />
-            <Route path="/openPost/:id" element={<OpenPost />} />
-            <Route path="/resumeBuilder" element={<ResumeBuilder />} />
-            <Route path="/showCoding" element={<ShowCoding />} />
-            <Route path="/roadmapPage" element={<RoadmapPage />} />
-
+            <Route path="/login" element={<Login />} />
+            <Route path="/resume"  element={<ResumeBuilder />} />
             <Route path="*" element={<PageNotFound />} />
           </Routes>
           <Footer />
