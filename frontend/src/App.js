@@ -15,7 +15,7 @@ import OpenPost from "./pages/Community/OpenPost.js";
 import CreatPost from "./pages/Community/CreatePost.js";
 import Profile from "./pages/Profile/Profile.js";
 import Roadmap from "./pages/Practice/roadmapPage.js";
-import ShowCoding from './pages/Practice/showcoding.js'
+import ShowCoding from "./pages/Practice/showcoding.js";
 import ResumeBuilder from "./pages/resumeBuilder/resumeBuilder.js";
 import PageNotFound from "./component/PageNotFound.js";
 import { AppProvider } from "./context";
@@ -41,7 +41,7 @@ function App() {
             <Route path="/createPost" element={<CreatPost />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/resume"  element={<ResumeBuilder />} />
+            <Route path="/resume" element={<ResumeBuilder />} />
             <Route path="*" element={<PageNotFound />} />
           </Routes>
           <Footer />

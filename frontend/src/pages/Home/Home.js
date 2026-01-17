@@ -1,6 +1,7 @@
 import React from 'react'
 import Card from '../../component/Card';
 import TrendingSkills from '../../component/TrendingSkills';
+import { useState } from 'react';
 import { Link } from "react-router-dom";
 import QuotesSlider from '../../component/QuotesSlider';
 import {
@@ -12,7 +13,10 @@ import {
   FaBook,
 } from "react-icons/fa";
 import Hero from './Hero'
+import VerificationpopUp from '../../component/VerificationpopUp';
 function Home() {
+ const [open, setOpen] = useState(true);
+
   const features = [
     {
       title: "Resume Builder",
@@ -131,6 +135,7 @@ function Home() {
   ];
   return (
     <>
+      <VerificationpopUp show={open} onClose={() => setOpen(false)} />
       <Hero />
       <div className="max-w-7xl mx-auto px-4 py-16">
         <div className="text-center mb-12">
@@ -144,7 +149,12 @@ function Home() {
 
         <div className="flex flex-wrap justify-center items-center">
           {features.map((feature, index) => (
-            <Card key={index} title={feature.title} icon={feature.icon} link={feature.link} />
+            <Card
+              key={index}
+              title={feature.title}
+              icon={feature.icon}
+              link={feature.link}
+            />
           ))}
         </div>
       </div>
