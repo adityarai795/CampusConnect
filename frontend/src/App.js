@@ -22,6 +22,8 @@ import About from "./pages/DetailsPageCC/about.js";
 import FAQ from "./pages/DetailsPageCC/faq.js";
 import Support from "./pages/DetailsPageCC/support.js";
 import MarketPlace from "./pages/MarketPlace/marketPlace.js";
+import ItemUploadForm from "./pages/MarketPlace/ItemUploadForm.js";
+import MarketPlaceViewItem from "./pages/MarketPlace/ViewItem.js";
 import AmbassadorsPage from "./pages/Ambassadors/AmbassadorsPage.js";
 import MyNotes from "./pages/Profile/MyNotes.js";
 import MyJobs from "./pages/Profile/MyJobs.js";
@@ -52,6 +54,14 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/resume" element={<ResumeBuilder />} />
             <Route path="/marketplace" element={<MarketPlace />} />
+            <Route
+              path="/marketplace/uploadItem"
+              element={<ItemUploadForm />}
+            />
+            <Route
+              path="/marketplace/viewItem/:id"
+              element={<MarketPlaceViewItem />}
+            />
             <Route path="/ambassadors" element={<AmbassadorsPage />} />
             <Route path="/cc/support" element={<Support />} />
             <Route path="/cc/about" element={<About />} />

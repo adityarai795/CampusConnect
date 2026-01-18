@@ -15,3 +15,6 @@ export const myAppliedJobs = () =>
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   });
+
+export const searchJobs = (search, jobType, category) =>
+  API.get(`/job/searchJobs?search=${search}&jobType=${jobType}&category=${category}`);

@@ -115,5 +115,51 @@ module.exports.getApplicantsForJob = async (req, res) => {
   }
 };
 
+module.exports.searchJobs = async (req, res) => {
+  try {
+    const { JobType, category, search, page = 1, limit = 10 } = req.query;
 
-module.exports.searchJobs = async (req, res) => { };  
+    const searchCriteria = {};
+
+    // Filter by JobType
+    if (JobType) {
+      searchCriteria.JobType = JobType;
+    }
+
+    // Filter by Category
+    if (category) {
+      searchCriteria.category = category;
+    }
+
+    // Search text
+    if (search) {
+      searchCriteria.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { company: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [jobs, total] = await Promise.all([
+      Job.find(searchCriteria)
+        .sort({ jobPostedOn: -1 })
+        .skip(skip)
+        .limit(Number(limit)),
+      Job.countDocuments(searchCriteria),
+    ]);
+
+    res.status(200).json({
+      jobs,
+      // pagination: {
+      //   totalJobs: total,
+      //   currentPage: Number(page),
+      //   totalPages: Math.ceil(total / limit),
+      // },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
