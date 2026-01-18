@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import API from "../../api/api";
+import Pagination from "../../component/Pagination.js";
 
 function Result() {
+    const [page, setPage] = useState(1);
+  
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
@@ -10,12 +13,15 @@ function Result() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
+  const onPageChange=(newPage) => {
+    setPage(newPage);
+  }
   // Fetch all results on mount
   useEffect(() => {
     const fetchAllResults = async () => {
       try {
         setInitialLoading(true);
-        const response = await API.get("/result/showall");
+        const response = await API.get(`/result/showall?page=${page}&limit=20`);
         console.log("All results response:", response.data.showall);
         setAllResults(response.data.showall || []);
       } catch (error) {
@@ -27,7 +33,7 @@ function Result() {
     };
 
     fetchAllResults();
-  }, []);
+  }, [page]);
 
   // Debounced search
   useEffect(() => {
@@ -296,9 +302,10 @@ function Result() {
               </div>
             )}
           </div>
-
+          
+          <Pagination onPageChange={setPage}/>
           {/* Info Footer */}
-          <div className="mt-6 bg-white rounded-xl shadow p-6">
+          {/* <div className="mt-6 bg-white rounded-xl shadow p-6">
             <div className="grid md:grid-cols-3 gap-4 text-center">
               <div className="p-4">
                 <div className="text-blue-500 text-3xl font-bold mb-2">
@@ -319,7 +326,7 @@ function Result() {
                 <p className="text-gray-600 text-sm">Real-time Results</p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

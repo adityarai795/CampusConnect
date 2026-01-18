@@ -47,8 +47,11 @@ module.exports.viewResource = async (req, res) => {
 
 module.exports.viewAll = async (req, res) => {
   try {
-    const data = await Resource.find({});
-    res.status(201).json({ message: data });
+    const page= parseInt(req.query.page) || 1;
+    const limit= parseInt(req.query.limit) || 20;
+    const skip= (page - 1) * limit;
+    const data = await Resource.find({}).skip(skip).limit(limit).sort({ createdAt: -1 });
+      res.status(201).json({ message: data });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

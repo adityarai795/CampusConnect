@@ -4,6 +4,7 @@ import { ResourceCard } from "./ResourceCard";
 import { viewResource, showall } from "../../api/resource.js";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import TopicBar from "./TopicBar";
+import Pagination from "../../component/Pagination.js";
 export default function Notes() {
   const RESOURCE_TYPES = [
     "Show all",
@@ -12,7 +13,7 @@ export default function Notes() {
     "Youtube",
     "Important Courses",
   ];
-
+  const [page, setPage] = useState(1);
   const [title, setTitle] = useState("");
   const [type, setType] = useState("Show all");
   const [subject, setSubject] = useState("");
@@ -24,7 +25,7 @@ export default function Notes() {
   const fetchAll = async () => {
     try {
       setInitialLoading(true);
-      const res = await showall();
+      const res = await showall(page);
       setAllResources(res.data.message || []);
     } catch {
       toast.error("Failed to load resources");
@@ -32,10 +33,12 @@ export default function Notes() {
       setInitialLoading(false);
     }
   };
-
+  const onPageChange = (newPage) => {
+    setPage(newPage);
+  }
   useEffect(() => {
     fetchAll();
-  }, []);
+  }, [page]);
 
   const handleSearch = async () => {
     if (!title.trim()) {
@@ -76,7 +79,7 @@ export default function Notes() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50 pt-24 pb-12">
+      <div className="min-h-screen bg-gray-50 pt-10 pb-12">
         <div className="max-w-7xl mx-auto px-4">
           <TopicBar />
           {/* Header */}
@@ -165,6 +168,7 @@ export default function Notes() {
               </div>
             </>
           )}
+          <Pagination onPageChange={setPage} />
         </div>
       </div>
     </>

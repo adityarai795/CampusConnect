@@ -1,7 +1,7 @@
 import React from "react";
 import Card from "../../component/Card";
 import TrendingSkills from "../../component/TrendingSkills";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Link } from "react-router-dom";
 import QuotesSlider from "../../component/QuotesSlider";
 import {
@@ -24,6 +24,7 @@ import {
   Map,
   Users,
 } from "lucide-react";
+import { getHomePageData } from "../../api/home.js";
 function Home() {
   const [open, setOpen] = useState(true);
 
@@ -68,7 +69,9 @@ const features = [
     icon: <Users className="w-6 h-6" />,
     link: "/ambassadors",
   },
-];
+  ];
+  
+
   return (
     <>
       {/* <VerificationpopUp show={open} onClose={() => setOpen(false)} /> */}

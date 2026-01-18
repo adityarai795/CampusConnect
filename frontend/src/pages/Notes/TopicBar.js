@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const TOPICS = [
   { name: "DSA", slug: "dsa" },
@@ -28,25 +28,25 @@ const TOPICS = [
   { name: "System Design", slug: "system-design" },
   { name: "Cyber Security", slug: "cyber-security" },
   { name: "Blockchain", slug: "blockchain" },
-];
-
+].map((topic) => ({
+  ...topic,
+  id: topic.slug.toUpperCase().replace(/-/g, "_"),
+}));
 
 export default function TopicBar() {
-  const navigate = useNavigate();
-
   return (
-    <div className="bg-white border-b border-gray-200 sticky top-16 z-40 scrollbar-hide">
-      <div className="max-w-7xl mx-auto px-4 scrollbar-hide">
-        <div className="flex gap-6 overflow-x-auto py-3 scrollbar-hide">
+    <div className="bg-white border-b border-gray-200 sticky  z-40">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex gap-6 overflow-x-auto hide-scrollbar py-3 scroll-smooth">
           {TOPICS.map((topic) => (
-            <button
-              key={topic.slug}
-              onClick={() => navigate(`/topic/${topic.slug}`)}
+            <Link
+              key={topic.id}
+              to={`/learntopic/${topic.slug}`}
               className="whitespace-nowrap text-sm font-semibold text-gray-700 hover:text-blue-600 transition relative group"
             >
               {topic.name}
               <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
-            </button>
+            </Link>
           ))}
         </div>
       </div>

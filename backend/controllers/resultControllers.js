@@ -40,7 +40,10 @@ module.exports.uploadResult= async (req, res) => {
 
 module.exports.showall = async (req, res) => {
   try {
-    const showall = await Result.find();
+    const page= parseInt(req.query.page) || 1;
+    const limit= parseInt(req.query.limit) || 20;
+    const skip= (page - 1) * limit;
+    const showall = await Result.find().skip(skip).limit(limit).sort({ createdAt: -1 });
 
     res.status(200).json({ showall });
   } catch (error) {

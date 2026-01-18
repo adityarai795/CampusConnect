@@ -36,6 +36,7 @@ export default function AuthSystem() {
   // Form states
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
+  const [abcId, setAbcId] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -80,7 +81,7 @@ export default function AuthSystem() {
     }
     setLoading(true);
     try {
-      const response = await registerUser({ email, username, password });
+      const response = await registerUser({ email, abcId, password });
       showToast(response.data.message);
       resetForm();
       setView("login");
@@ -260,7 +261,7 @@ export default function AuthSystem() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Username
+                    ABC ID
                   </label>
                   <div className="relative">
                     <User
@@ -269,8 +270,8 @@ export default function AuthSystem() {
                     />
                     <input
                       type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                      value={abcId}
+                      onChange={(e) => setAbcId(e.target.value)}
                       placeholder="johndoe"
                       required
                       className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none"

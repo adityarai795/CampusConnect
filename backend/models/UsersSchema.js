@@ -36,7 +36,7 @@ const academicSchema = new mongoose.Schema({
 });
 
 const userSchema = new mongoose.Schema(
-  {
+  { 
     abcId: {
       type: String,
       unique: true,
@@ -90,7 +90,7 @@ const userSchema = new mongoose.Schema(
     studentCategory: {
       type: String,
       enum: ["school", "college"],
-      required: true,
+      // required: true,
     },
     socialLinks: {
       leetcode: { type: String },

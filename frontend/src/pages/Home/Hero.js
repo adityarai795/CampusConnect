@@ -1,13 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getHomePageData } from "../../api/home.js";
+
 function Hero() {
   const [currentStat, setCurrentStat] = useState(0);
+const [statsdata, setStatsData] = useState({
+  activeStudents: 0,
+  universities: 0,
+  resources: 0,
+  jobListings: 0,
+});
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const response = await getHomePageData();
+      setStatsData({
+        activeStudents: response.data.totalUsers || 0,
+        universities: response.data.totalResults || 0,
+        resources: response.data.totalResources || 0,
+        jobListings: response.data.totalJobs || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching home page data:", error);
+    }
+  };
+
+  fetchData();
+}, [setStatsData]);
 
   const stats = [
-    { number: "50K+", label: "Active Students" },
-    { number: "500+", label: "Universities" },
-    { number: "10K+", label: "Resources" },
-    { number: "5K+", label: "Job Listings" },
+    { number: statsdata.activeStudents, label: "Active Students" },
+    { number: statsdata.universities, label: "Universities" },
+    { number: statsdata.resources, label: "Resources" },
+    { number: statsdata.jobListings, label: "Job Listings" },
   ];
 
   const features = [
@@ -399,19 +425,19 @@ function Hero() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
             <div className="text-center transform hover:scale-110 transition-transform cursor-pointer">
-              <div className="text-4xl font-bold text-blue-600">500+</div>
+              <div className="text-4xl font-bold text-blue-600">{statsdata.universities}+</div>
               <div className="text-gray-600">Universities</div>
             </div>
             <div className="text-center transform hover:scale-110 transition-transform cursor-pointer">
-              <div className="text-4xl font-bold text-purple-600">50K+</div>
+              <div className="text-4xl font-bold text-purple-600">{statsdata.activeStudents}+</div>
               <div className="text-gray-600">Students</div>
             </div>
             <div className="text-center transform hover:scale-110 transition-transform cursor-pointer">
-              <div className="text-4xl font-bold text-green-600">10K+</div>
+              <div className="text-4xl font-bold text-green-600">{statsdata.resources}+</div>
               <div className="text-gray-600">Resources</div>
             </div>
             <div className="text-center transform hover:scale-110 transition-transform cursor-pointer">
-              <div className="text-4xl font-bold text-orange-600">5K+</div>
+              <div className="text-4xl font-bold text-orange-600">{statsdata.jobListings}+</div>
               <div className="text-gray-600">Job Listings</div>
             </div>
           </div>

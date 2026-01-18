@@ -133,7 +133,7 @@ function Footer() {
               </li>
               <li>
                 <Link
-                  to="/cc/blog"
+                  to="/cc/about"
                   className="text-gray-600 hover:text-blue-600 hover:translate-x-1 transition-all duration-200 inline-block"
                 >
                   Blog

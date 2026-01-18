@@ -5,7 +5,11 @@ const Organization = require("../models/OrginazationSchema");
 const Teacher = require("../models/TeacherSchema");
 module.exports.signUp = async (req, res) => {
   try {
-    const { email, username, password } = req.body;
+    const { email, abcId, password } = req.body;
+    let { role } = req.body;
+    if (!role) {
+      role = "user";
+    }
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists 4" });
@@ -13,7 +17,7 @@ module.exports.signUp = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       email,
-      username,
+      abcId,
       password: hashedPassword,
     });
     await newUser.save();
@@ -26,76 +30,70 @@ module.exports.signUp = async (req, res) => {
 module.exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    let { role } = req.body;
-    if (!role) {
-      role = "user";
-    }
+
     if (!email || !password) {
       return res.status(400).json({
-        message: "Please provide email, password, and role",
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+    // 🔍 Search user across collections
+    let user = await User.findOne({ email });
+    let role = "user";
+
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+console.log("User found:", user);
+    // 🔐 Always verify password
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log("isMatch:", isMatch);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
       });
     }
 
-    let user = null;
-
-    if (role === "admin") {
-      user = await Organization.findOne({ email });
-    } else if (role === "teacher") {
-      user = await Teacher.findOne({ email });
-    } else {
-      user = await User.findOne({ email });
-    }
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    let isMatch = null;
-    if (role === "user") {
-      isMatch = await bcrypt.compare(password, user.password);
-    } else {
-      isMatch = true;
-    }
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid password" });
-    }
-
-    const userData = {
+    const tokenPayload = {
       id: user._id,
-      name: user.name || user.username,
       email: user.email,
-      role: user.role || role,
-      status: user.isActive || true,
+      role,
+      status: user.isActive ?? true,
     };
 
-    const token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-        role: user.role || role,
-        status: user.isActive || true,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" },
-    );
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      // secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 1000,
     });
 
     return res.status(200).json({
+      success: true,
       message: "Login successful",
       token,
-      user: userData,
+      user: {
+        id: user._id,
+        name: user.name || user.username,
+        email: user.email,
+        role,
+        status: user.isActive ?? true,
+      },
     });
   } catch (error) {
-    console.error(error);
+    console.error("Login Error:", error);
     return res.status(500).json({
-      message: "Internal server error",
-      error: error.message,
+      success: false,
+      message: error.message  ,
     });
   }
 };
@@ -132,7 +130,7 @@ module.exports.getuser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    return res.status(200).json({message:"Data fetch", data: user });
+    return res.status(200).json({ message: "Data fetch", data: user });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
