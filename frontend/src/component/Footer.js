@@ -125,7 +125,7 @@ function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/about"
+                  to="/cc/about"
                   className="text-gray-600 hover:text-blue-600 hover:translate-x-1 transition-all duration-200 inline-block"
                 >
                   About Us
@@ -133,7 +133,7 @@ function Footer() {
               </li>
               <li>
                 <Link
-                  to="/blog"
+                  to="/cc/blog"
                   className="text-gray-600 hover:text-blue-600 hover:translate-x-1 transition-all duration-200 inline-block"
                 >
                   Blog
@@ -141,7 +141,7 @@ function Footer() {
               </li>
               <li>
                 <Link
-                  to="/faq"
+                  to="/cc/faq"
                   className="text-gray-600 hover:text-blue-600 hover:translate-x-1 transition-all duration-200 inline-block"
                 >
                   FAQ
@@ -149,7 +149,7 @@ function Footer() {
               </li>
               <li>
                 <Link
-                  to="/support"
+                  to="/cc/support"
                   className="text-gray-600 hover:text-blue-600 hover:translate-x-1 transition-all duration-200 inline-block"
                 >
                   Support
@@ -157,7 +157,7 @@ function Footer() {
               </li>
               <li>
                 <Link
-                  to="/contact"
+                  to="/cc/contact"
                   className="text-gray-600 hover:text-blue-600 hover:translate-x-1 transition-all duration-200 inline-block"
                 >
                   Contact Us

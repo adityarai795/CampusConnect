@@ -9,18 +9,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../api/authrization";
-// Simulated API functions (replace with your actual API)
-
-const registerUser = async (data) => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  return { data: { message: "Account created successfully" } };
-};
-
-const forgetPassword = async (data) => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  return { data: { message: "Password reset successful" } };
-};
+import { loginUser,registerUser,forgetPassword } from "../../api/authrization";
+import { useUser } from "../../context/UserContext";
 
 // Toast notification component
 const Toast = ({ message, type, onClose }) => (
@@ -42,7 +32,7 @@ export default function AuthSystem() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
-
+  const { login } = useUser();
   // Form states
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -64,15 +54,15 @@ export default function AuthSystem() {
   };
 
   const handleLogin = async (e) => {
-    console.log("Login attempt");
     e.preventDefault();
     setLoading(true);
     try {
-      console.log("come in try");
-
       const response = await loginUser({ email, password });
       console.log(response);
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
       showToast(response.data.message);
+      login(response.data.user);
       navigation("/");
       resetForm();
     } catch (error) {

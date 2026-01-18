@@ -25,7 +25,6 @@ function Navbar() {
     { name: "Results", path: "/result", icon: Award },
     { name: "Community", path: "/community", icon: Users },
     { name: "Jobs", path: "/jobs", icon: Briefcase },
-    { name: "Profile", path: "/profile", icon: User },
   ];
 
   const closeMenu = () => setIsOpen(false);
@@ -76,19 +75,14 @@ function Navbar() {
             <div className="hidden md:flex items-center space-x-3">
               {user ? (
                 <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-                    <User size={18} className="text-blue-600" />
-                    <span className="text-sm font-medium text-gray-700">
-                      {user.name || user.username}
-                    </span>
-                  </div>
-                  <button
-                    onClick={logout}
-                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium"
-                  >
-                    <LogOut size={18} />
-                    <span>Logout</span>
-                  </button>
+                  <Link to="/profile">
+                    <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                      <User size={18} className="text-blue-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        {user.name || user.username}
+                      </span>
+                    </div>
+                  </Link>
                 </div>
               ) : (
                 <Link
@@ -137,22 +131,14 @@ function Navbar() {
             <div className="pt-4 border-t border-gray-200">
               {user ? (
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-                    <User size={20} className="text-blue-600" />
-                    <span className="font-medium text-gray-700">
-                      Hi, {user.name || user.username}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      logout();
-                      closeMenu();
-                    }}
-                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
-                  >
-                    <LogOut size={20} />
-                    <span>Logout</span>
-                  </button>
+                  <Link to="/profile" onClick={closeMenu}>
+                    <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                      <User size={20} className="text-blue-600" />
+                      <span className="font-medium text-gray-700">
+                        Hi, {user.name || user.username}
+                      </span>
+                    </div>
+                  </Link>
                 </div>
               ) : (
                 <Link

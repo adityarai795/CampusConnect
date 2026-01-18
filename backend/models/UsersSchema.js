@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const academicSchema = new mongoose.Schema({
   institutionType: {
     type: String,
-    enum: ["School", "College", "University"],
+    enum: ["School", "College", "University","school","college","university"],
     required: true,
   },
   institutionName: { type: String, required: true },
@@ -13,7 +13,9 @@ const academicSchema = new mongoose.Schema({
     default: "active",
   },
   // School specific fields
-  grade: { type: String }, // e.g., "10th", "12th"
+  grade: {
+    type: String
+  }, // e.g., "10th", "12th"
   section: { type: String }, // e.g., "A", "B"
 
   // College specific fields

@@ -18,6 +18,13 @@ import Roadmap from "./pages/Practice/roadmapPage.js";
 import ShowCoding from "./pages/Practice/showcoding.js";
 import ResumeBuilder from "./pages/resumeBuilder/resumeBuilder.js";
 import PageNotFound from "./component/PageNotFound.js";
+import About from "./pages/DetailsPageCC/about.js";
+import FAQ from "./pages/DetailsPageCC/faq.js";
+import Support from "./pages/DetailsPageCC/support.js";
+import MarketPlace from "./pages/MarketPlace/marketPlace.js";
+import AmbassadorsPage from "./pages/Ambassadors/AmbassadorsPage.js";
+import MyNotes from "./pages/Profile/MyNotes.js";
+import MyJobs from "./pages/Profile/MyJobs.js";
 import { AppProvider } from "./context";
 function App() {
   return (
@@ -42,6 +49,13 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/login" element={<Login />} />
             <Route path="/resume" element={<ResumeBuilder />} />
+            <Route path="/marketplace" element={<MarketPlace />} />
+            <Route path="/ambassadors" element={<AmbassadorsPage />} />
+            <Route path="/cc/support" element={<Support />} />
+            <Route path="/cc/about" element={<About />} />
+            <Route path="/profile/mynotes" element={<MyNotes />} />
+            <Route path="/profile/myjobs" element={<MyJobs />} />
+            <Route path="/cc/faq" element={<FAQ />} />
             <Route path="*" element={<PageNotFound />} />
           </Routes>
           <Footer />

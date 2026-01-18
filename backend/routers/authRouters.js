@@ -1,6 +1,6 @@
-const express = require('express')
+const express = require("express");
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
+const authMiddleware = require("../middleware/authMiddleware");
 const {
   login,
   signUp,
@@ -10,14 +10,14 @@ const {
   showalluser,
 } = require("../controllers/authControllers");
 
-router.get("/getuser/:id", getuser);
+router.get("/getuser",authMiddleware, getuser);
 router.get("/showalluser", showalluser);
 
-router.post('/signup', signUp)
+router.post("/signup", signUp);
 
-router.post('/login', login)
+router.post("/login", login);
 
-//logout 
+//logout
 router.post("/logout", logOut);
 
 router.patch("/forget-password", forgetPassword);
