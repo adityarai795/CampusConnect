@@ -1,70 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { showall } from "../../api/job.js";
-
-// Mock API - Replace with your actual API
-// const showall = async () => {
-//   await new Promise((resolve) => setTimeout(resolve, 800));
-//   return {
-//     data: {
-//       message: [
-//         {
-//           _id: "1",
-//           title: "Frontend Developer",
-//           company: "Tech Corp",
-//           jobType: "Full-Time",
-//           department: "Web Development",
-//           location: "Bangalore",
-//           salary: "₹8-12 LPA",
-//           experience: "2-4 years",
-//           description: "Looking for experienced React developer",
-//           postedDate: "2025-01-10",
-//           link: "https://example.com/job1",
-//         },
-//         {
-//           _id: "2",
-//           title: "Data Science Intern",
-//           company: "AI Solutions",
-//           jobType: "Internship",
-//           department: "Data Science",
-//           location: "Remote",
-//           salary: "₹15k/month",
-//           experience: "Fresher",
-//           description: "Learn and grow with our data science team",
-//           postedDate: "2025-01-12",
-//           link: "https://example.com/job2",
-//         },
-//         {
-//           _id: "3",
-//           title: "UI/UX Designer",
-//           company: "Design Studio",
-//           jobType: "Full-Time",
-//           department: "UI/UX",
-//           location: "Delhi",
-//           salary: "₹6-10 LPA",
-//           experience: "1-3 years",
-//           description: "Create beautiful user experiences",
-//           postedDate: "2025-01-14",
-//           link: "https://example.com/job3",
-//         },
-//         {
-//           _id: "4",
-//           title: "Cloud Engineer",
-//           company: "Cloud Systems",
-//           jobType: "Remote",
-//           department: "Cloud",
-//           location: "Pune",
-//           salary: "₹10-15 LPA",
-//           experience: "3-5 years",
-//           description: "Manage cloud infrastructure",
-//           postedDate: "2025-01-15",
-//           link: "https://example.com/job4",
-//         },
-//       ],
-//     },
-//   };
-// };
-
+import Pagination from "../../component/Pagination.js";
+import { useUser } from "../../context/UserContext";
+import { applyJob } from "../../api/job.js";
 // Job Card Component
 function JobCard({ job, onApply }) {
   return (
@@ -79,8 +18,8 @@ function JobCard({ job, onApply }) {
             job.jobType === "Internship"
               ? "bg-green-100 text-green-700"
               : job.jobType === "Remote"
-              ? "bg-purple-100 text-purple-700"
-              : "bg-blue-100 text-blue-700"
+                ? "bg-purple-100 text-purple-700"
+                : "bg-blue-100 text-blue-700"
           }`}
         >
           {job.jobType}
@@ -128,7 +67,7 @@ function JobCard({ job, onApply }) {
               d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
             />
           </svg>
-          {job.department}
+          {job.category}
         </div>
         <div className="flex items-center text-sm text-gray-600">
           <svg
@@ -144,7 +83,7 @@ function JobCard({ job, onApply }) {
               d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          {job.salary}
+          {job.salary || "Not Specified"}
         </div>
         <div className="flex items-center text-sm text-gray-600">
           <svg
@@ -197,13 +136,17 @@ function JobCard({ job, onApply }) {
 }
 
 function JobSection() {
+  const { user } = useUser();
+
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+
   const [filters, setFilters] = useState({
     search: "",
     jobType: "",
-    department: "",
+    category: "",
     location: "",
     subject: "",
   });
@@ -212,7 +155,7 @@ function JobSection() {
   const getBackendData = async () => {
     try {
       setLoading(true);
-      const response = await showall();
+      const response = await showall(page);
       const jobsData = response.data.message;
       setJobs(jobsData);
       setFilteredJobs(jobsData);
@@ -227,7 +170,7 @@ function JobSection() {
 
   useEffect(() => {
     getBackendData();
-  }, []);
+  }, [page]);
 
   // Handle filter changes
   const handleFilterChange = (e) => {
@@ -238,37 +181,6 @@ function JobSection() {
   // Apply filters
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    let filtered = [...jobs];
-
-    // Search filter
-    if (filters.search) {
-      filtered = filtered.filter(
-        (job) =>
-          job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-          job.company.toLowerCase().includes(filters.search.toLowerCase())
-      );
-    }
-
-    // Job type filter
-    if (filters.jobType) {
-      filtered = filtered.filter((job) => job.jobType === filters.jobType);
-    }
-
-    // Department filter
-    if (filters.department) {
-      filtered = filtered.filter(
-        (job) => job.department === filters.department
-      );
-    }
-
-    // Location filter
-    if (filters.location) {
-      filtered = filtered.filter((job) => job.location === filters.location);
-    }
-
-    setFilteredJobs(filtered);
-    toast.info(`Found ${filtered.length} jobs matching your criteria`);
   };
 
   // Reset filters
@@ -289,9 +201,46 @@ function JobSection() {
     if (job.link) {
       window.open(job.link, "_blank", "noopener,noreferrer");
     } else {
-      toast.info(`Applying for ${job.title} at ${job.company}`);
+      applyJob(job._id, { userId: user._id })
+        .then(() => {
+          toast.success(
+            `Applied for ${job.title} at ${job.company} successfully!`,
+          );
+        })
+        .catch((error) => {
+          toast.error(
+            `Failed to apply for ${job.title} at ${job.company}: ${error.message}`,
+          );
+        });
     }
   };
+
+  const handlePageChange = (newPage) => {
+    console.log("Page from child:", newPage);
+    setPage(newPage);
+  };
+
+  const jobType = [
+    "Internship",
+    "Full-Time",
+    "Remote",
+    "Part-Time",
+    "Contract",
+  ];
+  const departments = [
+    "Software Development",
+    "Data Science",
+    "UI/UX",
+    "Cloud",
+    "Cyber Security",
+    "Marketing",
+    "Sales",
+    "Finance",
+    "Human Resources",
+    "Construction",
+    "Education",
+    "Healthcare",
+  ];
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen py-10">
@@ -306,8 +255,11 @@ function JobSection() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Search Bar */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-6 rounded-xl shadow-lg space-y-6"
+        >
+          {/* 🔍 Search Bar */}
           <div className="relative">
             <input
               type="text"
@@ -318,7 +270,7 @@ function JobSection() {
               className="w-full px-4 py-3 pl-12 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
             />
             <svg
-              className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2"
+              className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -332,73 +284,58 @@ function JobSection() {
             </svg>
           </div>
 
-          {/* Filter Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <select
-              name="jobType"
-              value={filters.jobType}
-              onChange={handleFilterChange}
-              className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            >
-              <option value="">All Job Types</option>
-              <option value="Internship">Internship</option>
-              <option value="Full-Time">Full-Time</option>
-              <option value="Remote">Remote</option>
-            </select>
+          {/* 🎯 Filters Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Job Type */}
+            <div className="flex flex-col gap-1">
+              <select
+                name="jobType"
+                value={filters.jobType}
+                onChange={handleFilterChange}
+                className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+              >
+                <option value="">All Job Types</option>
+                {jobType.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <select
-              name="department"
-              value={filters.department}
-              onChange={handleFilterChange}
-              className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            >
-              <option value="">All Departments</option>
-              <option value="Web Development">Web Development</option>
-              <option value="Data Science">Data Science</option>
-              <option value="UI/UX">UI/UX</option>
-              <option value="Cloud">Cloud</option>
-              <option value="Cyber Security">Cyber Security</option>
-            </select>
+            {/* Department */}
+            <div className="flex flex-col gap-1">
+              <select
+                name="department"
+                value={filters.department}
+                onChange={handleFilterChange}
+                className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+              >
+                <option value="">All Departments</option>
+                {departments.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <select
-              name="location"
-              value={filters.location}
-              onChange={handleFilterChange}
-              className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            >
-              <option value="">All Locations</option>
-              <option value="Remote">Remote</option>
-              <option value="Delhi">Delhi</option>
-              <option value="Bangalore">Bangalore</option>
-              <option value="Pune">Pune</option>
-              <option value="Noida">Noida</option>
-            </select>
-
-            <input
-              type="text"
-              name="subject"
-              value={filters.subject}
-              onChange={handleFilterChange}
-              placeholder="Subject (Optional)"
-              className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            />
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              className="flex-1 bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors shadow-md hover:shadow-lg"
-            >
-              🔍 Apply Filters
-            </button>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
-            >
-              Reset
-            </button>
+            {/* Buttons */}
+            <div className="flex flex-col md:flex-row gap-3 md:items-end">
+              <button
+                type="submit"
+                className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
+              >
+                🔍 Apply Filters
+              </button>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="flex-1 md:flex-none px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Reset
+              </button>
+            </div>
           </div>
         </form>
 
@@ -493,6 +430,9 @@ function JobSection() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      <Pagination onPageChange={setPage} />
     </div>
   );
 }

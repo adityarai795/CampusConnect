@@ -1,9 +1,18 @@
 const mongoose = require("mongoose");
 
 const jobSchema = new mongoose.Schema({
+  recuriterId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   title: {
     type: String,
     required: [true, "Title is required"],
+  },
+  company: {
+    type: String,
+    default: "Confidential",
   },
   description: {
     type: String,
@@ -14,17 +23,17 @@ const jobSchema = new mongoose.Schema({
     enum: ["IT", "Marketing", "Finance", "HR", "Sales", "Other"],
     default: "IT",
   },
-  city: {
-    type: String,
-  },
   location: {
     type: String,
   },
   JobType: {
     type: String,
-    // required: true,
     enum: ["InternShip", "Part time", "Full Time", "Virtual", "Remote"],
     default: "Full Time",
+  },
+  experience: {
+    type: String,
+    default: "Not Specified",
   },
   expired: {
     type: Boolean,
@@ -36,7 +45,6 @@ const jobSchema = new mongoose.Schema({
   },
   link: {
     type: String,
-    default:"https://ad.com"
   }
 });
 

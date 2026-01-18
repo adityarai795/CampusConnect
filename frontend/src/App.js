@@ -25,6 +25,7 @@ import MarketPlace from "./pages/MarketPlace/marketPlace.js";
 import AmbassadorsPage from "./pages/Ambassadors/AmbassadorsPage.js";
 import MyNotes from "./pages/Profile/MyNotes.js";
 import MyJobs from "./pages/Profile/MyJobs.js";
+import JobApplay from "./pages/Job/JobApplay.js";
 import { AppProvider } from "./context";
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
             <Route path="/result" element={<Result />} />
             <Route path="/notes" element={<Notes />} />
             <Route path="/jobs" element={<JobSection />} />
+            <Route path="/jobs/applyJob/:id" element={<JobApplay />} />
             <Route path="/community" element={<Community />} />
             <Route path="/community/myposts" element={<Mypost />} />
             <Route path="/community/openPost/:id" element={<OpenPost />} />

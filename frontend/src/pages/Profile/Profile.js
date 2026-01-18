@@ -53,10 +53,8 @@ function Profile() {
   const fetchProfile = async () => {
     try {
       const response = await getProfile();
-      console.log("Profile data:", response.data);
       setProfileData(response.data.data);
       setAcademicDetails(response.data.data.academicDetails || []);
-      console.log("Profile data set:", response.data.data);
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
@@ -89,9 +87,7 @@ function Profile() {
         academicDetails,
       };
       setProfileData(finalData);
-      console.log("Submitting profile data:", finalData);
       const response = await updateProfile(finalData);
-      console.log("Profile updated:", response.data);
     } catch (error) {
       console.error("Error updating profile:", error);
     }
@@ -498,19 +494,7 @@ function Profile() {
                 <span>Logout</span>
               </button>
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-red-800 mb-2">
-                Danger Zone
-              </h3>
-              <p className="text-sm text-red-600 mb-4">
-                Once you delete your account, there is no going back. Please be
-                certain.
-              </p>
-              <button className="inline-flex items-center gap-2 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                <Trash2 className="w-4 h-4" />
-                Delete Account
-              </button>
-            </div>
+            
           </div>
         )}
       </div>
