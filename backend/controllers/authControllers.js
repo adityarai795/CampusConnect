@@ -48,10 +48,8 @@ module.exports.login = async (req, res) => {
         message: "User not found",
       });
     }
-console.log("User found:", user);
     // 🔐 Always verify password
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log("isMatch:", isMatch);
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -72,7 +70,6 @@ console.log("User found:", user);
 
     res.cookie("token", token, {
       httpOnly: true,
-      // secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 1000,
     });

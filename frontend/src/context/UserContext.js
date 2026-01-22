@@ -10,9 +10,9 @@ export const UserProvider = ({ children }) => {
   // 🔥 Restore user on refresh
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
+    const accessToken = localStorage.getItem("accessToken");
 
-    if (storedUser && token) {
+    if (storedUser && accessToken) {
       setUser(JSON.parse(storedUser));
     }
 
@@ -27,7 +27,8 @@ export const UserProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
   };
 
   if (loading) {

@@ -35,7 +35,7 @@ const academicSchema = new mongoose.Schema({
 });
 
 const userSchema = new mongoose.Schema(
-  { 
+  {
     abcId: {
       type: String,
       unique: true,
@@ -67,13 +67,14 @@ const userSchema = new mongoose.Schema(
         message: (props) => `${props.value} valid mobile number nahi hai!`,
       },
     },
-    dob: {
-      type: Date,
+    authProviders: {
+      local: { type: Boolean, default: false },
+      google: { type: Boolean, default: false },
     },
-    gender: {
-      type: String,
-      enum: ["male", "female", "other"],
-    },
+
+    googleId: String,
+      refreshToken: String,
+
     password: {
       type: String,
       required: true,
@@ -105,7 +106,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const User = mongoose.model("User", userSchema);
