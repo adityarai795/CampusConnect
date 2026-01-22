@@ -19,7 +19,6 @@ const academicSchema = new mongoose.Schema({
   section: { type: String }, // e.g., "A", "B"
 
   // College specific fields
-  degree: { type: String }, // e.g., "B.Tech", "B.Com"
   branch: { type: String }, // e.g., "Science", "Commerce", "CSE"
   semester: { type: Number },
 
@@ -90,7 +89,8 @@ const userSchema = new mongoose.Schema(
     studentCategory: {
       type: String,
       enum: ["school", "college"],
-      // required: true,
+      default: "college",
+      required: true,
     },
     socialLinks: {
       leetcode: { type: String },
@@ -107,15 +107,7 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-// userSchema.pre("findOneAndDelete", async function (next) {
-//   const orgId = this.getQuery()._id;
 
-//   try {
-
-//   } catch (error) {
-
-//   }
-// } )
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
