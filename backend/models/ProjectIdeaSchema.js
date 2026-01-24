@@ -12,6 +12,7 @@ const projectSchema = new mongoose.Schema(
     description: String,
     features: [String],
     githubSample: String,
+    tags: [String],
   },
   { timestamps: true },
 );

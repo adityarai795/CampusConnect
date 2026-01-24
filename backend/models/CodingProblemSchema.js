@@ -20,6 +20,7 @@ const codingProblemSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  tags: [String],
 });
 
 const CodingProblem = mongoose.model("CodingProblem", codingProblemSchema);

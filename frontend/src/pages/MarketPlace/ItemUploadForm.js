@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const CATEGORIES = [
   "Laptops",
@@ -11,6 +12,7 @@ const CATEGORIES = [
 ];
 
 function ItemUploadForm() {
+  const navigate = useNavigate();
   const [showUploadForm, setShowUploadForm] = useState(true);
   const [items, setItems] = useState([]); // ✅ defined
 
@@ -72,7 +74,10 @@ function ItemUploadForm() {
               List Your Gadget
             </h2>
             <button
-              onClick={() => setShowUploadForm(false)}
+              onClick={() => {
+                setShowUploadForm(false)
+                navigate("/marketplace");
+              }}
               className="text-gray-500 hover:text-gray-700"
             >
               <X size={24} />

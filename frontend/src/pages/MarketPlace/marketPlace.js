@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Search, Plus, X, Phone, Mail, MapPin, Calendar } from "lucide-react";
+import  { useEffect, useState } from "react";
+import { Search, Plus,  MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { fetchMarketPlaceItems } from "../../api/marketPlace.js";
 const CATEGORIES = [
   "All",
   "Laptops",
@@ -11,79 +12,11 @@ const CATEGORIES = [
   "Audio",
 ];
 
-const INITIAL_ITEMS = [
-  {
-    id: 1,
-    title: "MacBook Pro 2020",
-    price: 45000,
-    category: "Laptops",
-    condition: "Like New",
-    description:
-      "M1 chip, 8GB RAM, 256GB SSD. Excellent condition with original box and charger.",
-    seller: "Rahul Kumar",
-    contact: "+91 98765 43210",
-    email: "rahul@example.com",
-    location: "Gomti Nagar, Lucknow",
-    postedDate: "2 days ago",
-    image:
-      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop",
-  },
-  {
-    id: 2,
-    title: "iPhone 13 Pro",
-    price: 55000,
-    category: "Phones",
-    condition: "Good",
-    description:
-      "128GB, Graphite color. Minor scratches on back, screen is perfect. Battery health 87%.",
-    seller: "Priya Sharma",
-    contact: "+91 87654 32109",
-    email: "priya@example.com",
-    location: "Hazratganj, Lucknow",
-    postedDate: "5 days ago",
-    image:
-      "https://images.unsplash.com/photo-1591337676887-a217a6970a8a?w=400&h=300&fit=crop",
-  },
-  {
-    id: 3,
-    title: "iPad Air 2022",
-    price: 38000,
-    category: "Tablets",
-    condition: "Like New",
-    description:
-      "64GB, Wi-Fi only. Comes with Apple Pencil 2nd gen and smart folio case.",
-    seller: "Amit Verma",
-    contact: "+91 76543 21098",
-    email: "amit@example.com",
-    location: "Indira Nagar, Lucknow",
-    postedDate: "1 week ago",
-    image:
-      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop",
-  },
-  {
-    id: 4,
-    title: "Sony WH-1000XM4",
-    price: 15000,
-    category: "Audio",
-    condition: "Excellent",
-    description:
-      "Noise cancelling headphones. Used for 6 months, all accessories included.",
-    seller: "Sneha Gupta",
-    contact: "+91 65432 10987",
-    email: "sneha@example.com",
-    location: "Aliganj, Lucknow",
-    postedDate: "3 days ago",
-    image:
-      "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=400&h=300&fit=crop",
-  },
-];
-
 function MarketPlace() {
   const navigate = useNavigate();
-  const [items, setItems] = useState(INITIAL_ITEMS);
+  const [items, setItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedItem, setSelectedItem] = useState(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -135,14 +68,26 @@ function MarketPlace() {
       location: "",
     });
   };
-
+  const fetchItems = async () => {
+    try {
+      const data = await fetchMarketPlaceItems();
+      setItems(data);
+    } catch (error) {
+      console.error("Error fetching marketplace items:", error);
+    }
+  }
+  useEffect(() => { 
+    fetchItems();
+  }, []);
   return (
     <div className="min-h-screen bg-gray-50 ">
       <div className="bg-gradient-to-br  p-6 ">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h1 className="text-4xl font-bold p-2">Student Gadget Marketplace</h1>
+              <h1 className="text-4xl font-bold p-2">
+                Student Gadget Marketplace
+              </h1>
               <span className="flow p-1">
                 Buy, sell, and trade with fellow students in your campus
                 community
@@ -192,12 +137,12 @@ function MarketPlace() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredItems.map((item) => (
             <div
-              key={item.id}
-              onClick={() => navigate(`/marketplace/viewItem/${item.id}`)}
+              key={item._id}
+              onClick={() => navigate(`/marketplace/viewItem/${item._id}`)}
               className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1"
             >
               <img
-                src={item.image}
+                src={item.imageUrl}
                 alt={item.title}
                 className="w-full h-48 object-cover"
               />
@@ -216,7 +161,7 @@ function MarketPlace() {
                     <MapPin size={14} />
                     {item.location.split(",")[0]}
                   </span>
-                  <span>{item.postedDate}</span>
+                  <span>{item.createdAt}</span>
                 </div>
                 <span className="inline-block mt-2 px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
                   {item.condition}
@@ -239,13 +184,3 @@ function MarketPlace() {
 }
 
 export default MarketPlace;
-
-// import React from 'react'
-
-// function marketPlace() {
-//   return (
-//     <div>marketPlace</div>
-//   )
-// }
-
-// export default marketPlace

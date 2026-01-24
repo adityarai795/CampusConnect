@@ -10,7 +10,7 @@ const resourceRouter = require("./routers/resourceRouters");
 const postRouter = require("./routers/communityRouters");
 const profileRouter = require("./routers/profileRouter");
 const jobRouter = require("./routers/jobRouters");
-const codingProblemRouter = require("./routers/codingProblem.js");
+const problemRouter = require("./routers/problemRouters.js");
 const cookieParser = require("cookie-parser");
 const cloudinary = require("cloudinary").v2;
 const organizationRouter = require("./routers/orginazationRouter");
@@ -19,6 +19,7 @@ const dbConnect = require("./config/db");
 const homeRouter = require("./routers/homeRouters");
 const marketPlaceProductRouters = require("./routers/marketPlaceProductRouters");
 const practiceRouter = require("./routers/practiceRouter");
+const otpRouter = require("./routers/otpRouters");
 
 app.use(cookieParser());
 app.use(cors());
@@ -31,6 +32,9 @@ cloudinary.config({
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
 });
+
+
+
 dbConnect();
 
 app.use("/auth", authRouter);
@@ -40,11 +44,12 @@ app.use("/community", postRouter);
 app.use("/profile", profileRouter);
 app.use("/job", jobRouter);
 app.use("/home", homeRouter);
-app.use("/problem", codingProblemRouter);
+app.use("/problem", problemRouter);
 app.use("/teacher", teacherRouter);
 app.use("/organization", organizationRouter);
 app.use("/marketPlace", marketPlaceProductRouters);
 app.use("/practice", practiceRouter);
+app.use("/api/otp", otpRouter);
 
 app.get("/", (req, res) => {
   res.send("This is home ");

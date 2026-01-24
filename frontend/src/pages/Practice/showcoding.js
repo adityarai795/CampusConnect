@@ -30,17 +30,6 @@ function PlacementPrep() {
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Sample companies data
-  const companies = [
-    { name: "Google", logo: "🔵", problems: 156, difficulty: "Hard" },
-    { name: "Microsoft", logo: "🟦", problems: 142, difficulty: "Medium" },
-    { name: "Amazon", logo: "🟧", problems: 198, difficulty: "Medium" },
-    { name: "Meta", logo: "🔷", problems: 124, difficulty: "Hard" },
-    { name: "Apple", logo: "🍎", problems: 89, difficulty: "Medium" },
-    { name: "Netflix", logo: "🔴", problems: 67, difficulty: "Hard" },
-    { name: "Adobe", logo: "🔺", problems: 78, difficulty: "Medium" },
-    { name: "Uber", logo: "⚫", problems: 92, difficulty: "Medium" },
-  ];
 
   // Sample quizzes data
   const quizzes = [
@@ -204,7 +193,6 @@ function PlacementPrep() {
           <div className="flex overflow-x-auto">
             {[
               { id: "problems", label: "Coding Problems", icon: Code },
-              { id: "companies", label: "Top Companies", icon: Building2 },
               { id: "quizzes", label: "Quizzes", icon: Brain },
               { id: "progress", label: "My Progress", icon: BarChart3 },
             ].map((tab) => {
@@ -360,36 +348,6 @@ function PlacementPrep() {
           </div>
         )}
 
-        {/* Companies Tab */}
-        {activeTab === "companies" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {companies.map((company) => (
-              <div
-                key={company.name}
-                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all p-6 cursor-pointer group"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-4xl">{company.logo}</span>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${getDifficultyColor(company.difficulty)}`}
-                  >
-                    {company.difficulty}
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {company.name}
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  {company.problems} Problems
-                </p>
-                <button className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium group-hover:shadow-lg transition-all">
-                  <span>View Problems</span>
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Quizzes Tab */}
         {activeTab === "quizzes" && (

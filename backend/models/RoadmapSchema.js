@@ -59,6 +59,16 @@ const roadmapSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "Project",
         },
+        coding: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "CodingProblemSchema",
+        },
+        usefulLinks: [
+          {
+            title: String,
+            link: String,
+          },
+        ],
       },
     ],
 

@@ -16,6 +16,7 @@ const quizSchema = new mongoose.Schema(
         correctAnswer: Number,
       },
     ],
+    tags: [String],
   },
   { timestamps: true },
 );
