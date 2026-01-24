@@ -12,7 +12,6 @@ const profileRouter = require("./routers/profileRouter");
 const jobRouter = require("./routers/jobRouters");
 const problemRouter = require("./routers/problemRouters.js");
 const cookieParser = require("cookie-parser");
-const cloudinary = require("cloudinary").v2;
 const organizationRouter = require("./routers/orginazationRouter");
 const teacherRouter = require("./routers/teacherRouter");
 const dbConnect = require("./config/db");
@@ -26,14 +25,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
-
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_API_SECRET,
-});
-
-
 
 dbConnect();
 

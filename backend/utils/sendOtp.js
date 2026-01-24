@@ -1,30 +1,20 @@
-// const accountSid = process.env.TWILIO_API_KEY_SID;
-// const authToken = process.env.TWILIO_API_KEY_SECRET;
-// const fromPhone = process.env.TWILIO_PHONE_NUMBER;
+const accountSid = process.env.TWILIO_API_KEY_SID;
+const authToken = process.env.TWILIO_API_KEY_SECRET;
+const fromPhone = process.env.TWILIO_PHONE_NUMBER;
 
-// const client = require("twilio")(accountSid, authToken);
+const client = require("twilio")(accountSid, authToken);
 
-// client.messages
-//   .create({
-//     body: "Hello from twilio-node",
-//     to: "+91 8924812781", // Text your number
-//     from: fromPhone, // From a valid Twilio number
-//   })
-//   .then((message) => console.log(message.sid));
+module.exports.sendOtp = async (toPhone, otp) => {
+  try {
+    const message = await client.messages.create({
+      body: `Otp from CampusConnect: ${otp}`,
+      to: toPhone, // USER number (req.body se)
+      from: process.env.TWILIO_PHONE_NUMBER, // Twilio number
+    });
 
-
-
-const axios = require("axios");
-
-exports.sendSMS = async (phone, otp) => {
-  const response = await axios.get("https://www.fast2sms.com/dev/bulkV2", {
-    params: {
-      authorization: process.env.FAST2SMS_API_KEY,
-      route: "otp",
-      variables_values: otp,
-      numbers: phone,
-    },
-  });
-
-  return response.data;
+    return message;
+  } catch (err) {
+    console.error(err.message);
+    throw err;
+  }
 };
