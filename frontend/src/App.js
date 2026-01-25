@@ -16,6 +16,7 @@ import OpenPost from "./pages/Community/OpenPost.js";
 import CreatPost from "./pages/Community/CreatePost.js";
 import Profile from "./pages/Profile/Profile.js";
 import Roadmap from "./pages/Practice/roadmapPage.js";
+import RoadmapDetail from "./pages/Practice/openRoadMap.js";
 import ShowCoding from "./pages/Practice/showcoding.js";
 import ResumeBuilder from "./pages/resumeBuilder/resumeBuilder.js";
 import PageNotFound from "./component/PageNotFound.js";
@@ -44,6 +45,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             <Route path="/roadmap" element={<Roadmap />} />
+            <Route path="/roadmap/:id" element={<RoadmapDetail />} />
             <Route path="/showcoding" element={<ShowCoding />} />
             <Route path="/result" element={<Result />} />
             <Route path="/notes" element={<Notes />} />

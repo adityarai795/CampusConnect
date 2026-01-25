@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import { addMarketPlaceItem } from "../../api/marketPlace.js";
 const CATEGORIES = [
   "Laptops",
   "Phones",
@@ -18,13 +18,11 @@ function ItemUploadForm() {
 
   const [formData, setFormData] = useState({
     title: "",
+    imageUrl: "",
     price: "",
     category: "Laptops",
     condition: "Good",
     description: "",
-    seller: "",
-    contact: "",
-    email: "",
     location: "",
   });
 
@@ -35,36 +33,20 @@ function ItemUploadForm() {
   };
 
   // ➕ Submit Handler
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const newItem = {
-      id: Date.now(),
-      ...formData,
-      price: parseFloat(formData.price),
-      postedDate: "Just now",
-      image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop",
-    };
-
-    setItems((prev) => [newItem, ...prev]); // ✅ safe update
-    setShowUploadForm(false);
-
+    const res = await addMarketPlaceItem(formData);
     setFormData({
       title: "",
+      imageUrl: "",
       price: "",
       category: "Laptops",
       condition: "Good",
       description: "",
-      seller: "",
-      contact: "",
-      email: "",
       location: "",
     });
-
-    console.log("New Item Added:", newItem);
+    navigate("/marketplace");
   };
-
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       {showUploadForm && (
@@ -75,7 +57,7 @@ function ItemUploadForm() {
             </h2>
             <button
               onClick={() => {
-                setShowUploadForm(false)
+                setShowUploadForm(false);
                 navigate("/marketplace");
               }}
               className="text-gray-500 hover:text-gray-700"
@@ -98,7 +80,18 @@ function ItemUploadForm() {
                 placeholder="e.g., MacBook Pro 2020"
               />
             </div>
-
+            <div>
+              <label className="block text-sm font-medium mb-1">Image</label>
+              <input
+                type="text"
+                name="imageUrl"
+                value={formData.imageUrl}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., MacBook Pro 2020"
+              />
+            </div>
             {/* Price */}
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -166,50 +159,6 @@ function ItemUploadForm() {
                 rows="4"
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Describe your gadget..."
-              />
-            </div>
-
-            {/* Seller */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Your Name
-              </label>
-              <input
-                type="text"
-                name="seller"
-                value={formData.seller}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Contact */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Contact Number
-              </label>
-              <input
-                type="tel"
-                name="contact"
-                value={formData.contact}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="+91 98765 43210"
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
