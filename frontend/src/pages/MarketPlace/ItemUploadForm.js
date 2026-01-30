@@ -34,7 +34,7 @@ function ItemUploadForm() {
   // ➕ Submit Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
-   await addMarketPlaceItem(formData);
+    const res = await addMarketPlaceItem(formData);
     setFormData({
       title: "",
       imageUrl: "",

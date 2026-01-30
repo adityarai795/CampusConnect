@@ -43,18 +43,12 @@ app.use("/teacher", teacherRouter);
 app.use("/organization", organizationRouter);
 app.use("/marketPlace", marketPlaceProductRouters);
 app.use("/practice", practiceRouter);
-app.use("/roadmap", roadmapRouter);
-app.use("/otp", otpRouter); 
+app.use("/api/otp", otpRouter);
 
 app.get("/", (req, res) => {
   res.send("This is home ");
 });
 
-
-const { sendOtp } = require("./utils/sendOtp");
-app.get("/otp", (req, res) => {
-  sendOtp("+919839930768", "1234");
-});
 app.get("/health", (req, res) => {
   res.status(200).send("Server is healthy");
 });
