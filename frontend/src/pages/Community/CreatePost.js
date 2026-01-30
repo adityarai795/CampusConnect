@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { toast } from "react-toastify";
 import CommunityHeader from "./communityHeader";
 import { useNavigate } from "react-router-dom";
-import { addPost } from "../../api/community.js";
 import { Image, Upload, FileText, Building2, X, Loader2 } from "lucide-react";
 
 const CreatePost = () => {
@@ -89,13 +88,6 @@ const CreatePost = () => {
         navigate("/login");
         return;
       }
-
-      const res = await addPost(data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
 
       toast.success("Post created successfully!");
       navigate("/community");

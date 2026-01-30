@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { ChevronDown, HelpCircle, Search, Mail } from "lucide-react";
+import  { useState } from "react";
+import { ChevronDown, HelpCircle, Search } from "lucide-react";
 
 const FAQ_DATA = [
   {

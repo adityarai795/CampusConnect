@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { DollarSign, Bot, Clock, Users, TrendingUp, Zap, CheckCircle, Play, ArrowRight, Mail, Phone, User, GraduationCap } from 'lucide-react';
-
+import  { useState } from 'react';
+import { DollarSign, Bot, Clock, Users, TrendingUp, Zap, CheckCircle, Play, ArrowRight } from 'lucide-react';
+import { createAmbassador } from '../../api/authrization';
 function AmbassadorsPage() {
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -20,11 +20,12 @@ function AmbassadorsPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.fullName || !formData.email || !formData.phone || !formData.university) {
       alert('Please fill in all required fields');
       return;
     }
+    await createAmbassador(formData);
     alert('Application submitted successfully! We will contact you within 3-5 business days.');
     setShowApplicationForm(false);
     setFormData({

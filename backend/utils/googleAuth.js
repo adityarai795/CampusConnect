@@ -1,11 +1,9 @@
-const { OAuth2Client } = require("google-auth-library");
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const { google } = require("googleapis");
 
-module.exports.verifyGoogleToken = async (token) => {
-  const ticket = await client.verifyIdToken({
-    idToken: token,
-    audience: process.env.GOOGLE_CLIENT_ID,
-  });
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI || "postmessage",
+);
 
-  return ticket.getPayload();
-};
+module.exports = { oauth2Client };

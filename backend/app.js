@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const cors = require("cors");
 const helmet = require("helmet");
+const { google } = require("googleapis");
 const authRouter = require("./routers/authRouters");
 const resultRouter = require("./routers/resultRouters");
 const resourceRouter = require("./routers/resourceRouters");
@@ -18,7 +19,9 @@ const dbConnect = require("./config/db");
 const homeRouter = require("./routers/homeRouters");
 const marketPlaceProductRouters = require("./routers/marketPlaceProductRouters");
 const practiceRouter = require("./routers/practiceRouter");
+const roadmapRouter = require("./routers/roadMapRouter.js");
 const otpRouter = require("./routers/otpRouters");
+const { oauth2Client } = require("./utils/googleAuth");
 
 app.use(cookieParser());
 app.use(cors());
@@ -40,12 +43,18 @@ app.use("/teacher", teacherRouter);
 app.use("/organization", organizationRouter);
 app.use("/marketPlace", marketPlaceProductRouters);
 app.use("/practice", practiceRouter);
-app.use("/api/otp", otpRouter);
+app.use("/roadmap", roadmapRouter);
+app.use("/otp", otpRouter); 
 
 app.get("/", (req, res) => {
   res.send("This is home ");
 });
 
+
+const { sendOtp } = require("./utils/sendOtp");
+app.get("/otp", (req, res) => {
+  sendOtp("+919839930768", "1234");
+});
 app.get("/health", (req, res) => {
   res.status(200).send("Server is healthy");
 });

@@ -1,19 +1,8 @@
-import React from "react";
 import Card from "../../component/Card";
 import TrendingSkills from "../../component/TrendingSkills";
-import { useState,useEffect } from "react";
-import { Link } from "react-router-dom";
 import QuotesSlider from "../../component/QuotesSlider";
-import {
-  FaUniversity,
-  FaFileAlt,
-  FaUserGraduate,
-  FaLaptopCode,
-  FaBrain,
-  FaBook,
-} from "react-icons/fa";
+
 import Hero from "./Hero";
-import VerificationpopUp from "../../component/VerificationpopUp";
 import {
   ShoppingBag,
   FileText,
@@ -24,9 +13,8 @@ import {
   Map,
   Users,
 } from "lucide-react";
-import { getHomePageData } from "../../api/home.js";
+
 function Home() {
-  const [open, setOpen] = useState(true);
 
 const features = [
   {
@@ -71,13 +59,12 @@ const features = [
   },
   ];
   
-
   return (
     <>
       {/* <VerificationpopUp show={open} onClose={() => setOpen(false)} /> */}
-      <Hero />  
+      <Hero />
       <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="text-center mb-12">
+        <div className="text-center mb-12" >
           <h2 className="text-4xl font-bold text-gray-800 mb-4">
             Explore Our Services
           </h2>

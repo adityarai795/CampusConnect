@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { sendSMS } = require("../utils/sendOtp");
+const { sendOtp } = require("../utils/sendOtp");
 
 // TEMP STORE (Production me DB / Redis use karo)
 const otpStore = new Map();
@@ -11,9 +11,8 @@ function generateOTP() {
 }
 
 // SEND OTP API
-router.post("/send", async (req, res) => {
-  const { phone } = req.body;
-
+router.get("/send", async (req, res) => {
+  const phone = "+919839930768"; // for testing purpose
   if (!phone) {
     return res.status(400).json({ success: false, message: "Phone required" });
   }
@@ -27,7 +26,7 @@ router.post("/send", async (req, res) => {
   });
 
   try {
-    await sendSMS(phone, otp);
+    await sendOtp(phone, otp);
     res.json({ success: true, message: "OTP sent successfully" });
   } catch (err) {
     console.error(err);

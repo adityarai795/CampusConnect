@@ -13,3 +13,11 @@ export const googleAuth = (token) => API.post("/auth/google", { token });
 // 🆕 Refresh Token
 export const refreshAccessToken = (refreshToken) =>
   API.post("/auth/refresh-token", { refreshToken });
+
+export const googleLogout = (token) => API.post("/auth/google-logout", { token });
+
+
+export const googleLoginBackend = (code) => API.get(`/auth/google?code=${code}`);
+
+export const createAmbassador = (inputdata) =>
+  API.post("/auth/ambassadors", inputdata);

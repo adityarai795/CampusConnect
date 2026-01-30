@@ -33,9 +33,7 @@ export default function Notes() {
       setInitialLoading(false);
     }
   };
-  const onPageChange = (newPage) => {
-    setPage(newPage);
-  }
+
   useEffect(() => {
     fetchAll();
   }, [page]);

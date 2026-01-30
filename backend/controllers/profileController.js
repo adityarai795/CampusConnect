@@ -1,4 +1,3 @@
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/UsersSchema");
 
@@ -68,3 +67,4 @@ module.exports.updateProfile = async (req, res) => {
     return res.status(400).json({ message: error.message });
   }
 };
+

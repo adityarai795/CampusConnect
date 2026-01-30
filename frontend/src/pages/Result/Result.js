@@ -13,9 +13,6 @@ function Result() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
-  const onPageChange=(newPage) => {
-    setPage(newPage);
-  }
   // Fetch all results on mount
   useEffect(() => {
     const fetchAllResults = async () => {

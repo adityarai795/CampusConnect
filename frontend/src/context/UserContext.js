@@ -29,6 +29,7 @@ export const UserProvider = ({ children }) => {
     localStorage.removeItem("user");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    
   };
 
   if (loading) {

@@ -10,6 +10,11 @@ export const fetchMarketPlaceItemById = async (id) => {
   return response.data;
 }
 export const addMarketPlaceItem = async (itemData) => {
-  const response = await api.post('/marketplace/AddProduct', itemData);
+  const response = await api.post('/marketplace/AddProduct', itemData, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
   return response.data;
 }

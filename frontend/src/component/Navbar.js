@@ -8,7 +8,6 @@ import {
   Award,
   Users,
   Briefcase,
-  LogOut,
   LogIn,
   User,
 } from "lucide-react";
@@ -17,7 +16,7 @@ import Logo from "../assets/logo.png";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, logout } = useUser();
+  const { user } = useUser();
 
   const navLinks = [
     { name: "Home", path: "/", icon: Home },

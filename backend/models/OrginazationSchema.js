@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 
 const organizationSchema = new mongoose.Schema(
   {
@@ -105,41 +104,6 @@ const organizationSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-
-
-// 🔐 Hash password before save
-// organizationSchema.pre("save", async function (next) {
-//   if (!this.isModified("password")) return next();
-
-//   this.password = await bcrypt.hash(this.password, 10);
-//   next();
-// });
-
-
-
-// 🧹 Cascade delete on organization delete
-// organizationSchema.pre("findOneAndDelete", async function (next) {
-//   const orgId = this.getQuery()._id;
-
-//   try {
-//     await mongoose.model("Teacher").deleteMany({
-//       "experience.organizationId": orgId,
-//     });
-
-//     await mongoose.model("User").deleteMany({
-//       "academicDetails.organizationId": orgId,
-//     });
-
-//     await mongoose.model("Activity").deleteMany({
-//       organizationId: orgId,
-//     });
-
-//     next();
-//   } catch (error) {
-//     next(error);
-//   }
-// });
 
 
 

@@ -11,7 +11,6 @@ function Login() {
   const navigator = useNavigate();
   const dispatch = useDispatch();
   const authState = useSelector((state) => state.auth);
-  console.log("this is authstate for login",authState)
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -28,9 +27,7 @@ function Login() {
       toast.error("Login failed");
     }
   };
-  useEffect(() => {
-    
-  }, [authState]);
+
 
 
   return (

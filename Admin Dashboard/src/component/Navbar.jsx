@@ -8,7 +8,6 @@ function Navbar() {
   const authState = useSelector((state) => state.auth);
   console.log("this is auth for navbar :", authState);
   const dispatch = useDispatch();
-  useEffect(() => {}, [authState]);
   return (
     <>
       <div className="w-full flex justify-between items-center bg-white px-6 py-3 shadow-md border-b border-gray-200 fixed top-1 z-50">

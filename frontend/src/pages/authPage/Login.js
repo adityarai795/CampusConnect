@@ -13,8 +13,10 @@ import {
   loginUser,
   registerUser,
   forgetPassword,
+  googleLoginBackend,
 } from "../../api/authrization";
 import { useUser } from "../../context/UserContext";
+import { useGoogleLogin } from "@react-oauth/google";
 
 // Toast notification component
 const Toast = ({ message, type, onClose }) => (
@@ -30,6 +32,29 @@ const Toast = ({ message, type, onClose }) => (
 
 // Main Auth Component
 export default function AuthSystem() {
+  const responseGoogle = async (authResult) => {
+    try {
+      console.log("Google Auth Result:", authResult.code);
+
+      if (authResult.code) {
+        const result = await googleLoginBackend(authResult.code);
+        console.log("Backend Response:", result.data);
+        localStorage.setItem("token", result.data.token);
+        localStorage.setItem("user", JSON.stringify(result.data.user));
+        login(result.data.user);
+
+        navigation("/");
+      }
+    } catch (error) {
+      console.log("Google Login Error:", error.response?.data || error);
+    }
+  };
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: responseGoogle,
+    onError: responseGoogle,
+    flow: "auth-code",
+  });
   const navigation = useNavigate();
   const [view, setView] = useState("login"); // login, signup, forgot
   const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +64,6 @@ export default function AuthSystem() {
   const { login } = useUser();
   // Form states
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
   const [abcId, setAbcId] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -51,7 +75,6 @@ export default function AuthSystem() {
 
   const resetForm = () => {
     setEmail("");
-    setUsername("");
     setPassword("");
     setConfirmPassword("");
     setShowPassword(false);
@@ -252,6 +275,7 @@ export default function AuthSystem() {
 
                   <div className="flex gap-4 justify-center">
                     <img
+                      onClick={() => googleLogin()}
                       src="https://developers.google.com/identity/images/g-logo.png"
                       alt="Login with Google"
                       width="32"

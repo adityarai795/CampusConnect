@@ -13,86 +13,174 @@ import {
   FileText,
   Briefcase,
   Camera,
+  Plus,
+  LogOut,
+  X,
+  Linkedin,
+  Github,
+  Code,
 } from "lucide-react";
-import { LogOut } from "lucide-react";
 import { useUser } from "../../context/UserContext";
 import { getProfile, updateProfile } from "../../api/profile";
 import { useNavigate } from "react-router-dom";
+
+const EMPTY_ACADEMIC = {
+  institutionType: "college",
+  institutionName: "",
+  status: "active",
+  grade: "",
+  section: "",
+  branch: "",
+  semester: "",
+  rollNumber: "",
+  startYear: "",
+  endYear: "",
+  performanceMetric: "Percentage",
+  score: "",
+};
+
 function Profile() {
   const { logout } = useUser();
-  const navigation = useNavigate();
+  const navigate = useNavigate();
+
   const [isEditing, setIsEditing] = useState(false);
+  const [newSkill, setNewSkill] = useState("");
+  const [newCertification, setNewCertification] = useState("");
+
   const [profileData, setProfileData] = useState({
-    username: "",
+    abcId: "",
+    name: "",
     email: "",
     mobileno: "",
-    bio: "",
-    portfolio: "",
-    academicDetails: [
-      {
-        institutionType: "college",
-        institutionName: "",
-        branchOrClass: "",
-        semesterOrGrade: "",
-      },
-    ],
+    studentCategory: "college",
+    academicDetails: [],
     socialLinks: {
       linkedin: "",
+      github: "",
+      leetcode: "",
     },
+    skills: [],
+    certifications: [],
   });
-  const [academicDetails, setAcademicDetails] = useState([
-    {
-      institutionType: "college",
-      institutionName: "",
-      branchOrClass: "",
-      semesterOrGrade: "",
-    },
-  ]);
 
-  const [institution, setInstitution] = useState("college");
+  // ================= FETCH =================
   const fetchProfile = async () => {
     try {
-      const response = await getProfile();
-      setProfileData(response.data.data);
-      setAcademicDetails(response.data.data.academicDetails || []);
-    } catch (error) {
-      console.error("Error fetching profile:", error);
+      const res = await getProfile();
+      const data = res.data.data;
+
+      setProfileData({
+        ...data,
+        academicDetails: data.academicDetails || [],
+        socialLinks: data.socialLinks || {
+          linkedin: "",
+          github: "",
+          leetcode: "",
+        },
+        skills: data.skills || [],
+        certifications: data.certifications || [],
+      });
+    } catch (err) {
+      console.error("Profile fetch failed:", err);
     }
   };
+
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  // ================= BASIC INPUT =================
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProfileData((prev) => ({ ...prev, [name]: value }));
+    setProfileData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
+  // ================= ACADEMIC =================
   const handleAcademicChange = (index, field, value) => {
-    const updated = [...academicDetails];
-    updated[index][field] = value;
-    setAcademicDetails(updated);
-  };
-  const handleDelete = (index) => {
-    const updated = academicDetails.filter((_, i) => i !== index);
-    setAcademicDetails(updated);
+    setProfileData((prev) => {
+      const updated = [...prev.academicDetails];
+      updated[index] = {
+        ...updated[index],
+        [field]: value,
+      };
+      return { ...prev, academicDetails: updated };
+    });
   };
 
+  const handleAddAcademic = () => {
+    setProfileData((prev) => ({
+      ...prev,
+      academicDetails: [...prev.academicDetails, { ...EMPTY_ACADEMIC }],
+    }));
+  };
+
+  const handleDeleteAcademic = (index) => {
+    setProfileData((prev) => ({
+      ...prev,
+      academicDetails: prev.academicDetails.filter((_, i) => i !== index),
+    }));
+  };
+
+  // ================= SKILLS =================
+  const handleAddSkill = () => {
+    if (!newSkill.trim()) return;
+    setProfileData((prev) => ({
+      ...prev,
+      skills: [...prev.skills, newSkill.trim()],
+    }));
+    setNewSkill("");
+  };
+
+  const handleRemoveSkill = (index) => {
+    setProfileData((prev) => ({
+      ...prev,
+      skills: prev.skills.filter((_, i) => i !== index),
+    }));
+  };
+
+  // ================= CERTIFICATIONS =================
+  const handleAddCertification = () => {
+    if (!newCertification.trim()) return;
+    setProfileData((prev) => ({
+      ...prev,
+      certifications: [...prev.certifications, newCertification.trim()],
+    }));
+    setNewCertification("");
+  };
+
+  const handleRemoveCertification = (index) => {
+    setProfileData((prev) => ({
+      ...prev,
+      certifications: prev.certifications.filter((_, i) => i !== index),
+    }));
+  };
+
+  // ================= SOCIAL =================
+  const handleSocialLinkChange = (platform, value) => {
+    setProfileData((prev) => ({
+      ...prev,
+      socialLinks: {
+        ...prev.socialLinks,
+        [platform]: value,
+      },
+    }));
+  };
+
+  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
+      await updateProfile(profileData);
       setIsEditing(false);
-
-      const finalData = {
-        ...profileData,
-        academicDetails,
-      };
-      setProfileData(finalData);
-      const response = await updateProfile(finalData);
-    } catch (error) {
-      console.error("Error updating profile:", error);
+    } catch (err) {
+      console.error("Profile update failed:", err);
     }
   };
 
+  // ================= UI =================
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-20">
       {/* Header with Cover Photo */}
@@ -105,7 +193,6 @@ function Profile() {
         {/* Profile Picture */}
         <div className="absolute -bottom-20 left-1/2 transform -translate-x-1/2">
           <div className="relative group">
-            {/* <input type="file" /> */}
             <div className="w-40 h-40 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 p-1 shadow-2xl">
               <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                 <User className="w-20 h-20 text-gray-400" />
@@ -123,7 +210,7 @@ function Profile() {
         {/* Name and Edit Button */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            {profileData.username}
+            {profileData.name || "Your Name"}
           </h1>
           <p className="text-gray-600">{profileData.email}</p>
           {!isEditing && (
@@ -137,26 +224,60 @@ function Profile() {
           )}
         </div>
 
-        <div>
-          {/* Basic Info Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
-            <div className="flex items-center gap-2 mb-6">
-              <User className="w-5 h-5 text-blue-600" />
-              <h2 className="text-xl font-bold text-gray-800">
-                Basic Information
-              </h2>
+        {/* Basic Info Card */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
+          <div className="flex items-center gap-2 mb-6">
+            <User className="w-5 h-5 text-blue-600" />
+            <h2 className="text-xl font-bold text-gray-800">
+              Basic Information
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            <div className="group">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                <User className="w-4 h-4" />
+                Full Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={profileData.name}
+                onChange={handleInputChange}
+                disabled={!isEditing}
+                className={`w-full px-4 py-3 rounded-lg border-2 ${
+                  isEditing
+                    ? "border-blue-300 bg-white focus:border-blue-500"
+                    : "border-gray-200 bg-gray-50"
+                } focus:outline-none transition-all`}
+              />
             </div>
 
-            <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
               <div className="group">
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
-                  <User className="w-4 h-4" />
-                  Full Name
+                  <Mail className="w-4 h-4" />
+                  Email Address
                 </label>
                 <input
-                  type="text"
-                  name="username"
-                  value={profileData.username}
+                  type="email"
+                  name="email"
+                  value={profileData.email}
+                  onChange={handleInputChange}
+                  disabled={true}
+                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 bg-gray-50 focus:outline-none transition-all"
+                />
+              </div>
+
+              <div className="group">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                  <Phone className="w-4 h-4" />
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  name="mobileno"
+                  value={profileData.mobileno}
                   onChange={handleInputChange}
                   disabled={!isEditing}
                   className={`w-full px-4 py-3 rounded-lg border-2 ${
@@ -166,257 +287,317 @@ function Profile() {
                   } focus:outline-none transition-all`}
                 />
               </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="group">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
-                    <Mail className="w-4 h-4" />
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={profileData.email}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className={`w-full px-4 py-3 rounded-lg border-2 ${
-                      isEditing
-                        ? "border-blue-300 bg-white focus:border-blue-500"
-                        : "border-gray-200 bg-gray-50"
-                    } focus:outline-none transition-all`}
-                  />
-                </div>
-
-                <div className="group">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
-                    <Phone className="w-4 h-4" />
-                    Phone Number
-                  </label>
-                  <input
-                    type="number"
-                    name="mobileno"
-                    value={profileData.mobileno}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className={`w-full px-4 py-3 rounded-lg border-2 ${
-                      isEditing
-                        ? "border-blue-300 bg-white focus:border-blue-500"
-                        : "border-gray-200 bg-gray-50"
-                    } focus:outline-none transition-all`}
-                  />
-                </div>
-              </div>
             </div>
           </div>
+        </div>
 
-          {/* Academic Details Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
-            <div className="flex justify-between items-center gap-2 mb-6">
-              <div>
-                <GraduationCap className="w-5 h-5 text-indigo-600" />
-                <h2 className="text-xl font-bold text-gray-800">
-                  Academic Details
-                </h2>
-              </div>
-              <div>
-                <button
-                  className="text-sm text-blue-600 hover:underline"
-                  onClick={() =>
-                    setAcademicDetails([
-                      ...academicDetails,
-                      {
-                        institutionType: "college",
-                        institutionName: "",
-                        branchOrClass: "",
-                        semesterOrGrade: "",
-                      },
-                    ])
-                  }
-                >
-                  + Add one more
-                </button>
-              </div>
+        {/* Academic Details Card */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="w-5 h-5 text-indigo-600" />
+              <h2 className="text-xl font-bold text-gray-800">
+                Academic Details
+              </h2>
             </div>
-
-            {academicDetails.map((item, index) => (
-              <div key={index} className="mb-8 border-b pb-6 last:border-none">
-                <div className="flex justify-between">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                    Institution {index + 1}
-                  </h3>
-                  {!isEditing && index > 0 && (
-                    <button
-                      className="text-red-600 hover:underline text-sm"
-                      onClick={() => {
-                        handleDelete(index);
-                      }}
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-
-                {/* RADIO */}
-                <div className="flex gap-6 mb-4">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-600 cursor-pointer">
-                    <input
-                      type="radio"
-                      name={`institutionType-${index}`}
-                      value="college"
-                      checked={item.institutionType === "college"}
-                      onChange={(e) =>
-                        handleAcademicChange(
-                          index,
-                          "institutionType",
-                          e.target.value,
-                        )
-                      }
-                      disabled={!isEditing}
-                    />
-                    <Building2 className="w-4 h-4" />
-                    College
-                  </label>
-
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-600 cursor-pointer">
-                    <input
-                      type="radio"
-                      name={`institutionType-${index}`}
-                      value="school"
-                      checked={item.institutionType === "school"}
-                      onChange={(e) =>
-                        handleAcademicChange(
-                          index,
-                          "institutionType",
-                          e.target.value,
-                        )
-                      }
-                      disabled={!isEditing}
-                    />
-                    <Building2 className="w-4 h-4" />
-                    School
-                  </label>
-                </div>
-                {/* INSTITUTION NAME */}
-                <div className="group mb-4">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
-                    <Building2 className="w-4 h-4" />
-                    {item.institutionType === "college"
-                      ? "College Name"
-                      : "School Name"}
-                  </label>
-                  <input
-                    type="text"
-                    name="hh"
-                    value={item.institutionName}
-                    onChange={(e) =>
-                      handleAcademicChange(
-                        index,
-                        "institutionName",
-                        e.target.value,
-                      )
-                    }
-                    disabled={!isEditing}
-                    className={`w-full px-4 py-3 rounded-lg border-2 ${
-                      isEditing
-                        ? "border-blue-300 bg-white focus:border-blue-500"
-                        : "border-gray-200 bg-gray-50"
-                    } focus:outline-none transition-all`}
-                  />
-                </div>
-
-                {/* BRANCH / CLASS + SEMESTER / GRADE */}
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="group">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
-                      <GraduationCap className="w-4 h-4" />
-                      {item.institutionType === "college" ? "Branch" : "Class"}
-                    </label>
-                    <input
-                      type="text"
-                      value={item.branchOrClass || item.grade}
-                      onChange={(e) =>
-                        handleAcademicChange(
-                          index,
-                          "branchOrClass",
-                          e.target.value,
-                        )
-                      }
-                      disabled={!isEditing}
-                      className={`w-full px-4 py-3 rounded-lg border-2 ${
-                        isEditing
-                          ? "border-blue-300 bg-white focus:border-blue-500"
-                          : "border-gray-200 bg-gray-50"
-                      } focus:outline-none transition-all`}
-                    />
-                  </div>
-
-                  <div className="group">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
-                      <Calendar className="w-4 h-4" />
-                      {item.institutionType === "college"
-                        ? "Semester"
-                        : "Grade"}
-                    </label>
-                    <input
-                      type="text"
-                      value={item.semesterOrGrade || item.section}
-                      onChange={(e) =>
-                        handleAcademicChange(
-                          index,
-                          "semesterOrGrade",
-                          e.target.value,
-                        )
-                      }
-                      disabled={!isEditing}
-                      className={`w-full px-4 py-3 rounded-lg border-2 ${
-                        isEditing
-                          ? "border-blue-300 bg-white focus:border-blue-500"
-                          : "border-gray-200 bg-gray-50"
-                      } focus:outline-none transition-all`}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+            {isEditing && (
+              <button
+                className="text-sm text-blue-600 hover:underline"
+                onClick={handleAddAcademic}
+              >
+                + Add one more
+              </button>
+            )}
           </div>
 
-          {/* About Section */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
-            <div className="flex items-center gap-2 mb-6">
-              <FileText className="w-5 h-5 text-purple-600" />
-              <h2 className="text-xl font-bold text-gray-800">About Me</h2>
-            </div>
+          {profileData.academicDetails.map((item, index) => (
+            <div key={index} className="mb-8 border-b pb-6 last:border-none">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Institution {index + 1}
+                </h3>
+                {isEditing && profileData.academicDetails.length > 1 && (
+                  <button
+                    className="text-red-600 hover:underline text-sm flex items-center gap-1"
+                    onClick={() => handleDeleteAcademic(index)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Remove
+                  </button>
+                )}
+              </div>
 
-            <div className="space-y-4">
-              <div className="group">
-                <label className="text-sm font-medium text-gray-600 mb-2 block">
-                  Bio
+              {/* Institution Type */}
+              <div className="group mb-4">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                  <Building2 className="w-4 h-4" />
+                  Institution Type
                 </label>
-                <textarea
-                  name="bio"
-                  value={profileData.bio}
-                  onChange={handleInputChange}
+                <select
+                  value={item.institutionType}
+                  onChange={(e) =>
+                    handleAcademicChange(index, "institutionType", e.target.value)
+                  }
                   disabled={!isEditing}
-                  rows="4"
                   className={`w-full px-4 py-3 rounded-lg border-2 ${
                     isEditing
                       ? "border-blue-300 bg-white focus:border-blue-500"
                       : "border-gray-200 bg-gray-50"
-                  } focus:outline-none transition-all resize-none`}
-                  placeholder="Tell us about yourself..."
+                  } focus:outline-none transition-all`}
+                >
+                  <option value="school">School</option>
+                  <option value="college">College</option>
+                  <option value="university">University</option>
+                </select>
+              </div>
+
+              {/* Institution Name */}
+              <div className="group mb-4">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                  <Building2 className="w-4 h-4" />
+                  Institution Name
+                </label>
+                <input
+                  type="text"
+                  value={item.institutionName}
+                  onChange={(e) =>
+                    handleAcademicChange(index, "institutionName", e.target.value)
+                  }
+                  disabled={!isEditing}
+                  placeholder="Enter institution name"
+                  className={`w-full px-4 py-3 rounded-lg border-2 ${
+                    isEditing
+                      ? "border-blue-300 bg-white focus:border-blue-500"
+                      : "border-gray-200 bg-gray-50"
+                  } focus:outline-none transition-all`}
                 />
               </div>
 
+              {/* Branch and Semester */}
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
+                <div className="group">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <GraduationCap className="w-4 h-4" />
+                    Branch
+                  </label>
+                  <input
+                    type="text"
+                    value={item.branch}
+                    onChange={(e) =>
+                      handleAcademicChange(index, "branch", e.target.value)
+                    }
+                    disabled={!isEditing}
+                    placeholder="e.g., Computer Science"
+                    className={`w-full px-4 py-3 rounded-lg border-2 ${
+                      isEditing
+                        ? "border-blue-300 bg-white focus:border-blue-500"
+                        : "border-gray-200 bg-gray-50"
+                    } focus:outline-none transition-all`}
+                  />
+                </div>
+
+                <div className="group">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <Calendar className="w-4 h-4" />
+                    Semester
+                  </label>
+                  <input
+                    type="text"
+                    value={item.semester}
+                    onChange={(e) =>
+                      handleAcademicChange(index, "semester", e.target.value)
+                    }
+                    disabled={!isEditing}
+                    placeholder="e.g., 5th Semester"
+                    className={`w-full px-4 py-3 rounded-lg border-2 ${
+                      isEditing
+                        ? "border-blue-300 bg-white focus:border-blue-500"
+                        : "border-gray-200 bg-gray-50"
+                    } focus:outline-none transition-all`}
+                  />
+                </div>
+              </div>
+
+              {/* Roll Number and Score */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="group">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <FileText className="w-4 h-4" />
+                    Roll Number
+                  </label>
+                  <input
+                    type="text"
+                    value={item.rollNumber}
+                    onChange={(e) =>
+                      handleAcademicChange(index, "rollNumber", e.target.value)
+                    }
+                    disabled={!isEditing}
+                    placeholder="Enter roll number"
+                    className={`w-full px-4 py-3 rounded-lg border-2 ${
+                      isEditing
+                        ? "border-blue-300 bg-white focus:border-blue-500"
+                        : "border-gray-200 bg-gray-50"
+                    } focus:outline-none transition-all`}
+                  />
+                </div>
+
+                <div className="group">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <FileText className="w-4 h-4" />
+                    Score / CGPA
+                  </label>
+                  <input
+                    type="text"
+                    value={item.score}
+                    onChange={(e) =>
+                      handleAcademicChange(index, "score", e.target.value)
+                    }
+                    disabled={!isEditing}
+                    placeholder="e.g., 8.5 CGPA"
+                    className={`w-full px-4 py-3 rounded-lg border-2 ${
+                      isEditing
+                        ? "border-blue-300 bg-white focus:border-blue-500"
+                        : "border-gray-200 bg-gray-50"
+                    } focus:outline-none transition-all`}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Skills Section */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
+          <div className="flex items-center gap-2 mb-6">
+            <Code className="w-5 h-5 text-purple-600" />
+            <h2 className="text-xl font-bold text-gray-800">Skills</h2>
+          </div>
+
+          <div className="space-y-4">
+            {/* Display existing skills */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {profileData.skills && profileData.skills.length > 0 ? (
+                profileData.skills.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
+                  >
+                    {skill}
+                    {isEditing && (
+                      <button
+                        onClick={() => handleRemoveSkill(index)}
+                        className="hover:bg-blue-200 rounded-full p-0.5"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </span>
+                ))
+              ) : (
+                <p className="text-gray-400 text-sm">No skills added yet</p>
+              )}
+            </div>
+
+            {/* Add new skill */}
+            {isEditing && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newSkill}
+                  onChange={(e) => setNewSkill(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleAddSkill()}
+                  className="flex-1 px-4 py-3 rounded-lg border-2 border-blue-300 bg-white focus:border-blue-500 focus:outline-none transition-all"
+                  placeholder="Add a skill (e.g., React, Python)..."
+                />
+                <button
+                  onClick={handleAddSkill}
+                  className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Professional Links */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
+          <div className="flex items-center gap-2 mb-6">
+            <Link className="w-5 h-5 text-purple-600" />
+            <h2 className="text-xl font-bold text-gray-800">Professional Links</h2>
+          </div>
+
+          <div className="space-y-4">
+            {/* Certifications Section */}
+            <div className="group">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                <FileText className="w-4 h-4" />
+                Certifications
+              </label>
+
+              {/* Display existing certifications */}
+              <div className="space-y-2 mb-3">
+                {profileData.certifications && profileData.certifications.length > 0 ? (
+                  profileData.certifications.map((cert, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-purple-50 px-4 py-2 rounded-lg"
+                    >
+                      <a
+                        href={cert}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-purple-600 hover:underline text-sm truncate flex-1"
+                      >
+                        {cert}
+                      </a>
+                      {isEditing && (
+                        <button
+                          onClick={() => handleRemoveCertification(index)}
+                          className="ml-2 text-red-500 hover:text-red-700"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-400 text-sm">No certifications added yet</p>
+                )}
+              </div>
+
+              {/* Add new certification */}
+              {isEditing && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    value={newCertification}
+                    onChange={(e) => setNewCertification(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && handleAddCertification()}
+                    className="flex-1 px-4 py-3 rounded-lg border-2 border-blue-300 bg-white focus:border-blue-500 focus:outline-none transition-all"
+                    placeholder="https://certificate-url.com"
+                  />
+                  <button
+                    onClick={handleAddCertification}
+                    className="p-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Social Links */}
+            <div className="space-y-3">
               <div className="group">
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
-                  <Link className="w-4 h-4" />
-                  LinkedIn / Portfolio
+                  <Linkedin className="w-4 h-4" />
+                  LinkedIn
                 </label>
                 <input
                   type="url"
-                  name="portfolio"
-                  value={profileData.portfolio}
-                  onChange={handleInputChange}
+                  value={profileData.socialLinks.linkedin}
+                  onChange={(e) => handleSocialLinkChange("linkedin", e.target.value)}
                   disabled={!isEditing}
                   className={`w-full px-4 py-3 rounded-lg border-2 ${
                     isEditing
@@ -426,31 +607,72 @@ function Profile() {
                   placeholder="https://linkedin.com/in/your-profile"
                 />
               </div>
+
+              <div className="group">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                  <Github className="w-4 h-4" />
+                  GitHub
+                </label>
+                <input
+                  type="url"
+                  value={profileData.socialLinks.github}
+                  onChange={(e) => handleSocialLinkChange("github", e.target.value)}
+                  disabled={!isEditing}
+                  className={`w-full px-4 py-3 rounded-lg border-2 ${
+                    isEditing
+                      ? "border-blue-300 bg-white focus:border-blue-500"
+                      : "border-gray-200 bg-gray-50"
+                  } focus:outline-none transition-all`}
+                  placeholder="https://github.com/your-username"
+                />
+              </div>
+
+              <div className="group">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                  <Code className="w-4 h-4" />
+                  LeetCode
+                </label>
+                <input
+                  type="url"
+                  value={profileData.socialLinks.leetcode}
+                  onChange={(e) => handleSocialLinkChange("leetcode", e.target.value)}
+                  disabled={!isEditing}
+                  className={`w-full px-4 py-3 rounded-lg border-2 ${
+                    isEditing
+                      ? "border-blue-300 bg-white focus:border-blue-500"
+                      : "border-gray-200 bg-gray-50"
+                  } focus:outline-none transition-all`}
+                  placeholder="https://leetcode.com/your-username"
+                />
+              </div>
             </div>
           </div>
-
-          {/* Action Buttons */}
-          {isEditing && (
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <button
-                onClick={handleSubmit}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all transform hover:scale-105"
-              >
-                Save Changes
-              </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-all"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
         </div>
+
+        {/* Action Buttons */}
+        {isEditing && (
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <button
+              onClick={handleSubmit}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all transform hover:scale-105"
+            >
+              Save Changes
+            </button>
+            <button
+              onClick={() => setIsEditing(false)}
+              className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <button className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105 group" onClick={()=>{navigation("/profile/mynotes")}}>
+          <button
+            className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105 group"
+            onClick={() => navigate("/profile/mynotes")}
+          >
             <div className="flex flex-col items-center text-center">
               <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-200 transition-colors">
                 <FileText className="w-7 h-7 text-blue-600" />
@@ -460,8 +682,10 @@ function Profile() {
             </div>
           </button>
 
-          <button className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105 group"
-          onClick={()=>{navigation("/profile")}}>
+          <button
+            className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105 group"
+            onClick={() => navigate("/profile/bookmarked")}
+          >
             <div className="flex flex-col items-center text-center">
               <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-orange-200 transition-colors">
                 <BookMarked className="w-7 h-7 text-orange-600" />
@@ -470,8 +694,11 @@ function Profile() {
               <p className="text-sm text-gray-500 mt-1">Saved items</p>
             </div>
           </button>
-          
-          <button className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105 group" onClick={()=>{navigation("/profile/myjobs")}}>
+
+          <button
+            className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105 group"
+            onClick={() => navigate("/profile/myjobs")}
+          >
             <div className="flex flex-col items-center text-center">
               <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-green-200 transition-colors">
                 <Briefcase className="w-7 h-7 text-green-600" />
@@ -482,19 +709,16 @@ function Profile() {
           </button>
         </div>
 
-        {/* Danger Zone */}
+        {/* Logout Section */}
         {!isEditing && (
           <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6">
-            <div>
-              <button
-                onClick={logout}
-                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium"
-              >
-                <LogOut size={18} />
-                <span>Logout</span>
-              </button>
-            </div>
-            
+            <button
+              onClick={logout}
+              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 font-medium"
+            >
+              <LogOut size={18} />
+              <span>Logout</span>
+            </button>
           </div>
         )}
       </div>

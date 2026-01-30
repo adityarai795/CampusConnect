@@ -2,24 +2,16 @@ import React, { useEffect, useState } from "react";
 import { showallProblem } from "../../api/codingProblem.js";
 import {
   Code,
-  Building2,
-  Trophy,
-  Target,
   CheckCircle2,
   Circle,
   Search,
-  Filter,
   TrendingUp,
   BookOpen,
-  Award,
   Clock,
   Flame,
-  ChevronRight,
   ExternalLink,
   BarChart3,
-  Zap,
   Brain,
-  Calendar,
 } from "lucide-react";
 
 function PlacementPrep() {

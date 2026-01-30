@@ -50,8 +50,19 @@ const newApplicationEmail = async (to, appName) => {
   await sendEmail(to, subject, text);
 };
 
+const ambassadorApprovalEmail = async (to, name) => {
+  const subject = "Campus Ambassador Application Approved";
+  const text = `Hello ${name},
+Congratulations! Your application to become a Campus Ambassador has been approved. Welcome aboard!
+
+Best regards,  
+The CampusConnect Team`;
+  return await sendEmail(to, subject, text);
+};
+
 module.exports = {
   sendEmail,
   welcomeEmail,
   newApplicationEmail,
+  ambassadorApprovalEmail,
 };

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Phone, Mail, MapPin, Calendar, X, User } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchMarketPlaceItemById } from "../../api/marketPlace.js";
-import axios from "axios";
 
 function ViewItem() {
   const navigate = useNavigate();

@@ -17,18 +17,7 @@ function MarketPlace() {
   const [items, setItems] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [showUploadForm, setShowUploadForm] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    price: "",
-    category: "Laptops",
-    condition: "Good",
-    description: "",
-    seller: "",
-    contact: "",
-    email: "",
-    location: "",
-  });
+
 
   const filteredItems = items.filter((item) => {
     const matchesCategory =
@@ -39,35 +28,6 @@ function MarketPlace() {
     return matchesCategory && matchesSearch;
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const newItem = {
-      id: items.length + 1,
-      ...formData,
-      price: parseFloat(formData.price),
-      postedDate: "Just now",
-      image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop",
-    };
-    setItems([newItem, ...items]);
-    setShowUploadForm(false);
-    setFormData({
-      title: "",
-      price: "",
-      category: "Laptops",
-      condition: "Good",
-      description: "",
-      seller: "",
-      contact: "",
-      email: "",
-      location: "",
-    });
-  };
   const fetchItems = async () => {
     try {
       const data = await fetchMarketPlaceItems();
