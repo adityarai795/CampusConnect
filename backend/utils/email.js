@@ -60,9 +60,16 @@ The CampusConnect Team`;
   return await sendEmail(to, subject, text);
 };
 
+const contactEmailToAdmin = async (from, subject, message) => {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const fullSubject = `Contact Form Submission: ${subject}`;
+  const text = `You have received a new message from the contact form:\n\nFrom: ${from}\n\nMessage:\n${message}`;
+  return await sendEmail(adminEmail, fullSubject, text);
+}
 module.exports = {
   sendEmail,
   welcomeEmail,
   newApplicationEmail,
   ambassadorApprovalEmail,
+  contactEmailToAdmin,
 };

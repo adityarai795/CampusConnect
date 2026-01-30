@@ -17,6 +17,7 @@ import {
   Heart,
 } from "lucide-react";
 import Logo from "../assets/logo.png";
+import { subscribeEmailFunction } from "../api/home.js";
 
 function Footer() {
   const currentYear = new Date().getFullYear();
@@ -43,6 +44,17 @@ function Footer() {
     { name: "Cookie Policy", path: "/cookies" },
   ];
 
+  const [subscribeEmail, setSubscribeEmail] = React.useState("");
+  const CallsubscribeEmail = async () => { 
+    try {
+      const response = await subscribeEmailFunction({ email: subscribeEmail });
+      alert(response.data.message);
+      setSubscribeEmail("");
+    } catch (error) {
+      console.error("Subscription error:", error);
+      alert("An error occurred. Please try again later.");
+    }
+  }
   return (
     <footer className="bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 border-t border-gray-200">
       {/* Main Footer Content */}
@@ -210,11 +222,13 @@ function Footer() {
               </p>
               <div className="flex">
                 <input
+                  value={subscribeEmail}
+                  onChange={(e) => setSubscribeEmail(e.target.value)}
                   type="email"
                   placeholder="Your email"
                   className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-                <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-r-lg hover:shadow-lg transition-all duration-200 text-sm font-medium">
+                <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-r-lg hover:shadow-lg transition-all duration-200 text-sm font-medium" onClick={()=>{CallsubscribeEmail()}}>
                   Subscribe
                 </button>
               </div>

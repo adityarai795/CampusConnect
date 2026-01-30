@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Mail, Phone, MapPin, Send, MessageSquare } from "lucide-react";
+import { submitContactForm } from "../../api/home.js";
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -13,9 +14,11 @@ export default function Contact() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     alert("Thanks for reaching out! We'll get back to you shortly.");
+    const response = await submitContactForm(form);
+    console.log("Contact Form Response:", response.data);
     setForm({ name: "", email: "", subject: "", message: "" });
   };
 
