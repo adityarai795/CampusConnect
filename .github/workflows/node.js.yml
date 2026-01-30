@@ -1,0 +1,14 @@
+name: CampusConnect Basic CI
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+        # 1. Success message
+      - name: CampusConnect Status
+        run: echo "CampusConnect CI ran successfully 🚀"
