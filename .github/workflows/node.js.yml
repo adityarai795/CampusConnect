@@ -1,0 +1,35 @@
+name: CampusConnect Basic CI
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Repo checkout
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      # 3. Frontend deps
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm install
+
+      # 4. Backend deps
+      - name: Install Backend Dependencies
+        working-directory: backend
+        run: npm install
+
+      # 5. Success message
+      - name: CampusConnect Status
+        run: echo "CampusConnect CI ran successfully 🚀"
