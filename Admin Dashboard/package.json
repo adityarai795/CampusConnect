@@ -12,13 +12,13 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.10.0",
-    "chart.js": "^4.5.1",
     "lucide-react": "^0.555.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.3",
     "react-toastify": "^11.0.5",
+    "recharts": "^2.10.3",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0"
   },

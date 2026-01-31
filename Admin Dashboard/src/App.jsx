@@ -5,55 +5,98 @@ import "react-toastify/dist/ReactToastify.css";
 import Navbar from "./component/Navbar";
 import Sidebar from "./component/Sidebar";
 import Home from "./pages/Home/Home";
-import Notes from "./pages/Notes/notes";
+
+// Resource Pages
+import ResourceTableManagement from "./pages/Notes/ResourceTableManagement";
 import UploadResource from "./pages/Notes/UploadResource";
-import ResourceTable from "./pages/Notes/ResourceTable";
-import Result from "./pages/Result/result";
-import Community from "./pages/Community/community";
+
+// Job Pages
+import JobManagement from "./pages/Jobs/JobManagement";
+import CreateJob from "./pages/Jobs/CreateJob";
+
+// Result Pages
+import ResultManagement from "./pages/Result/ResultManagement";
+import CreateResult from "./pages/Result/CreateResult";
+
+// Community Pages
+import CommunityManagement from "./pages/Community/CommunityManagement";
+
+// Coding Problem Pages
+import ProblemManagement from "./pages/coding/ProblemManagement";
+import AddProblem from "./pages/coding/AddProblem";
+
+// Practice Pages
+import PracticeManagement from "./pages/Practice/PracticeManagement";
+
+// Roadmap Pages
+import RoadmapManagement from "./pages/Roadmap/RoadmapManagement";
+
+// Marketplace Pages
+import MarketplaceManagement from "./pages/Marketplace/MarketplaceManagement";
+
+// Auth Pages
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import ForgetPassword from "./pages/Auth/ForgetPassword";
-import Jobs from "./pages/Jobs/JobView";
-import JobView from "./pages/Jobs/JobView";
-import CreateJob from "./pages/Jobs/CreateJob";
-import CreateResult from "./pages/Result/CreateResult";
-import ShowallResult from "./pages/Result/ShowallResult";
-import ShowallPost from "./pages/Community/ShowallPost";
-import ShowAllProblem from "./pages/coding/showallProblems";
-import AddProblem from "./pages/coding/AddProblem";
-import ManageCollege from "./pages/College/manageCollege";
-import PageNotFound from "./component/PageNotFound";
 
+// Other Pages
+import PageNotFound from "./component/PageNotFound";
 
 const App = () => (
   <Router>
-    <Navbar />
+    {/* <Navbar /> */}
     <ToastContainer position="top-right" autoClose={3000} />
     <div className="flex min-h-screen">
       <Sidebar />
 
-      <main className="flex-1 p-4">
+      <main className="flex-1 p-4 md:p-8 w-full">
         <Routes>
+          {/* Dashboard */}
           <Route path="/" element={<Home />} />
-          <Route path="/notes" element={<Notes />} />
-          <Route path="/uploadnotes" element={<UploadResource />} />
-          <Route path="/showallNotes" element={<ResourceTable />} />
-          <Route path="/result" element={<Result />} />
-          <Route path="/community" element={<Community />} />
+
+          {/* Authentication */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forget" element={<ForgetPassword />} />
-          <Route path="/jobs" element={<Jobs />} />
-          <Route path="/viewalljobs" element={<JobView />} />
+
+          {/* Users & Staff */}
+
+          {/* Resources/Notes */}
+          <Route path="/notes" element={<ResourceTableManagement />} />
+          <Route path="/uploadnotes" element={<UploadResource />} />
+          <Route path="/showallNotes" element={<ResourceTableManagement />} />
+
+          {/* Jobs */}
+          <Route path="/jobs" element={<JobManagement />} />
+          <Route path="/viewalljobs" element={<JobManagement />} />
           <Route path="/createJob" element={<CreateJob />} />
+
+          {/* Results */}
+          <Route path="/result" element={<ResultManagement />} />
           <Route path="/createResult" element={<CreateResult />} />
-          <Route path="/showallResult" element={<ShowallResult />} />
-          <Route path="/showallPost" element={<ShowallPost />} />
-          <Route path="/showallProblems" element={<ShowAllProblem />} />
-          <Route path="/addProblems" element={<AddProblem />} />
-          <Route path="/managecollege" element={<ManageCollege />} />
+          <Route path="/showallResult" element={<ResultManagement />} />
+
+          {/* Community */}
+          <Route path="/community" element={<CommunityManagement />} />
+          <Route path="/showallPost" element={<CommunityManagement />} />
+
+          {/* Coding Problems */}
+          <Route path="/showallProblems" element={<ProblemManagement />} />
+          <Route path="/addProblems" element={<ProblemManagement />} />
+
+          {/* Practice */}
+          <Route path="/practice" element={<PracticeManagement />} />
+
+          {/* Roadmaps */}
+          <Route path="/roadmaps" element={<RoadmapManagement />} />
+
+          {/* Marketplace */}
+          <Route path="/marketplace" element={<MarketplaceManagement />} />
+
+          {/* College Management */}
+
+          {/* 404 */}
           <Route path="*" element={<PageNotFound />} />
-          {/* future route example */}
         </Routes>
       </main>
     </div>
