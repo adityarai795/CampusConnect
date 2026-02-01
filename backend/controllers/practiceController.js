@@ -38,6 +38,19 @@ module.exports.searchRoadMaps = async (req, res) => { };
 
 
 
+module.exports.getMyProgress = async (req, res) => {
+  const { id } = req.user._id;
+  try {
+    const totalProblems = await Problem.countDocuments({ userId: id });
+    const solvedProblems = await Problem.countDocuments({
+      userId: id,
+      status: "solved",
+    });
+    res.status(200).json({ totalProblems, solvedProblems });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-
+module.exports.updateMyProgress = async (req, res) => { };
 

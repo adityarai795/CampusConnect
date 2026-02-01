@@ -1,7 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware.js');
-const { addCodingProblem , getCodingProblem,updateCodingProblem,updateQuizQuestion, addQuizQuestion, getQuizQuestions, addProjectIdea, getProjectIdeas, searchResourcesOnPractice, filterPracticeResources, addRoadMap, getRoadMaps, getRoadMapById, searchRoadMaps } = require('../controllers/practiceController');
+const {
+  addCodingProblem,
+  getCodingProblem,
+  updateCodingProblem,
+  updateQuizQuestion,
+  addQuizQuestion,
+  getQuizQuestions,
+  addProjectIdea,
+  getProjectIdeas,
+  searchResourcesOnPractice,
+  filterPracticeResources,
+  addRoadMap,
+  getRoadMaps,
+  getRoadMapById,
+  searchRoadMaps,
+  getMyProgress,
+  updateMyProgress,
+} = require("../controllers/practiceController");
 
 
 // Coding Problem Routes
@@ -30,6 +47,8 @@ router.get('/GetRoadMap/:id', getRoadMapById);
 router.get('/SearchRoadMaps', searchRoadMaps);
 
 
-
+router.route("/")
+  .get(authMiddleware, getMyProgress)
+  .patch(authMiddleware, updateMyProgress);
 
 module.exports = router;

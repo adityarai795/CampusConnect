@@ -74,3 +74,20 @@ module.exports.deleteQuizProblem = async (req, res) => {
 module.exports.updateQuizProblem = async (req, res) => {
   // Implementation for updating quiz problem
 }
+
+
+module.exports.filterQuizProblem = async (req, res) => {
+  // Implementation for filtering quiz problems
+}
+
+
+module.exports.getMyProgress = async (req, res) => {
+  const { id } = req.user._id;
+  try {
+    const totalProblems = await Problem.countDocuments({ userId: id });
+    const solvedProblems = await Problem.countDocuments({ userId: id, status: 'solved' });
+    res.status(200).json({ totalProblems, solvedProblems });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+}
