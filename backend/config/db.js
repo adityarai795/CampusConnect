@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const dbConnect = async () => {
+  console.log("Connecting to MongoDB...");
+  console.log("MongoDB connection string:", process.env.mongoose_url);
   mongoose
     .connect(process.env.mongoose_url, { useNewUrlParser: true })
     .then(() => {
