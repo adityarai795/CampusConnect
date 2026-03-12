@@ -8,10 +8,13 @@ export default function RootLayout() {
   useEffect(() => {
     setTimeout(() => {
       SplashScreen.hideAsync();
-    }, 4000); 
+    }, 4000);
   }, []);
 
-  return <Stack>
-    <Stack.Screen name="index" options={{ headerShown: false }} />
-  </Stack>;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* <Stack.Screen name="(auth)" options={{ headerShown: false }} /> */}
+      <Stack.Screen name="(main)" options={{ headerShown: false }} />
+    </Stack>
+  );
 }
