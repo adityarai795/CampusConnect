@@ -63,7 +63,7 @@ function OpenPost() {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
 
     try {
-      await fetch(`http://localhost:3000/community/post/${postId}/delete`, {
+      await fetch(`${BASE_URL}community/post/${postId}/delete`, {
         method: "DELETE",
       });
       toast.success("Post deleted successfully!");
@@ -105,7 +105,7 @@ function OpenPost() {
       const res = await addComment(
         post._id,
         { comment: newComment },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       toast.success("Comment added!");
       setNewComment("");
