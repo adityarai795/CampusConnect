@@ -20,7 +20,6 @@ import Ambassador from "./stack/ambassador";
 import Roadmap from "./stack/roadmap";
 import Resources from "./stack/resources";
 import Help from "./stack/help";
-import Contact from "./stack/contact";
 import About from "./stack/about";
 import FAQ from "./stack/faq";
 import Profile from "./stack/profile";
@@ -124,7 +123,6 @@ export default function MainLayout() {
       <Drawer.Screen name="roadmap" component={Roadmap} />
       <Drawer.Screen name="resources" component={Resources} />
       <Drawer.Screen name="help" component={Help} />
-      <Drawer.Screen name="contact" component={Contact} />
       <Drawer.Screen name="about" component={About} />
       <Drawer.Screen name="faq" component={FAQ} />
     </Drawer.Navigator>

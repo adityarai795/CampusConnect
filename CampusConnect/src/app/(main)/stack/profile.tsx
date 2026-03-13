@@ -503,22 +503,6 @@ const Profile = () => {
             onPress={handleApplications}
           />
         </View>
-
-        {/* ===== LOGOUT BUTTON ===== */}
-        {!isEditing && (
-          <TouchableOpacity
-            style={styles.logoutBtn}
-            onPress={handleLogout}
-            activeOpacity={0.8}
-          >
-            <MaterialCommunityIcons
-              name="logout"
-              size={22}
-              color={COLORS.white}
-            />
-            <Text style={styles.logoutText}>Logout</Text>
-          </TouchableOpacity>
-        )}
       </ScrollView>
 
       {/* ===== ADD SKILL MODAL ===== */}

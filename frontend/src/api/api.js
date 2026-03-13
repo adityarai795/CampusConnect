@@ -5,7 +5,7 @@ export const BASE_URL = "https://campusconnectbackend-q596.onrender.com/"
 
 
 const API = axios.create({
-  baseURL: "https://campusconnectbackend-q596.onrender.com/",
+  baseURL: "http://13.203.2.23:3000/",
   // baseURL: "http://localhost:3000/",
 });
 

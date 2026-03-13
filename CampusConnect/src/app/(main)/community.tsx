@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,91 +13,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Header from "../../components/Header";
+import axios from "axios";
 
 const Community = () => {
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      author: "Aditya Rai",
-      avatar: "👨‍💻",
-      title: "Tips for learning React",
-      description:
-        "Share your best practices and tips for learning React framework effectively",
-      likes: 124,
-      comments: 32,
-      liked: false,
-      posted: "2h ago",
-      tags: ["React", "Tips"],
-    },
-    {
-      id: 2,
-      author: "Guddu Kumar",
-      avatar: "👩‍💻",
-      title: "Web Development Best Practices",
-      description:
-        "Discuss best practices in modern web development and clean code",
-      likes: 87,
-      comments: 19,
-      liked: false,
-      posted: "4h ago",
-      tags: ["WebDev", "Best Practices"],
-    },
-    {
-      id: 3,
-      author: "Priya Singh",
-      avatar: "👩‍💻",
-      title: "JavaScript Interview Tips",
-      description: "Share your favorite JS interview questions and answers",
-      likes: 156,
-      comments: 45,
-      liked: false,
-      posted: "6h ago",
-      tags: ["JavaScript", "Interviews"],
-    },
-  ]);
+  const [posts, setPosts] = useState([]);
 
   const [searchText, setSearchText] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
 
-  const handleLikePost = useCallback((postId: number) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) => {
-        if (post.id === postId) {
-          return {
-            ...post,
-            liked: !post.liked,
-            likes: post.liked ? post.likes - 1 : post.likes + 1,
-          };
-        }
-        return post;
-      }),
-    );
-  }, []);
-
-  const handleCreatePost = useCallback(() => {
-    Alert.alert("Create Post", "Write your question or share your thoughts", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Post",
-        onPress: () => {
-          Alert.alert("Success", "Your post has been created!");
-        },
-      },
-    ]);
-  }, []);
-
-  const filteredPosts = posts.filter((post) => {
-    const matchesSearch = post.title
-      .toLowerCase()
-      .includes(searchText.toLowerCase());
-    const matchesFilter =
-      activeFilter === "All" ||
-      post.tags.some((tag) =>
-        tag.toLowerCase().includes(activeFilter.toLowerCase()),
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get(
+        "http://13.203.2.23:3000/community/post/viewall",
       );
-    return matchesSearch && matchesFilter;
-  });
-
+      console.log("Fetched posts:", response);
+      setPosts(response.data.posts);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
+  };
+  useEffect(() => {
+    fetchPosts();
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
@@ -153,7 +90,7 @@ const Community = () => {
         {/* Create Post Button */}
         <TouchableOpacity
           style={styles.createPostButton}
-          onPress={handleCreatePost}
+          // onPress={handleCreatePost}
         >
           <MaterialCommunityIcons name="pencil-plus" size={18} color="#fff" />
           <Text style={styles.createPostText}>Create a Post</Text>
@@ -162,68 +99,73 @@ const Community = () => {
         {/* Posts Section */}
         <View style={styles.postsSection}>
           <Text style={styles.sectionTitle}>
-            {filteredPosts.length > 0 ? "Recent Posts" : "No posts found"}
+            {posts?.length > 0 ? "Recent Posts" : "No posts found"}
           </Text>
-          {filteredPosts.map((post) => (
-            <View key={post.id} style={styles.postCard}>
-              <View style={styles.postHeader}>
-                <Text style={styles.avatar}>{post.avatar}</Text>
-                <View style={styles.authorSection}>
-                  <Text style={styles.author}>{post.author}</Text>
-                  <Text style={styles.postedTime}>{post.posted}</Text>
+          <View>
+            {posts.map((post: any) => (
+              <View key={post._id} style={styles.postCard}>
+                <View style={styles.postHeader}>
+                  <Text style={styles.avatar}>{post.avatar}</Text>
+                  <View style={styles.authorSection}>
+                    <Text style={styles.author}>{post.author}</Text>
+                    <Text style={styles.postedTime}>{post.posted}</Text>
+                  </View>
                 </View>
-              </View>
 
-              <View style={styles.postContent}>
-                <Text style={styles.postTitle}>{post.title}</Text>
-                <Text style={styles.postDescription}>{post.description}</Text>
+                <View style={styles.postContent}>
+                  <Text style={styles.postTitle}>{post.title}</Text>
+                  <Text style={styles.postDescription}>{post.description}</Text>
 
-                {/* Tags */}
-                <View style={styles.tagsContainer}>
-                  {post.tags.map((tag) => (
-                    <View key={tag} style={styles.tag}>
-                      <Text style={styles.tagText}>#{tag}</Text>
-                    </View>
-                  ))}
+                  {/* Tags */}
+                  <View style={styles.tagsContainer}>
+                    {post?.tags?.map((tag: string) => (
+                      <View key={tag} style={styles.tag}>
+                        <Text style={styles.tagText}>#{tag}</Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-              </View>
 
-              {/* Post Footer */}
-              <View style={styles.postFooter}>
-                <TouchableOpacity
-                  style={styles.footerItem}
-                  onPress={() => handleLikePost(post.id)}
-                >
-                  <MaterialCommunityIcons
-                    name={post.liked ? "heart" : "heart-outline"}
-                    size={16}
-                    color={post.liked ? "#FF3B30" : "#999"}
-                  />
-                  <Text
-                    style={[styles.footerText, post.liked && styles.likedText]}
+                {/* Post Footer */}
+                <View style={styles.postFooter}>
+                  <TouchableOpacity
+                    style={styles.footerItem}
+                    // onPress={() => handleLikePost(post.id)}
                   >
-                    {post.likes}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.footerItem}>
-                  <MaterialCommunityIcons
-                    name="comment-outline"
-                    size={16}
-                    color="#999"
-                  />
-                  <Text style={styles.footerText}>{post.comments}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.footerItem}>
-                  <MaterialCommunityIcons
-                    name="share-outline"
-                    size={16}
-                    color="#999"
-                  />
-                  <Text style={styles.footerText}>Share</Text>
-                </TouchableOpacity>
+                    <MaterialCommunityIcons
+                      name={post.liked ? "heart" : "heart-outline"}
+                      size={16}
+                      color={post.liked ? "#FF3B30" : "#999"}
+                    />
+                    <Text
+                      style={[
+                        styles.footerText,
+                        post.liked && styles.likedText,
+                      ]}
+                    >
+                      {post.likes}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.footerItem}>
+                    <MaterialCommunityIcons
+                      name="comment-outline"
+                      size={16}
+                      color="#999"
+                    />
+                    <Text style={styles.footerText}>{post.comments}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.footerItem}>
+                    <MaterialCommunityIcons
+                      name="share-outline"
+                      size={16}
+                      color="#999"
+                    />
+                    <Text style={styles.footerText}>Share</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          ))}
+            ))}{" "}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

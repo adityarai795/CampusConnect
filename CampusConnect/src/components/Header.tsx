@@ -27,7 +27,7 @@ const Header: React.FC = () => {
         </View>
         <View style={styles.textInfo}>
           <Text style={styles.name}>Aditya Rai</Text>
-          <Text style={styles.email}>john@example.com</Text>
+          <Text style={styles.email}>aditya@123.com</Text>
         </View>
       </View>
 

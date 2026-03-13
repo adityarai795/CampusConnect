@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, use, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -14,86 +14,55 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Header from "../../components/Header";
-
+import api from "@/src/services/api";
+import axios from "axios";
 const Job = () => {
-  const [jobs, setJobs] = useState([
-    {
-      id: 1,
-      company: "Tech Startups Inc",
-      position: "Junior React Developer",
-      location: "Remote",
-      salary: "$50k - $70k",
-      icon: "🏢",
-      level: "Junior",
-      applied: false,
-      type: "Full-time",
-    },
-    {
-      id: 2,
-      company: "Digital Solutions Ltd",
-      position: "Full Stack Developer",
-      location: "New York, NY",
-      salary: "$80k - $120k",
-      icon: "🏭",
-      level: "Senior",
-      applied: false,
-      type: "Full-time",
-    },
-    {
-      id: 3,
-      company: "Cloud Systems Corp",
-      position: "Backend Engineer",
-      location: "San Francisco, CA",
-      salary: "$90k - $130k",
-      icon: "☁️",
-      level: "Mid",
-      applied: false,
-      type: "Full-time",
-    },
-    {
-      id: 4,
-      company: "Startup Hub",
-      position: "Frontend Intern",
-      location: "Remote",
-      salary: "$20k - $30k",
-      icon: "🚀",
-      level: "Intern",
-      applied: false,
-      type: "Internship",
-    },
-  ]);
+  const [jobs, setJobs] = useState([]);
 
   const [searchText, setSearchText] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
 
-  const handleApplyJob = useCallback((jobId: number) => {
-    setJobs((prevJobs) =>
-      prevJobs.map((job) => {
-        if (job.id === jobId) {
-          const newApplied = !job.applied;
-          if (newApplied) {
-            Alert.alert("Success", "You have applied for this job!");
-          }
-          return { ...job, applied: newApplied };
-        }
-        return job;
-      }),
-    );
+  // const handleApplyJob = useCallback((jobId: number) => {
+  //   setJobs((prevJobs) =>
+  //     prevJobs.map((job) => {
+  //       if (job.id === jobId) {
+  //         const newApplied = !job.applied;
+  //         if (newApplied) {
+  //           Alert.alert("Success", "You have applied for this job!");
+  //         }
+  //         return { ...job, applied: newApplied };
+  //       }
+  //       return job;
+  //     }),
+  //   );
+  // }, []);
+
+  // const filteredJobs = useMemo(() => {
+  //   return jobs.filter((job) => {
+  //     const matchesSearch =
+  //       job.position.toLowerCase().includes(searchText.toLowerCase()) ||
+  //       job.company.toLowerCase().includes(searchText.toLowerCase());
+  //     const matchesLevel =
+  //       selectedLevel === "All" || job.level === selectedLevel;
+  //     const matchesType = selectedType === "All" || job.type === selectedType;
+  //     return matchesSearch && matchesLevel && matchesType;
+  //   });
+  // }, [jobs, searchText, selectedLevel, selectedType]);
+
+
+  const fetchJobs = useCallback(async () => {
+    try {
+      // const response = await api.get("/job/showall");
+      const response = await axios.get("http://13.203.2.23:3000/job/showall");
+      setJobs(response.data.message);
+    } catch (error) {
+      Alert.alert("Error", "Failed to fetch jobs. Please try again later.");
+    } 
   }, []);
-
-  const filteredJobs = useMemo(() => {
-    return jobs.filter((job) => {
-      const matchesSearch =
-        job.position.toLowerCase().includes(searchText.toLowerCase()) ||
-        job.company.toLowerCase().includes(searchText.toLowerCase());
-      const matchesLevel =
-        selectedLevel === "All" || job.level === selectedLevel;
-      const matchesType = selectedType === "All" || job.type === selectedType;
-      return matchesSearch && matchesLevel && matchesType;
-    });
-  }, [jobs, searchText, selectedLevel, selectedType]);
-
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
@@ -173,21 +142,20 @@ const Job = () => {
 
         {/* Jobs List */}
         <View style={styles.jobsSection}>
-          <Text style={styles.sectionTitle}>
-            {filteredJobs.length > 0
-              ? `${filteredJobs.length} Job${filteredJobs.length > 1 ? "s" : ""} Found`
-              : "No jobs found"}
-          </Text>
-          {filteredJobs.map((job) => (
-            <View key={job.id} style={styles.jobCard}>
+          {jobs.map((job: any) => (
+            <View key={job._id} style={styles.jobCard}>
               <View style={styles.jobHeader}>
-                <Text style={styles.jobIcon}>{job.icon}</Text>
+                <Text style={styles.jobIcon}>💼</Text>
+
                 <View style={styles.jobInfo}>
-                  <Text style={styles.jobTitle}>{job.position}</Text>
+                  <Text style={styles.jobTitle}>{job.title}</Text>
                   <Text style={styles.jobCompany}>{job.company}</Text>
                 </View>
-                <View style={[styles.levelBadge, getLevelColor(job.level)]}>
-                  <Text style={styles.levelText}>{job.level}</Text>
+
+                <View
+                  style={[styles.levelBadge, { backgroundColor: "#E5F3FF" }]}
+                >
+                  <Text style={styles.levelText}>{job.experience}</Text>
                 </View>
               </View>
 
@@ -198,41 +166,42 @@ const Job = () => {
                     size={14}
                     color="#666"
                   />
-                  <Text style={styles.detailText}>{job.location}</Text>
+                  <Text style={styles.detailText}>
+                    {job.location || job.city}
+                  </Text>
                 </View>
-                <View style={styles.detail}>
-                  <MaterialCommunityIcons
-                    name="cash"
-                    size={14}
-                    color="#34C759"
-                  />
-                  <Text style={styles.detailText}>{job.salary}</Text>
-                </View>
+
                 <View style={styles.detail}>
                   <MaterialCommunityIcons
                     name="briefcase"
                     size={14}
                     color="#007AFF"
                   />
-                  <Text style={styles.detailText}>{job.type}</Text>
+                  <Text style={styles.detailText}>{job.JobType}</Text>
+                </View>
+
+                <View style={styles.detail}>
+                  <MaterialCommunityIcons
+                    name="calendar"
+                    size={14}
+                    color="#34C759"
+                  />
+                  <Text style={styles.detailText}>
+                    {new Date(job.jobPostedOn).toDateString()}
+                  </Text>
                 </View>
               </View>
 
               <TouchableOpacity
-                style={[
-                  styles.applyButton,
-                  job.applied && styles.appliedButton,
-                ]}
-                onPress={() => handleApplyJob(job.id)}
+                style={styles.applyButton}
+                onPress={() => {
+                  if (job.link) {
+                    Alert.alert("Apply", "Opening application link");
+                  }
+                }}
               >
-                <MaterialCommunityIcons
-                  name={job.applied ? "check" : "send"}
-                  size={16}
-                  color="#fff"
-                />
-                <Text style={styles.applyButtonText}>
-                  {job.applied ? "Applied" : "Apply Now"}
-                </Text>
+                <MaterialCommunityIcons name="send" size={16} color="#fff" />
+                <Text style={styles.applyButtonText}>Apply Now</Text>
               </TouchableOpacity>
             </View>
           ))}

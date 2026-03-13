@@ -5,8 +5,9 @@ import {
   ScrollView,
   TouchableOpacity,
   Text,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -26,7 +27,6 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
 
   const supportFeatures = [
     { icon: "help-circle", label: "Help & Support", route: "help" },
-    { icon: "phone", label: "Contact", route: "contact" },
     { icon: "information", label: "About", route: "about" },
     { icon: "frequently-asked-questions", label: "FAQ", route: "faq" },
   ];

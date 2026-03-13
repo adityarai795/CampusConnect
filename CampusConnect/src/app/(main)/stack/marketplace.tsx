@@ -1,55 +1,25 @@
-import React, { useCallback, useState, useMemo } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
   View,
   ScrollView,
   TouchableOpacity,
-  FlatList,
   SafeAreaView,
   StatusBar,
   TextInput,
   Alert,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-const INITIAL_PRODUCTS = [
-  {
-    id: 1,
-    name: "Premium Course Bundle",
-    price: "$99.99",
-    icon: "📚",
-    rating: 4.8,
-    inCart: false,
-  },
-  {
-    id: 2,
-    name: "Mock Interview Session",
-    price: "$49.99",
-    icon: "🎤",
-    rating: 4.9,
-    inCart: false,
-  },
-  {
-    id: 3,
-    name: "Career Mentorship",
-    price: "$199.99",
-    icon: "👨‍🏫",
-    rating: 4.7,
-    inCart: false,
-  },
-];
-
 const MarketPlace = () => {
   const navigation = useNavigation();
 
-  // ===== STATE =====
-  const [products, setProducts] = useState(INITIAL_PRODUCTS);
+  const [products, setProducts] = useState<any[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [cartCount, setCartCount] = useState(0);
 
-  // ===== HANDLERS =====
   const handleBackPress = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
@@ -58,33 +28,52 @@ const MarketPlace = () => {
     setSearchText(text);
   }, []);
 
-  const handleAddToCart = useCallback((id: number) => {
-    setProducts((prev) =>
-      prev.map((product) => {
-        if (product.id === id) {
-          setCartCount((count) => count + (product.inCart ? -1 : 1));
-          return { ...product, inCart: !product.inCart };
-        }
-        return product;
-      }),
-    );
+  // ===== FETCH PRODUCTS =====
+  const fetchData = async () => {
+    try {
+      const response = await fetch(
+        "http://13.203.2.23:3000/marketplace/ShowAllProducts",
+      );
+
+      const data = await response.json();
+
+      console.log("API DATA:", data);
+
+      // Handle both possible responses
+      if (Array.isArray(data)) {
+        setProducts(data);
+      } else if (Array.isArray(data.products)) {
+        setProducts(data.products);
+      } else {
+        setProducts([]);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      Alert.alert("Error", "Failed to fetch products.");
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
-  // ===== FILTERED PRODUCTS =====
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) =>
-      product.name.toLowerCase().includes(searchText.toLowerCase()),
-    );
-  }, [products, searchText]);
+  // ===== FILTER PRODUCTS =====
+  const filteredProducts = products.filter((product) =>
+    product.title?.toLowerCase().includes(searchText.toLowerCase()),
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+
+      {/* ===== HEADER ===== */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <MaterialCommunityIcons name="chevron-left" size={24} color="#000" />
         </TouchableOpacity>
+
         <Text style={styles.title}>Market Place</Text>
+
         <View style={{ width: 24 }} />
       </View>
 
@@ -92,6 +81,7 @@ const MarketPlace = () => {
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
       >
+        {/* ===== SEARCH ===== */}
         <View style={styles.searchBar}>
           <MaterialCommunityIcons name="magnify" size={20} color="#999" />
           <TextInput
@@ -103,38 +93,34 @@ const MarketPlace = () => {
           />
         </View>
 
+        {/* ===== PRODUCTS ===== */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Featured Products</Text>
+
           {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <View key={product.id} style={styles.productCard}>
-                <Text style={styles.productIcon}>{product.icon}</Text>
+            filteredProducts.map((product: any) => (
+              <View key={product._id} style={styles.productCard}>
+                <Image
+                  source={{ uri: product.imageUrl }}
+                  style={styles.productImage}
+                />
+
                 <View style={styles.productInfo}>
-                  <Text style={styles.productName}>{product.name}</Text>
-                  <View style={styles.ratingContainer}>
-                    <MaterialCommunityIcons
-                      name="star"
-                      size={14}
-                      color="#FFB800"
-                    />
-                    <Text style={styles.rating}>{product.rating}</Text>
-                  </View>
+                  <Text style={styles.productName}>{product.title}</Text>
+
+                  <Text style={styles.location}>📍 {product.location}</Text>
                 </View>
+
                 <View style={styles.priceSection}>
-                  <Text style={styles.price}>{product.price}</Text>
-                  <TouchableOpacity
-                    style={[
-                      styles.addButton,
-                      product.inCart && styles.addButtonActive,
-                    ]}
-                    onPress={() => handleAddToCart(product.id)}
-                  >
+                  <Text style={styles.price}>₹{product.price}</Text>
+
+                  {/* <TouchableOpacity style={styles.addButton}>
                     <MaterialCommunityIcons
-                      name={product.inCart ? "check" : "plus"}
+                      name="cart-plus"
                       size={18}
                       color="#fff"
                     />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
               </View>
             ))
@@ -154,6 +140,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -163,20 +150,25 @@ const styles = StyleSheet.create({
     borderBottomColor: "#E5E5EA",
     borderBottomWidth: 1,
   },
+
   backButton: {
     padding: 8,
   },
+
   title: {
     fontSize: 18,
     fontWeight: "600",
     color: "#000",
   },
+
   content: {
     flex: 1,
   },
+
   scrollContent: {
     padding: 20,
   },
+
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -186,65 +178,68 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 20,
   },
+
   searchInput: {
     flex: 1,
     marginLeft: 8,
-    color: "#999",
+    color: "#000",
     fontSize: 14,
   },
-  searchPlaceholder: {
-    marginLeft: 8,
-    color: "#999",
-    fontSize: 14,
-  },
+
   section: {
     marginBottom: 20,
   },
+
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 12,
     color: "#000",
   },
+
   productCard: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F2F2F7",
-    borderRadius: 8,
+    borderRadius: 10,
     padding: 12,
     marginBottom: 12,
   },
-  productIcon: {
-    fontSize: 28,
+
+  productImage: {
+    width: 55,
+    height: 55,
+    borderRadius: 8,
     marginRight: 12,
   },
+
   productInfo: {
     flex: 1,
   },
+
   productName: {
     fontSize: 14,
     fontWeight: "600",
     color: "#000",
   },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-  },
-  rating: {
+
+  location: {
     fontSize: 12,
     color: "#666",
-    marginLeft: 4,
+    marginTop: 3,
   },
+
   priceSection: {
     alignItems: "flex-end",
   },
+
   price: {
     fontSize: 14,
     fontWeight: "600",
     color: "#34C759",
     marginBottom: 8,
   },
+
   addButton: {
     backgroundColor: "#007AFF",
     width: 32,
@@ -253,9 +248,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  addButtonActive: {
-    backgroundColor: "#34C759",
-  },
+
   noResultsText: {
     fontSize: 14,
     color: "#999",
