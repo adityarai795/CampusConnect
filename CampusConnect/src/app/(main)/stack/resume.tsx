@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,21 +7,53 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+const INITIAL_RESUMES = [
+  {
+    id: 1,
+    name: "Software Engineer Resume",
+    updatedAt: "2 days ago",
+  },
+];
+
 const Resume = () => {
   const navigation = useNavigation();
+
+  // ===== STATE =====
+  const [resumes, setResumes] = useState(INITIAL_RESUMES);
+
+  // ===== HANDLERS =====
+  const handleBackPress = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const handleCreateResume = useCallback(() => {
+    Alert.alert("Create Resume", "Start building your professional resume", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Create",
+        onPress: () => console.log("Creating new resume"),
+      },
+    ]);
+  }, []);
+
+  const handleViewTemplates = useCallback(() => {
+    console.log("Viewing resume templates");
+  }, []);
+
+  const handleResumePress = useCallback((id: number, name: string) => {
+    console.log("Opening resume:", name);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <MaterialCommunityIcons name="chevron-left" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>Resume</Text>
@@ -44,33 +76,44 @@ const Resume = () => {
             experience to potential employers.
           </Text>
 
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={handleCreateResume}>
             <Text style={styles.buttonText}>Create New Resume</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button, styles.buttonOutline]}>
+          <TouchableOpacity
+            style={[styles.button, styles.buttonOutline]}
+            onPress={handleViewTemplates}
+          >
             <Text style={styles.buttonOutlineText}>View Templates</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Your Resumes</Text>
-          <View style={styles.resumeItem}>
-            <MaterialCommunityIcons
-              name="file-document"
-              size={28}
-              color="#007AFF"
-            />
-            <View style={styles.resumeInfo}>
-              <Text style={styles.resumeName}>Software Engineer Resume</Text>
-              <Text style={styles.resumeDate}>Updated 2 days ago</Text>
-            </View>
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={24}
-              color="#999"
-            />
-          </View>
+          {resumes.map((resume) => (
+            <TouchableOpacity
+              key={resume.id}
+              style={styles.resumeItem}
+              onPress={() => handleResumePress(resume.id, resume.name)}
+            >
+              <MaterialCommunityIcons
+                name="file-document"
+                size={28}
+                color="#007AFF"
+              />
+              <View style={styles.resumeInfo}>
+                <Text style={styles.resumeName}>{resume.name}</Text>
+                <Text style={styles.resumeDate}>
+                  Updated {resume.updatedAt}
+                </Text>
+              </View>
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={24}
+                color="#999"
+              />
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>

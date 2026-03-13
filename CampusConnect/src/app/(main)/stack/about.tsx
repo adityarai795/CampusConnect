@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -14,14 +15,23 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 const About = () => {
   const navigation = useNavigation();
 
+  // ===== HANDLERS =====
+  const handleBackPress = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const handleSocialPress = useCallback((platform: string) => {
+    console.log(`Opening ${platform}`);
+    Alert.alert("Social Link", `Redirecting to ${platform}...`, [
+      { text: "OK" },
+    ]);
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <MaterialCommunityIcons name="chevron-left" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>About Us</Text>
@@ -91,28 +101,40 @@ const About = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Follow Us</Text>
           <View style={styles.socialLinks}>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={() => handleSocialPress("Facebook")}
+            >
               <MaterialCommunityIcons
                 name="facebook"
                 size={24}
                 color="#1877F2"
               />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={() => handleSocialPress("Twitter")}
+            >
               <MaterialCommunityIcons
                 name="twitter"
                 size={24}
                 color="#1DA1F2"
               />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={() => handleSocialPress("Instagram")}
+            >
               <MaterialCommunityIcons
                 name="instagram"
                 size={24}
                 color="#E4405F"
               />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={() => handleSocialPress("LinkedIn")}
+            >
               <MaterialCommunityIcons
                 name="linkedin"
                 size={24}

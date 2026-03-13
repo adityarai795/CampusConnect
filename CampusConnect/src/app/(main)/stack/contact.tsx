@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,6 +8,7 @@ import {
   TextInput,
   SafeAreaView,
   StatusBar,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -15,14 +16,54 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 const Contact = () => {
   const navigation = useNavigation();
 
+  // ===== STATE =====
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+
+  // ===== HANDLERS =====
+  const handleInputChange = useCallback((field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }, []);
+
+  const handleBackPress = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const handleSubmit = useCallback(() => {
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.message.trim()
+    ) {
+      Alert.alert("Error", "Please fill in all required fields");
+      return;
+    }
+
+    // TODO: API call to send message
+    console.log("Message sent:", formData);
+    Alert.alert("Success", "Your message has been sent successfully!");
+
+    // Reset form
+    setFormData({
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+    });
+  }, [formData]);
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <MaterialCommunityIcons name="chevron-left" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>Contact Us</Text>
@@ -51,6 +92,8 @@ const Contact = () => {
             style={styles.input}
             placeholder="Your name"
             placeholderTextColor="#999"
+            value={formData.name}
+            onChangeText={(value) => handleInputChange("name", value)}
           />
 
           <Text style={styles.label}>Email</Text>
@@ -59,6 +102,8 @@ const Contact = () => {
             placeholder="Your email"
             placeholderTextColor="#999"
             keyboardType="email-address"
+            value={formData.email}
+            onChangeText={(value) => handleInputChange("email", value)}
           />
 
           <Text style={styles.label}>Subject</Text>
@@ -66,6 +111,8 @@ const Contact = () => {
             style={styles.input}
             placeholder="Subject"
             placeholderTextColor="#999"
+            value={formData.subject}
+            onChangeText={(value) => handleInputChange("subject", value)}
           />
 
           <Text style={styles.label}>Message</Text>
@@ -76,9 +123,11 @@ const Contact = () => {
             multiline
             numberOfLines={4}
             textAlignVertical="top"
+            value={formData.message}
+            onChangeText={(value) => handleInputChange("message", value)}
           />
 
-          <TouchableOpacity style={styles.submitButton}>
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitButtonText}>Send Message</Text>
           </TouchableOpacity>
         </View>

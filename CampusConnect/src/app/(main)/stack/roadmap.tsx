@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,52 +7,83 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+const INITIAL_STAGES = [
+  {
+    id: 1,
+    stage: "Fundamentals",
+    topics: "HTML, CSS, JavaScript",
+    completed: true,
+    icon: "📚",
+  },
+  {
+    id: 2,
+    stage: "Frontend Basics",
+    topics: "React, Responsive Design",
+    completed: true,
+    icon: "🎨",
+  },
+  {
+    id: 3,
+    stage: "Backend",
+    topics: "Node.js, Databases",
+    completed: false,
+    icon: "⚙️",
+  },
+  {
+    id: 4,
+    stage: "Full Stack",
+    topics: "Full App Development",
+    completed: false,
+    icon: "🏗️",
+  },
+];
+
 const Roadmap = () => {
   const navigation = useNavigation();
 
-  const roadmapStages = [
-    {
-      id: 1,
-      stage: "Fundamentals",
-      topics: "HTML, CSS, JavaScript",
-      completed: true,
-      icon: "📚",
+  // ===== STATE =====
+  const [roadmapStages, setRoadmapStages] = useState(INITIAL_STAGES);
+
+  // ===== HANDLERS =====
+  const handleBackPress = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const handleStagePress = useCallback(
+    (id: number, stageName: string) => {
+      const stage = roadmapStages.find((s) => s.id === id);
+      if (stage?.completed) {
+        Alert.alert("Stage Completed", `You have completed "${stageName}"!`);
+      } else {
+        Alert.alert("Start Learning", `Begin learning "${stageName}"?`, [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Start",
+            onPress: () => {
+              console.log("Starting stage:", stageName);
+            },
+          },
+        ]);
+      }
     },
-    {
-      id: 2,
-      stage: "Frontend Basics",
-      topics: "React, Responsive Design",
-      completed: true,
-      icon: "🎨",
-    },
-    {
-      id: 3,
-      stage: "Backend",
-      topics: "Node.js, Databases",
-      completed: false,
-      icon: "⚙️",
-    },
-    {
-      id: 4,
-      stage: "Full Stack",
-      topics: "Full App Development",
-      completed: false,
-      icon: "🏗️",
-    },
-  ];
+    [roadmapStages],
+  );
+
+  // ===== CALCULATIONS =====
+  const completedCount = roadmapStages.filter((s) => s.completed).length;
+  const totalCount = roadmapStages.length;
+  const progressPercentage = (completedCount / totalCount) * 100;
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <MaterialCommunityIcons name="chevron-left" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>Roadmap</Text>
@@ -66,15 +97,22 @@ const Roadmap = () => {
         <View style={styles.progressCard}>
           <Text style={styles.progressLabel}>Your Progress</Text>
           <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: "50%" }]} />
+            <View
+              style={[styles.progressFill, { width: `${progressPercentage}%` }]}
+            />
           </View>
-          <Text style={styles.progressText}>2 of 4 stages completed</Text>
+          <Text style={styles.progressText}>
+            {completedCount} of {totalCount} stages completed
+          </Text>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Learning Path</Text>
           {roadmapStages.map((stage, index) => (
-            <View key={stage.id}>
+            <TouchableOpacity
+              key={stage.id}
+              onPress={() => handleStagePress(stage.id, stage.stage)}
+            >
               <View style={styles.stageCard}>
                 <View
                   style={[
@@ -95,7 +133,7 @@ const Roadmap = () => {
               {index < roadmapStages.length - 1 && (
                 <View style={styles.stageConnector} />
               )}
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>

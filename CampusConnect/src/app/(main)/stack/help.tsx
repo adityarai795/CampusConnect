@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,17 +11,54 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+const INITIAL_FAQS = [
+  {
+    id: 1,
+    question: "How do I reset my password?",
+    answer:
+      "Go to the login page, click 'Forgot Password', enter your email, and follow the instructions sent to your inbox.",
+    isExpanded: false,
+  },
+  {
+    id: 2,
+    question: "How do I update my profile?",
+    answer:
+      "Go to your profile page, tap the Edit Profile button, make the changes you want, and tap Save Changes.",
+    isExpanded: false,
+  },
+];
+
 const Help = () => {
   const navigation = useNavigation();
+
+  // ===== STATE =====
+  const [faqs, setFaqs] = useState(INITIAL_FAQS);
+
+  // ===== HANDLERS =====
+  const handleBackPress = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const handleToggleFAQ = useCallback((id: number) => {
+    setFaqs((prev) =>
+      prev.map((faq) => {
+        if (faq.id === id) {
+          return { ...faq, isExpanded: !faq.isExpanded };
+        }
+        return faq;
+      }),
+    );
+  }, []);
+
+  const handleContactSupport = useCallback((type: string) => {
+    console.log(`Opening ${type} support`);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <MaterialCommunityIcons name="chevron-left" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>Help & Support</Text>
@@ -46,7 +83,10 @@ const Help = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Support Options</Text>
-          <TouchableOpacity style={styles.supportOption}>
+          <TouchableOpacity
+            style={styles.supportOption}
+            onPress={() => handleContactSupport("email")}
+          >
             <MaterialCommunityIcons name="email" size={24} color="#007AFF" />
             <View style={styles.optionInfo}>
               <Text style={styles.optionTitle}>Email Support</Text>
@@ -59,7 +99,10 @@ const Help = () => {
             />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.supportOption}>
+          <TouchableOpacity
+            style={styles.supportOption}
+            onPress={() => handleContactSupport("chat")}
+          >
             <MaterialCommunityIcons name="chat" size={24} color="#34C759" />
             <View style={styles.optionInfo}>
               <Text style={styles.optionTitle}>Live Chat</Text>
@@ -72,7 +115,10 @@ const Help = () => {
             />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.supportOption}>
+          <TouchableOpacity
+            style={styles.supportOption}
+            onPress={() => handleContactSupport("phone")}
+          >
             <MaterialCommunityIcons name="phone" size={24} color="#FF9500" />
             <View style={styles.optionInfo}>
               <Text style={styles.optionTitle}>Phone Support</Text>
@@ -88,22 +134,27 @@ const Help = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Common Issues</Text>
-          <TouchableOpacity style={styles.issueCard}>
-            <Text style={styles.issueTitle}>How do I reset my password?</Text>
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={20}
-              color="#999"
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.issueCard}>
-            <Text style={styles.issueTitle}>How do I update my profile?</Text>
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={20}
-              color="#999"
-            />
-          </TouchableOpacity>
+          {faqs.map((faq) => (
+            <TouchableOpacity
+              key={faq.id}
+              style={styles.issueCard}
+              onPress={() => handleToggleFAQ(faq.id)}
+            >
+              <Text style={styles.issueTitle}>{faq.question}</Text>
+              <MaterialCommunityIcons
+                name={faq.isExpanded ? "chevron-up" : "chevron-down"}
+                size={20}
+                color="#999"
+              />
+            </TouchableOpacity>
+          ))}
+          {faqs.map((faq) =>
+            faq.isExpanded ? (
+              <View key={`answer-${faq.id}`} style={styles.answerContainer}>
+                <Text style={styles.answerText}>{faq.answer}</Text>
+              </View>
+            ) : null,
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -203,5 +254,17 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#000",
     flex: 1,
+  },
+  answerContainer: {
+    backgroundColor: "#F2F2F7",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    marginHorizontal: 0,
+  },
+  answerText: {
+    fontSize: 13,
+    color: "#666",
+    lineHeight: 20,
   },
 });

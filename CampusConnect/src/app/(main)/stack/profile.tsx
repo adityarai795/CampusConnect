@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,7 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
-  Dimensions,
+  Alert,
+  TextInput,
+  Modal,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,7 +17,6 @@ import { useNavigation } from "@react-navigation/native";
 // ============================================
 // CONSTANTS & THEME
 // ============================================
-const { width } = Dimensions.get("window");
 
 const COLORS = {
   primary: "#4A6CF7",
@@ -30,14 +31,26 @@ const COLORS = {
   shadow: "#000000",
 };
 
-const profileData = {
+const INITIAL_PROFILE = {
   name: "Aditya Rai",
   email: "adityrai742@gmail.com",
-  phone: "+91 9839930768",
-  college: "Bansal Institute of Engineering and Technology",
-  branch: "Computer Science",
-  semester: "6th Semester",
+  mobileno: "+91 9839930768",
+  academicDetails: [
+    {
+      institutionName: "Bansal Institute of Engineering and Technology",
+      branch: "Computer Science",
+      semester: "6th Semester",
+      rollNumber: "BIT2021001",
+      score: "8.5 CGPA",
+    },
+  ],
   skills: ["React", "Node.js", "MongoDB", "Java", "Python", "Firebase"],
+  certifications: [],
+  socialLinks: {
+    linkedin: "",
+    github: "",
+    leetcode: "",
+  },
 };
 
 // ============================================
@@ -61,30 +74,80 @@ const HeaderBar = ({ onBackPress }: { onBackPress: () => void }) => (
   </View>
 );
 
-const InfoItem = ({ icon, label, value }: { icon: string; label: string; value: string }) => (
+const EditableInfoItem = ({
+  icon,
+  label,
+  value,
+  onChangeText,
+  isEditing,
+}: {
+  icon: string;
+  label: string;
+  value: string;
+  onChangeText?: (text: string) => void;
+  isEditing?: boolean;
+}) => (
   <View style={styles.infoRow}>
-    <MaterialCommunityIcons name={icon} size={20} color={COLORS.primary} />
+    <MaterialCommunityIcons
+      name={icon as any}
+      size={20}
+      color={COLORS.primary}
+    />
     <View style={styles.infoContent}>
       <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value}</Text>
+      {isEditing ? (
+        <TextInput
+          style={styles.editInput}
+          value={value}
+          onChangeText={onChangeText}
+          placeholderTextColor={COLORS.textLight}
+        />
+      ) : (
+        <Text style={styles.infoValue}>{value}</Text>
+      )}
     </View>
   </View>
 );
 
-const SkillTag = ({ skill }: { skill: string }) => (
+const SkillTag = ({
+  skill,
+  isEditing,
+  onRemove,
+}: {
+  skill: string;
+  isEditing?: boolean;
+  onRemove?: () => void;
+}) => (
   <View style={styles.skill}>
     <Text style={styles.skillText}>{skill}</Text>
+    {isEditing && (
+      <TouchableOpacity onPress={onRemove} style={styles.skillRemoveBtn}>
+        <MaterialCommunityIcons name="close" size={14} color={COLORS.primary} />
+      </TouchableOpacity>
+    )}
   </View>
 );
 
-const ActionButton = ({ icon, label, onPress }: { icon: string; label: string; onPress: () => void }) => (
+const ActionButton = ({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: string;
+  label: string;
+  onPress: () => void;
+}) => (
   <TouchableOpacity
     style={styles.actionBtn}
     onPress={onPress}
     activeOpacity={0.7}
   >
     <View style={styles.actionIconContainer}>
-      <MaterialCommunityIcons name={icon} size={24} color={COLORS.primary} />
+      <MaterialCommunityIcons
+        name={icon as any}
+        size={24}
+        color={COLORS.primary}
+      />
     </View>
     <Text style={styles.actionText}>{label}</Text>
     <MaterialCommunityIcons
@@ -102,19 +165,97 @@ const ActionButton = ({ icon, label, onPress }: { icon: string; label: string; o
 const Profile = () => {
   const navigation = useNavigation();
 
+  // ===== STATE =====
+  const [isEditing, setIsEditing] = useState(false);
+  const [newSkill, setNewSkill] = useState("");
+  const [showAddSkillModal, setShowAddSkillModal] = useState(false);
+  const [profileData, setProfileData] = useState(INITIAL_PROFILE);
+
+  // ===== HANDLERS =====
+
   const handleBackPress = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
-  const handleEditProfile = useCallback(() => {
-    // Navigate to edit profile screen
-    console.log("Edit Profile");
+  const handleEditToggle = useCallback(() => {
+    setIsEditing(!isEditing);
+  }, [isEditing]);
+
+  const handleInputChange = useCallback((field: string, value: string) => {
+    setProfileData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   }, []);
 
-  const handleLogout = useCallback(() => {
-    // Handle logout
-    console.log("Logout");
+  const handleSocialLinkChange = useCallback(
+    (platform: string, value: string) => {
+      setProfileData((prev) => ({
+        ...prev,
+        socialLinks: {
+          ...prev.socialLinks,
+          [platform]: value,
+        },
+      }));
+    },
+    [],
+  );
+
+  const handleAddSkill = useCallback(() => {
+    if (newSkill.trim()) {
+      setProfileData((prev) => ({
+        ...prev,
+        skills: [...prev.skills, newSkill.trim()],
+      }));
+      setNewSkill("");
+      setShowAddSkillModal(false);
+    }
+  }, [newSkill]);
+
+  const handleRemoveSkill = useCallback((index: number) => {
+    setProfileData((prev) => ({
+      ...prev,
+      skills: prev.skills.filter((_, i) => i !== index),
+    }));
   }, []);
+
+  const handleSaveProfile = useCallback(() => {
+    // TODO: API call to save profile data
+    console.log("Profile saved:", profileData);
+    setIsEditing(false);
+    Alert.alert("Success", "Profile updated successfully!");
+  }, [profileData]);
+
+  const handleLogout = useCallback(() => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: () => {
+          // TODO: Clear auth and navigate to login
+          console.log("User logged out");
+        },
+      },
+    ]);
+  }, []);
+
+  const handleMyNotes = useCallback(() => {
+    navigation.goBack();
+    // TODO: Navigate to MyNotes when implemented
+  }, [navigation]);
+
+  const handleBookmarked = useCallback(() => {
+    navigation.goBack();
+    // TODO: Navigate to Bookmarked when implemented
+  }, [navigation]);
+
+  const handleApplications = useCallback(() => {
+    navigation.goBack();
+    // TODO: Navigate to Applications when implemented
+  }, [navigation]);
+
+  // ===== RENDER =====
 
   return (
     <SafeAreaView style={styles.container}>
@@ -131,72 +272,217 @@ const Profile = () => {
             <MaterialCommunityIcons
               name="account-circle"
               size={80}
-              color={COLORS.primary}
+              color={COLORS.white}
             />
           </View>
           <Text style={styles.name}>{profileData.name}</Text>
           <Text style={styles.email}>{profileData.email}</Text>
-          <TouchableOpacity
-            style={styles.editBtn}
-            onPress={handleEditProfile}
-            activeOpacity={0.8}
-          >
-            <MaterialCommunityIcons
-              name="pencil-outline"
-              size={16}
-              color={COLORS.primary}
-            />
-            <Text style={styles.editText}>Edit Profile</Text>
-          </TouchableOpacity>
+          {!isEditing && (
+            <TouchableOpacity
+              style={styles.editBtn}
+              onPress={handleEditToggle}
+              activeOpacity={0.8}
+            >
+              <MaterialCommunityIcons
+                name="pencil-outline"
+                size={16}
+                color={COLORS.primary}
+              />
+              <Text style={styles.editText}>Edit Profile</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* ===== BASIC INFORMATION ===== */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Contact Information</Text>
-          <InfoItem
-            icon="email-outline"
-            label="Email"
-            value={profileData.email}
+          <Text style={styles.cardTitle}>Basic Information</Text>
+          <EditableInfoItem
+            icon="account-outline"
+            label="Full Name"
+            value={profileData.name}
+            onChangeText={(value) => handleInputChange("name", value)}
+            isEditing={isEditing}
           />
           <View style={styles.divider} />
-          <InfoItem
+          <EditableInfoItem
+            icon="email-outline"
+            label="Email Address"
+            value={profileData.email}
+            isEditing={false}
+          />
+          <View style={styles.divider} />
+          <EditableInfoItem
             icon="phone-outline"
-            label="Phone"
-            value={profileData.phone}
+            label="Phone Number"
+            value={profileData.mobileno}
+            onChangeText={(value) => handleInputChange("mobileno", value)}
+            isEditing={isEditing}
           />
         </View>
 
         {/* ===== ACADEMIC DETAILS ===== */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Academic Details</Text>
-          <InfoItem
-            icon="school-outline"
-            label="College"
-            value={profileData.college}
-          />
-          <View style={styles.divider} />
-          <InfoItem
-            icon="book-outline"
-            label="Branch"
-            value={profileData.branch}
-          />
-          <View style={styles.divider} />
-          <InfoItem
-            icon="calendar-outline"
-            label="Semester"
-            value={profileData.semester}
-          />
+          {profileData.academicDetails.map((academic, index) => (
+            <View key={index}>
+              <EditableInfoItem
+                icon="school-outline"
+                label="Institution"
+                value={academic.institutionName}
+                onChangeText={(value) => {
+                  setProfileData((prev) => {
+                    const updated = [...prev.academicDetails];
+                    updated[index].institutionName = value;
+                    return { ...prev, academicDetails: updated };
+                  });
+                }}
+                isEditing={isEditing}
+              />
+              <View style={styles.divider} />
+              <EditableInfoItem
+                icon="book-outline"
+                label="Branch"
+                value={academic.branch}
+                onChangeText={(value) => {
+                  setProfileData((prev) => {
+                    const updated = [...prev.academicDetails];
+                    updated[index].branch = value;
+                    return { ...prev, academicDetails: updated };
+                  });
+                }}
+                isEditing={isEditing}
+              />
+              <View style={styles.divider} />
+              <EditableInfoItem
+                icon="calendar-outline"
+                label="Semester"
+                value={academic.semester}
+                onChangeText={(value) => {
+                  setProfileData((prev) => {
+                    const updated = [...prev.academicDetails];
+                    updated[index].semester = value;
+                    return { ...prev, academicDetails: updated };
+                  });
+                }}
+                isEditing={isEditing}
+              />
+              <View style={styles.divider} />
+              <EditableInfoItem
+                icon="id-card-outline"
+                label="Roll Number"
+                value={academic.rollNumber}
+                onChangeText={(value) => {
+                  setProfileData((prev) => {
+                    const updated = [...prev.academicDetails];
+                    updated[index].rollNumber = value;
+                    return { ...prev, academicDetails: updated };
+                  });
+                }}
+                isEditing={isEditing}
+              />
+              <View style={styles.divider} />
+              <EditableInfoItem
+                icon="chart-line"
+                label="CGPA / Score"
+                value={academic.score}
+                onChangeText={(value) => {
+                  setProfileData((prev) => {
+                    const updated = [...prev.academicDetails];
+                    updated[index].score = value;
+                    return { ...prev, academicDetails: updated };
+                  });
+                }}
+                isEditing={isEditing}
+              />
+            </View>
+          ))}
         </View>
 
         {/* ===== SKILLS ===== */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Technical Skills</Text>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Technical Skills</Text>
+            {isEditing && (
+              <TouchableOpacity
+                onPress={() => setShowAddSkillModal(true)}
+                hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+              >
+                <MaterialCommunityIcons
+                  name="plus-circle"
+                  size={24}
+                  color={COLORS.primary}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
           <View style={styles.skillContainer}>
-            {profileData.skills.map((skill, index) => (
-              <SkillTag key={index} skill={skill} />
-            ))}
+            {profileData.skills.length > 0 ? (
+              profileData.skills.map((skill, index) => (
+                <SkillTag
+                  key={index}
+                  skill={skill}
+                  isEditing={isEditing}
+                  onRemove={() => handleRemoveSkill(index)}
+                />
+              ))
+            ) : (
+              <Text style={styles.emptyText}>No skills added</Text>
+            )}
           </View>
         </View>
+
+        {/* ===== SOCIAL LINKS ===== */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Professional Links</Text>
+          <EditableInfoItem
+            icon="linkedin"
+            label="LinkedIn"
+            value={profileData.socialLinks.linkedin}
+            onChangeText={(value) => handleSocialLinkChange("linkedin", value)}
+            isEditing={isEditing}
+          />
+          <View style={styles.divider} />
+          <EditableInfoItem
+            icon="github"
+            label="GitHub"
+            value={profileData.socialLinks.github}
+            onChangeText={(value) => handleSocialLinkChange("github", value)}
+            isEditing={isEditing}
+          />
+          <View style={styles.divider} />
+          <EditableInfoItem
+            icon="code-braces"
+            label="LeetCode"
+            value={profileData.socialLinks.leetcode}
+            onChangeText={(value) => handleSocialLinkChange("leetcode", value)}
+            isEditing={isEditing}
+          />
+        </View>
+
+        {/* ===== ACTION BUTTONS FOR EDIT MODE ===== */}
+        {isEditing && (
+          <View style={styles.editActionContainer}>
+            <TouchableOpacity
+              style={styles.saveBtn}
+              onPress={handleSaveProfile}
+              activeOpacity={0.8}
+            >
+              <MaterialCommunityIcons
+                name="content-save"
+                size={20}
+                color={COLORS.white}
+              />
+              <Text style={styles.saveBtnText}>Save Changes</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelBtn}
+              onPress={handleEditToggle}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.cancelBtnText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* ===== QUICK ACTIONS ===== */}
         <View style={styles.card}>
@@ -204,34 +490,72 @@ const Profile = () => {
           <ActionButton
             icon="book-open-outline"
             label="My Notes"
-            onPress={() => {}}
+            onPress={handleMyNotes}
           />
           <ActionButton
             icon="bookmark-outline"
             label="Bookmarked"
-            onPress={() => {}}
+            onPress={handleBookmarked}
           />
           <ActionButton
             icon="briefcase-outline"
             label="Applications"
-            onPress={() => {}}
+            onPress={handleApplications}
           />
         </View>
 
         {/* ===== LOGOUT BUTTON ===== */}
-        <TouchableOpacity
-          style={styles.logoutBtn}
-          onPress={handleLogout}
-          activeOpacity={0.8}
-        >
-          <MaterialCommunityIcons
-            name="logout"
-            size={22}
-            color={COLORS.white}
-          />
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
+        {!isEditing && (
+          <TouchableOpacity
+            style={styles.logoutBtn}
+            onPress={handleLogout}
+            activeOpacity={0.8}
+          >
+            <MaterialCommunityIcons
+              name="logout"
+              size={22}
+              color={COLORS.white}
+            />
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
+
+      {/* ===== ADD SKILL MODAL ===== */}
+      <Modal
+        visible={showAddSkillModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowAddSkillModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Add a Skill</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="e.g., React, Python, AWS..."
+              placeholderTextColor={COLORS.textLight}
+              value={newSkill}
+              onChangeText={setNewSkill}
+              autoFocus
+            />
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setShowAddSkillModal(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalAddBtn}
+                onPress={handleAddSkill}
+              >
+                <Text style={styles.modalAddText}>Add</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -292,7 +616,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 120,
     height: 120,
-    backgroundColor: COLORS.white,
+    backgroundColor: "rgba(255,255,255,0.2)",
     borderRadius: 60,
     justifyContent: "center",
     alignItems: "center",
@@ -351,10 +675,16 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
 
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+
   cardTitle: {
     fontSize: 18,
     fontWeight: "700",
-    marginBottom: 14,
     color: COLORS.text,
     letterSpacing: 0.3,
   },
@@ -387,6 +717,16 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
 
+  editInput: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: COLORS.text,
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.primary,
+    paddingVertical: 6,
+    paddingHorizontal: 0,
+  },
+
   divider: {
     height: 1,
     backgroundColor: "#f0f0f0",
@@ -407,12 +747,25 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     borderColor: "#d0d8ff",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
 
   skillText: {
     color: COLORS.primary,
     fontSize: 13,
     fontWeight: "600",
+  },
+
+  skillRemoveBtn: {
+    padding: 2,
+  },
+
+  emptyText: {
+    color: COLORS.textLight,
+    fontSize: 14,
+    fontStyle: "italic",
   },
 
   /* ACTION BUTTONS */
@@ -442,6 +795,53 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  /* EDIT MODE ACTIONS */
+  editActionContainer: {
+    flexDirection: "row",
+    gap: 12,
+    marginHorizontal: 16,
+    marginVertical: 12,
+  },
+
+  saveBtn: {
+    flex: 1,
+    backgroundColor: COLORS.success,
+    paddingVertical: 14,
+    borderRadius: 14,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 10,
+    elevation: 3,
+    shadowColor: COLORS.success,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+
+  saveBtnText: {
+    color: COLORS.white,
+    fontWeight: "700",
+    fontSize: 16,
+    letterSpacing: 0.3,
+  },
+
+  cancelBtn: {
+    flex: 1,
+    backgroundColor: COLORS.textGray,
+    paddingVertical: 14,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  cancelBtnText: {
+    color: COLORS.white,
+    fontWeight: "700",
+    fontSize: 16,
+    letterSpacing: 0.3,
+  },
+
   /* LOGOUT */
   logoutBtn: {
     backgroundColor: COLORS.error,
@@ -465,5 +865,71 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 16,
     letterSpacing: 0.3,
+  },
+
+  /* MODAL */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+
+  modalContent: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 40,
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 16,
+  },
+
+  modalInput: {
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 15,
+    color: COLORS.text,
+    marginBottom: 16,
+  },
+
+  modalButtonContainer: {
+    flexDirection: "row",
+    gap: 12,
+  },
+
+  modalCancelBtn: {
+    flex: 1,
+    backgroundColor: COLORS.primaryLight,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+
+  modalCancelText: {
+    color: COLORS.primary,
+    fontWeight: "700",
+    fontSize: 16,
+  },
+
+  modalAddBtn: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+
+  modalAddText: {
+    color: COLORS.white,
+    fontWeight: "700",
+    fontSize: 16,
   },
 });

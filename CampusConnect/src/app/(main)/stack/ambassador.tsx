@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,39 +8,77 @@ import {
   Image,
   SafeAreaView,
   StatusBar,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+const INITIAL_AMBASSADORS = [
+  {
+    id: 1,
+    name: "Sarah Johnson",
+    role: "Senior Developer",
+    icon: "👩‍💼",
+    followers: 1200,
+    isFollowing: false,
+  },
+  {
+    id: 2,
+    name: "Mike Chen",
+    role: "Tech Lead",
+    icon: "👨‍💼",
+    followers: 890,
+    isFollowing: false,
+  },
+  {
+    id: 3,
+    name: "Emma Davis",
+    role: "Product Manager",
+    icon: "👩‍💻",
+    followers: 650,
+    isFollowing: false,
+  },
+];
+
 const Ambassador = () => {
   const navigation = useNavigation();
 
-  const ambassadors = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      role: "Senior Developer",
-      icon: "👩‍💼",
-      followers: 1200,
-    },
-    { id: 2, name: "Mike Chen", role: "Tech Lead", icon: "👨‍💼", followers: 890 },
-    {
-      id: 3,
-      name: "Emma Davis",
-      role: "Product Manager",
-      icon: "👩‍💻",
-      followers: 650,
-    },
-  ];
+  // ===== STATE =====
+  const [ambassadors, setAmbassadors] = useState(INITIAL_AMBASSADORS);
+
+  // ===== HANDLERS =====
+  const handleBackPress = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const handleFollowAmbassador = useCallback((id: number) => {
+    setAmbassadors((prev) =>
+      prev.map((amb) => {
+        if (amb.id === id) {
+          return {
+            ...amb,
+            isFollowing: !amb.isFollowing,
+            followers: amb.isFollowing ? amb.followers - 1 : amb.followers + 1,
+          };
+        }
+        return amb;
+      }),
+    );
+  }, []);
+
+  const handleApplyAmbassador = useCallback(() => {
+    Alert.alert(
+      "Ambassador Program",
+      "Thank you for your interest! Your application has been submitted.",
+      [{ text: "OK", onPress: () => console.log("Application submitted") }],
+    );
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <MaterialCommunityIcons name="chevron-left" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>Ambassador</Text>
@@ -58,7 +96,10 @@ const Ambassador = () => {
             Become a CampusConnect ambassador and help others grow their coding
             skills. Get exclusive perks and recognition.
           </Text>
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleApplyAmbassador}
+          >
             <Text style={styles.buttonText}>Apply Now</Text>
           </TouchableOpacity>
         </View>
@@ -72,14 +113,17 @@ const Ambassador = () => {
                 <Text style={styles.ambassadorName}>{ambassador.name}</Text>
                 <Text style={styles.ambassadorRole}>{ambassador.role}</Text>
               </View>
-              <View style={styles.followersSection}>
+              <TouchableOpacity
+                style={styles.followersSection}
+                onPress={() => handleFollowAmbassador(ambassador.id)}
+              >
                 <MaterialCommunityIcons
-                  name="heart"
+                  name={ambassador.isFollowing ? "heart" : "heart-outline"}
                   size={16}
-                  color="#FF3B30"
+                  color={ambassador.isFollowing ? "#FF3B30" : "#999"}
                 />
                 <Text style={styles.followers}>{ambassador.followers}</Text>
-              </View>
+              </TouchableOpacity>
             </View>
           ))}
         </View>

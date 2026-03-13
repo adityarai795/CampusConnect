@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,45 +7,77 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+const INITIAL_QUIZZES = [
+  {
+    id: 1,
+    title: "JavaScript Basics",
+    difficulty: "Beginner",
+    questions: 10,
+    icon: "🟨",
+    attempts: 0,
+  },
+  {
+    id: 2,
+    title: "React Fundamentals",
+    difficulty: "Intermediate",
+    questions: 15,
+    icon: "⚛️",
+    attempts: 0,
+  },
+  {
+    id: 3,
+    title: "Advanced TypeScript",
+    difficulty: "Advanced",
+    questions: 20,
+    icon: "🔷",
+    attempts: 0,
+  },
+];
+
 const Quiz = () => {
   const navigation = useNavigation();
 
-  const quizzes = [
-    {
-      id: 1,
-      title: "JavaScript Basics",
-      difficulty: "Beginner",
-      questions: 10,
-      icon: "🟨",
-    },
-    {
-      id: 2,
-      title: "React Fundamentals",
-      difficulty: "Intermediate",
-      questions: 15,
-      icon: "⚛️",
-    },
-    {
-      id: 3,
-      title: "Advanced TypeScript",
-      difficulty: "Advanced",
-      questions: 20,
-      icon: "🔷",
-    },
-  ];
+  // ===== STATE =====
+  const [quizzes, setQuizzes] = useState(INITIAL_QUIZZES);
+  const [quizzesTaken, setQuizzesTaken] = useState(5);
+  const [avgScore, setAvgScore] = useState(84);
+
+  // ===== HANDLERS =====
+  const handleBackPress = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const handleTakeQuiz = useCallback((id: number, title: string) => {
+    Alert.alert("Start Quiz", `Ready to take "${title}"? Let's go!`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Start",
+        onPress: () => {
+          setQuizzes((prev) =>
+            prev.map((quiz) => {
+              if (quiz.id === id) {
+                return { ...quiz, attempts: quiz.attempts + 1 };
+              }
+              return quiz;
+            }),
+          );
+          setQuizzesTaken((prev) => prev + 1);
+          console.log(`Starting quiz: ${title}`);
+        },
+      },
+    ]);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <MaterialCommunityIcons name="chevron-left" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>Quiz</Text>
@@ -58,11 +90,11 @@ const Quiz = () => {
       >
         <View style={styles.statsCard}>
           <View style={styles.stat}>
-            <Text style={styles.statValue}>5</Text>
+            <Text style={styles.statValue}>{quizzesTaken}</Text>
             <Text style={styles.statLabel}>Quizzes Taken</Text>
           </View>
           <View style={styles.stat}>
-            <Text style={styles.statValue}>84%</Text>
+            <Text style={styles.statValue}>{avgScore}%</Text>
             <Text style={styles.statLabel}>Avg Score</Text>
           </View>
         </View>
@@ -70,7 +102,11 @@ const Quiz = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Available Quizzes</Text>
           {quizzes.map((quiz) => (
-            <TouchableOpacity key={quiz.id} style={styles.quizCard}>
+            <TouchableOpacity
+              key={quiz.id}
+              style={styles.quizCard}
+              onPress={() => handleTakeQuiz(quiz.id, quiz.title)}
+            >
               <Text style={styles.quizIcon}>{quiz.icon}</Text>
               <View style={styles.quizInfo}>
                 <Text style={styles.quizTitle}>{quiz.title}</Text>
@@ -80,9 +116,20 @@ const Quiz = () => {
                   <Text style={styles.questions}>
                     {quiz.questions} Questions
                   </Text>
+                  {quiz.attempts > 0 && (
+                    <>
+                      <Text style={styles.questions}>•</Text>
+                      <Text style={styles.questions}>
+                        {quiz.attempts} Attempt{quiz.attempts !== 1 ? "s" : ""}
+                      </Text>
+                    </>
+                  )}
                 </View>
               </View>
-              <TouchableOpacity style={styles.takeButton}>
+              <TouchableOpacity
+                style={styles.takeButton}
+                onPress={() => handleTakeQuiz(quiz.id, quiz.title)}
+              >
                 <Text style={styles.takeButtonText}>Take</Text>
               </TouchableOpacity>
             </TouchableOpacity>

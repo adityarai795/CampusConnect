@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -54,18 +54,24 @@ const FAQ = () => {
     },
   ];
 
-  const toggleExpand = (id: number) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
+  // ===== HANDLERS =====
+  const handleBackPress = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const toggleExpand = useCallback((id: number) => {
+    setExpandedId((prevId) => (prevId === id ? null : id));
+  }, []);
+
+  const handleContactPress = useCallback(() => {
+    navigation.navigate("Contact" as any);
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <MaterialCommunityIcons name="chevron-left" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>FAQ</Text>
@@ -113,7 +119,10 @@ const FAQ = () => {
 
         <View style={styles.contactSection}>
           <Text style={styles.sectionTitle}>Still have questions?</Text>
-          <TouchableOpacity style={styles.contactButton}>
+          <TouchableOpacity
+            style={styles.contactButton}
+            onPress={handleContactPress}
+          >
             <Text style={styles.contactButtonText}>Contact us</Text>
           </TouchableOpacity>
         </View>
