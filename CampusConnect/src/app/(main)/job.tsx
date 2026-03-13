@@ -6,9 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  SafeAreaView,
   StatusBar,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Header from "../../components/Header";
 const Job = () => {

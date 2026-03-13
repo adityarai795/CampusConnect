@@ -23,6 +23,7 @@ import Help from "./stack/help";
 import Contact from "./stack/contact";
 import About from "./stack/about";
 import FAQ from "./stack/faq";
+import Profile from "./stack/profile";
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -38,9 +39,10 @@ function TabNavigator() {
           backgroundColor: "#fff",
           borderTopColor: "#E5E5EA",
           borderTopWidth: 1,
-          height: 60,
-          paddingBottom: 5,
+          height: 70,
+          paddingBottom: 10,
         },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tab.Screen
@@ -105,7 +107,7 @@ export default function MainLayout() {
       screenOptions={{
         headerShown: false,
       }}
-      drawerContent={(props:any) => <DrawerContent {...props} />}
+      drawerContent={(props: any) => <DrawerContent {...props} />}
     >
       <Drawer.Screen
         name="tabsGroup"
@@ -114,6 +116,8 @@ export default function MainLayout() {
       />
       {/* Stack navigation screens */}
       <Drawer.Screen name="resume" component={Resume} />
+
+      <Drawer.Screen name="profile" component={Profile} />
       <Drawer.Screen name="marketplace" component={MarketPlace} />
       <Drawer.Screen name="quiz" component={Quiz} />
       <Drawer.Screen name="ambassador" component={Ambassador} />

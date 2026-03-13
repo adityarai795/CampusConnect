@@ -43,8 +43,14 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
           />
         </View>
         <View style={styles.userInfo}>
-          <Text style={styles.name}>Aditya Rai</Text>
-          <Text style={styles.email}>adityarai@123.com</Text>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("profile");
+            }}
+          >
+            <Text style={styles.name}>Aditya Rai</Text>
+            <Text style={styles.email}>adityarai@123.com</Text>
+          </TouchableOpacity> 
         </View>
       </View>
 

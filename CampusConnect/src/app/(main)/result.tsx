@@ -6,10 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  SafeAreaView,
   StatusBar,
 } from "react-native";
 import Header from "../../components/Header";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Result = () => {
   const results = [
