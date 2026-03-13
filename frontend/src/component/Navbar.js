@@ -40,12 +40,12 @@ function Navbar() {
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
                   <img
                     src={Logo}
-                    alt="CampusConnect Logo"
+                    alt="CollegeConnect Logo"
                     className="h-10 w-10 rounded-full relative z-10 ring-2 ring-white shadow-lg"
                   />
                 </div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hidden sm:block">
-                  CampusConnect
+                  CollegeConnect
                 </h1>
               </Link>
             </div>

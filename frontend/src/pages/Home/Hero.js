@@ -155,7 +155,7 @@ useEffect(() => {
                   </span>
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  Connect, Learn, and Grow with CampusConnect – Your ultimate
+                  Connect, Learn, and Grow with CollegeConnect – Your ultimate
                   companion for academic success, career opportunities, and
                   community building.
                 </p>
@@ -329,7 +329,7 @@ useEffect(() => {
           </h1>
 
           <p className="text-gray-600 text-lg px-2">
-            Connect, Learn, and Grow with CampusConnect – Your ultimate campus
+            Connect, Learn, and Grow with CollegeConnect – Your ultimate campus
             companion.
           </p>
 
