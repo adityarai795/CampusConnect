@@ -74,7 +74,6 @@ const Job = () => {
           <Text style={styles.subtitle}>Find your next career opportunity</Text>
         </View>
 
-        {/* Search Bar */}
         <View style={styles.searchSection}>
           <View style={styles.searchBar}>
             <MaterialCommunityIcons name="magnify" size={18} color="#999" />
@@ -86,58 +85,6 @@ const Job = () => {
               onChangeText={setSearchText}
             />
           </View>
-        </View>
-
-        {/* Level Filter */}
-        <View style={styles.filterSection}>
-          <Text style={styles.filterLabel}>Level</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {["All", "Intern", "Junior", "Mid", "Senior"].map((level) => (
-              <TouchableOpacity
-                key={level}
-                style={[
-                  styles.filterButton,
-                  selectedLevel === level && styles.activeFilterButton,
-                ]}
-                onPress={() => setSelectedLevel(level)}
-              >
-                <Text
-                  style={[
-                    styles.filterButtonText,
-                    selectedLevel === level && styles.activeFilterText,
-                  ]}
-                >
-                  {level}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Type Filter */}
-        <View style={styles.filterSection}>
-          <Text style={styles.filterLabel}>Job Type</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {["All", "Full-time", "Internship"].map((type) => (
-              <TouchableOpacity
-                key={type}
-                style={[
-                  styles.filterButton,
-                  selectedType === type && styles.activeFilterButton,
-                ]}
-                onPress={() => setSelectedType(type)}
-              >
-                <Text
-                  style={[
-                    styles.filterButtonText,
-                    selectedType === type && styles.activeFilterText,
-                  ]}
-                >
-                  {type}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
         </View>
 
         {/* Jobs List */}

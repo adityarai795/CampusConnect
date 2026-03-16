@@ -14,8 +14,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Header from "../../components/Header";
 import axios from "axios";
+import { useNavigation } from "@react-navigation/native";
 
 const Community = () => {
+  const navigation = useNavigation<any>();
   const [posts, setPosts] = useState([]);
 
   const [searchText, setSearchText] = useState("");
@@ -90,10 +92,18 @@ const Community = () => {
         {/* Create Post Button */}
         <TouchableOpacity
           style={styles.createPostButton}
-          // onPress={handleCreatePost}
+          onPress={() => navigation.navigate("communityCreatePost")}
         >
           <MaterialCommunityIcons name="pencil-plus" size={18} color="#fff" />
           <Text style={styles.createPostText}>Create a Post</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.myPostsButton}
+          onPress={() => navigation.navigate("communityMyPosts")}
+        >
+          <MaterialCommunityIcons name="account" size={18} color="#007AFF" />
+          <Text style={styles.myPostsText}>View My Posts</Text>
         </TouchableOpacity>
 
         {/* Posts Section */}
@@ -103,7 +113,17 @@ const Community = () => {
           </Text>
           <View>
             {posts.map((post: any) => (
-              <View key={post._id} style={styles.postCard}>
+              <TouchableOpacity
+                key={post._id}
+                style={styles.postCard}
+                activeOpacity={0.9}
+                onPress={() =>
+                  navigation.navigate("communityPostDetails", {
+                    postId: post._id,
+                    post,
+                  })
+                }
+              >
                 <View style={styles.postHeader}>
                   <Text style={styles.avatar}>{post.avatar}</Text>
                   <View style={styles.authorSection}>
@@ -163,7 +183,7 @@ const Community = () => {
                     <Text style={styles.footerText}>Share</Text>
                   </TouchableOpacity>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}{" "}
           </View>
         </View>
@@ -253,6 +273,24 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 15,
+  },
+  myPostsButton: {
+    marginHorizontal: 20,
+    marginBottom: 14,
+    borderRadius: 8,
+    borderColor: "#007AFF",
+    borderWidth: 1,
+    paddingVertical: 11,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#F4F8FF",
+  },
+  myPostsText: {
+    color: "#007AFF",
+    fontSize: 14,
+    fontWeight: "600",
   },
   postsSection: {
     paddingHorizontal: 20,

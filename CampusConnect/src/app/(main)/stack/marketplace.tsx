@@ -13,9 +13,10 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import api from "@/src/services/api";
 
 const MarketPlace = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const [products, setProducts] = useState<any[]>([]);
   const [searchText, setSearchText] = useState("");
@@ -31,19 +32,16 @@ const MarketPlace = () => {
   // ===== FETCH PRODUCTS =====
   const fetchData = async () => {
     try {
-      const response = await fetch(
-        "http://13.203.2.23:3000/marketplace/ShowAllProducts",
-      );
-
-      const data = await response.json();
-
-      console.log("API DATA:", data);
-
+      // const response = await fetch(
+      //   "http://api.collegeconnect.me/marketplace/ShowAllProducts",
+      // );
+      const response = await api.get("/marketplace/ShowAllProducts");
+      console.log("API Response:", response);
       // Handle both possible responses
-      if (Array.isArray(data)) {
-        setProducts(data);
-      } else if (Array.isArray(data.products)) {
-        setProducts(data.products);
+      if (Array.isArray(response.data)) {
+        setProducts(response.data);
+      } else if (Array.isArray(response.data.products)) {
+        setProducts(response.data.products);
       } else {
         setProducts([]);
       }
@@ -95,34 +93,49 @@ const MarketPlace = () => {
 
         {/* ===== PRODUCTS ===== */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Featured Products</Text>
+          <View>
+            <Text style={styles.sectionTitle}>Featured Products</Text>
+            <TouchableOpacity
+              style={[
+                styles.addButton,
+                { position: "absolute", right: 0, top: -5 },
+              ]}
+              onPress={() => navigation.navigate("marketplaceUploadProduct")}
+            >
+              {" "}
+              <MaterialCommunityIcons name="plus" size={16} color="#fff" />
+            </TouchableOpacity>
+          </View>
 
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product: any) => (
-              <View key={product._id} style={styles.productCard}>
-                <Image
-                  source={{ uri: product.imageUrl }}
-                  style={styles.productImage}
-                />
+              <TouchableOpacity
+                key={product._id}
+                style={styles.productCard}
+                onPress={() =>
+                  navigation.navigate("productDetails", {
+                    productId: product._id,
+                    product,
+                  })
+                }
+              >
+                <View key={product._id} style={styles.productCard}>
+                  <Image
+                    source={{ uri: product.imageUrl }}
+                    style={styles.productImage}
+                  />
 
-                <View style={styles.productInfo}>
-                  <Text style={styles.productName}>{product.title}</Text>
+                  <View style={styles.productInfo}>
+                    <Text style={styles.productName}>{product.title}</Text>
 
-                  <Text style={styles.location}>📍 {product.location}</Text>
+                    <Text style={styles.location}>📍 {product.location}</Text>
+                  </View>
+
+                  <View style={styles.priceSection}>
+                    <Text style={styles.price}>₹{product.price}</Text>
+                  </View>
                 </View>
-
-                <View style={styles.priceSection}>
-                  <Text style={styles.price}>₹{product.price}</Text>
-
-                  {/* <TouchableOpacity style={styles.addButton}>
-                    <MaterialCommunityIcons
-                      name="cart-plus"
-                      size={18}
-                      color="#fff"
-                    />
-                  </TouchableOpacity> */}
-                </View>
-              </View>
+              </TouchableOpacity>
             ))
           ) : (
             <Text style={styles.noResultsText}>No products found</Text>

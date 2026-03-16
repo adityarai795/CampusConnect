@@ -15,6 +15,8 @@ import Result from "./result";
 // Import stack screens
 import Resume from "./stack/resume";
 import MarketPlace from "./stack/marketplace";
+import ProductDetails from "./stack/productDetails";
+import MarketplaceUploadProduct from "./stack/marketplaceUploadProduct";
 import Quiz from "./stack/quiz";
 import Ambassador from "./stack/ambassador";
 import Roadmap from "./stack/roadmap";
@@ -23,6 +25,9 @@ import Help from "./stack/help";
 import About from "./stack/about";
 import FAQ from "./stack/faq";
 import Profile from "./stack/profile";
+import CommunityPostDetails from "./stack/communityPostDetails";
+import CommunityMyPosts from "./stack/communityMyPosts";
+import CommunityCreatePost from "./stack/communityCreatePost";
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -118,10 +123,24 @@ export default function MainLayout() {
 
       <Drawer.Screen name="profile" component={Profile} />
       <Drawer.Screen name="marketplace" component={MarketPlace} />
+      <Drawer.Screen name="productDetails" component={ProductDetails} />
+      <Drawer.Screen
+        name="marketplaceUploadProduct"
+        component={MarketplaceUploadProduct}
+      />
       <Drawer.Screen name="quiz" component={Quiz} />
       <Drawer.Screen name="ambassador" component={Ambassador} />
       <Drawer.Screen name="roadmap" component={Roadmap} />
       <Drawer.Screen name="resources" component={Resources} />
+      <Drawer.Screen
+        name="communityPostDetails"
+        component={CommunityPostDetails}
+      />
+      <Drawer.Screen name="communityMyPosts" component={CommunityMyPosts} />
+      <Drawer.Screen
+        name="communityCreatePost"
+        component={CommunityCreatePost}
+      />
       <Drawer.Screen name="help" component={Help} />
       <Drawer.Screen name="about" component={About} />
       <Drawer.Screen name="faq" component={FAQ} />
