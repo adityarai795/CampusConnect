@@ -3,8 +3,8 @@ import { Platform } from "react-native";
 
 const BASE_URL =
   Platform.OS === "web"
-    ? "http://api.collegeconnect.me/"
-    : "http://api.collegeconnect.me/"; // your PC IP for mobile
+    ? "https://api.collegeconnect.me/"
+    : "https://api.collegeconnect.me/"; // your PC IP for mobile
 
 export const api = axios.create({
   baseURL: BASE_URL,

@@ -34,9 +34,6 @@ const Result = () => {
       setLoading(true);
 
       const response = await api.get("/result/showall");
-
-      console.log("API Response:", response.data.showall);
-
       const data = Array.isArray(response?.data?.showall)
         ? response.data.showall
         : [];

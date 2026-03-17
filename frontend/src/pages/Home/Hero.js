@@ -4,30 +4,30 @@ import { getHomePageData } from "../../api/home.js";
 
 function Hero() {
   const [currentStat, setCurrentStat] = useState(0);
-const [statsdata, setStatsData] = useState({
-  activeStudents: 0,
-  universities: 0,
-  resources: 0,
-  jobListings: 0,
-});
+  const [statsdata, setStatsData] = useState({
+    activeStudents: 0,
+    universities: 0,
+    resources: 0,
+    jobListings: 0,
+  });
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const response = await getHomePageData();
-      setStatsData({
-        activeStudents: response.data.totalUsers || 0,
-        universities: response.data.totalResults || 0,
-        resources: response.data.totalResources || 0,
-        jobListings: response.data.totalJobs || 0,
-      });
-    } catch (error) {
-      console.error("Error fetching home page data:", error);
-    }
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getHomePageData();
+        setStatsData({
+          activeStudents: response.data.totalUsers || 0,
+          universities: response.data.totalResults || 0,
+          resources: response.data.totalResources || 0,
+          jobListings: response.data.totalJobs || 0,
+        });
+      } catch (error) {
+        console.error("Error fetching home page data:", error);
+      }
+    };
 
-  fetchData();
-}, [setStatsData]);
+    fetchData();
+  }, [setStatsData]);
 
   const stats = [
     { number: statsdata.activeStudents, label: "Active Students" },
@@ -350,24 +350,30 @@ useEffect(() => {
 
           {/* Mobile CTA Buttons */}
           <div className="space-y-3">
-            <button
-              onClick={() => handleNavigation("/result")}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-xl font-bold shadow-xl active:scale-95 transition-transform"
-            >
-              Explore University Results
-            </button>
-            <button
-              onClick={() => handleNavigation("/community")}
-              className="w-full bg-white text-blue-600 py-4 rounded-xl font-bold border-2 border-blue-600 shadow-lg active:scale-95 transition-transform"
-            >
-              Join Community
-            </button>
-            <button
-              onClick={() => handleNavigation("/jobs")}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl font-bold shadow-xl active:scale-95 transition-transform"
-            >
-              Browse Jobs
-            </button>
+            <Link to="/result">
+              <button
+                onClick={() => handleNavigation("/result")}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-xl font-bold shadow-xl active:scale-95 transition-transform"
+              >
+                Explore University Results
+              </button>
+            </Link>
+            <Link to="/community">
+              <button
+                onClick={() => handleNavigation("/community")}
+                className="w-full bg-white text-blue-600 py-4 rounded-xl font-bold border-2 border-blue-600 shadow-lg active:scale-95 transition-transform"
+              >
+                Join Community
+              </button>
+            </Link>
+            <Link to="/jobs">
+              <button
+                onClick={() => handleNavigation("/jobs")}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl font-bold shadow-xl active:scale-95 transition-transform"
+              >
+                Browse Jobs
+              </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -425,19 +431,27 @@ useEffect(() => {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
             <div className="text-center transform hover:scale-110 transition-transform cursor-pointer">
-              <div className="text-4xl font-bold text-blue-600">{statsdata.universities}+</div>
+              <div className="text-4xl font-bold text-blue-600">
+                {statsdata.universities}+
+              </div>
               <div className="text-gray-600">Universities</div>
             </div>
             <div className="text-center transform hover:scale-110 transition-transform cursor-pointer">
-              <div className="text-4xl font-bold text-purple-600">{statsdata.activeStudents}+</div>
+              <div className="text-4xl font-bold text-purple-600">
+                {statsdata.activeStudents}+
+              </div>
               <div className="text-gray-600">Students</div>
             </div>
             <div className="text-center transform hover:scale-110 transition-transform cursor-pointer">
-              <div className="text-4xl font-bold text-green-600">{statsdata.resources}+</div>
+              <div className="text-4xl font-bold text-green-600">
+                {statsdata.resources}+
+              </div>
               <div className="text-gray-600">Resources</div>
             </div>
             <div className="text-center transform hover:scale-110 transition-transform cursor-pointer">
-              <div className="text-4xl font-bold text-orange-600">{statsdata.jobListings}+</div>
+              <div className="text-4xl font-bold text-orange-600">
+                {statsdata.jobListings}+
+              </div>
               <div className="text-gray-600">Job Listings</div>
             </div>
           </div>

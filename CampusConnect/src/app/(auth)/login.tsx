@@ -12,6 +12,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import { useEffect } from "react";
+import api from "@/src/services/api";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -37,10 +38,29 @@ const [request, response, promptAsync] = Google.useAuthRequest({
   const handleLinkedInLogin = () => {
     Alert.alert(
       "LinkedIn Login",
-      "LinkedIn OAuth should be handled via backend redirect"
+      "Currently, LinkedIn login is not implemented. Please use Google login or email/password to continue."
     );
   };
 
+  const login = async () => {
+    try {
+          if (!email || !password) {
+            Alert.alert("Error", "Please enter both email and password");
+            return;
+          }
+          const response = await api.post("/auth/login", { email, password });
+          if (response.status === 200) {
+            Alert.alert("Login Successful", `Welcome back, ${email}!`);
+            router.push("/(main)");
+          } else {
+            Alert.alert("Login Failed", "Invalid email or password");
+          }
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Login Failed", "An error occurred during login");
+    }
+
+  }
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -75,7 +95,7 @@ const [request, response, promptAsync] = Google.useAuthRequest({
           style={styles.loginButton}
           onPress={() => {
             Alert.alert("Login Successful", `Welcome back, ${email}!`);
-            router.push("/(main)");
+            login();
           }}
         >
           <Text style={styles.loginButtonText}>Login</Text>

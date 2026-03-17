@@ -11,6 +11,10 @@ export default function RootLayout() {
     }, 2000);
   }, []);
 
+  useEffect(() => {
+    
+  }, []);
+
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
