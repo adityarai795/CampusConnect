@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import CommunityHeader from "./communityHeader";
 import { useNavigate } from "react-router-dom";
 import { Image, Upload, FileText, Building2, X, Loader2 } from "lucide-react";
+import { addPost } from "../../api/community";
 
 const CreatePost = () => {
   const navigate = useNavigate();
@@ -89,8 +90,19 @@ const CreatePost = () => {
         return;
       }
 
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${token}`
+        }
+      };
+
+      const response = await addPost(data, config);
+
+      if (response.status === 201) {
       toast.success("Post created successfully!");
       navigate("/community");
+      }
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Failed to create post");

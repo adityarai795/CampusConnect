@@ -11,6 +11,11 @@ export const updatePost = (inputData, config) => API.patch(`/community/post/${in
 export const addPost = (data, config) =>
   API.post("/community/post/addPost", data, config);
 
+export const viewMyPosts = (config) => 
+  API.get("/community/post/myposts", config);
+
+export const toggleLike = (postId, config) => 
+  API.post(`/community/post/${postId}/like`, {}, config);
 
 export const addComment = (id, inputData, config) =>
   API.post(`/community/addcomment/${id}`, inputData, config);

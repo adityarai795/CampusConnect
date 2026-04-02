@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { viewOne } from "../../api/community.js";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  addComment,
+  showallComments,
+  deleteComment,
+  viewOne,
+  toggleLike as toggleLikeAPI,
+  deletePost as deletePostAPI
+} from "../../api/community.js";
 import { useParams, useNavigate } from "react-router-dom";
 import CommunityHeader from "./communityHeader.js";
 import {
@@ -14,11 +21,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { BASE_URL } from "../../api/api.js";
-import {
-  addComment,
-  showallComments,
-  deleteComment,
-} from "../../api/community.js";
 import { toast } from "react-toastify";
 import { useUser } from "../../context/UserContext";
 
@@ -35,20 +37,27 @@ function OpenPost() {
   const [commenting, setCommenting] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const response = await viewOne(id);
-      setPost(response.data.post);
-    } catch (error) {
-      console.error("Error fetching post:", error);
-      toast.error("Failed to load post");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchData = useCallback(async () => {
+  try {
+    setLoading(true);
+    const response = await viewOne(id);
+    const fetchedPost = response.data.post;
+    setPost(fetchedPost);
 
-  const fetchComments = async () => {
+    if (user && user._id && fetchedPost.like) {
+      const hasLiked = fetchedPost.like.some(likeId => 
+        String(typeof likeId === 'string' ? likeId : likeId._id) === String(user._id)
+      );
+      setLiked(hasLiked);
+    }
+  } catch (error) {
+    toast.error("Failed to load post");
+  } finally {
+    setLoading(false);
+  }
+  }, [id, user]);
+
+  const fetchComments = useCallback(async () => {
     try {
       const response = await showallComments(id);
       if (response.data.data) {
@@ -57,22 +66,23 @@ function OpenPost() {
     } catch (error) {
       console.error("Error fetching comments:", error);
     }
-  };
+  }, [id]);
 
-  const handleDelete = async (postId) => {
-    if (!window.confirm("Are you sure you want to delete this post?")) return;
+  const handleDelete = useCallback(async (postId) => {
+  if (!window.confirm("Are you sure you want to delete this post?")) return;
 
-    try {
-      await fetch(`http://localhost:3000/community/post/${postId}/delete`, {
-        method: "DELETE",
-      });
-      toast.success("Post deleted successfully!");
-      navigate("/community");
-    } catch (err) {
-      toast.error("Failed to delete post");
-      console.error(err.message);
-    }
-  };
+  try {
+    const token = localStorage.getItem("token");
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    
+    await deletePostAPI(postId, config);
+    
+    toast.success("Post deleted successfully!");
+    navigate("/community");
+  } catch (err) {
+    toast.error("Failed to delete post");
+  }
+  }, [navigate]);
 
   const handleShare = () => {
     const url = `${BASE_URL}openPost/${id}`;
@@ -89,11 +99,47 @@ function OpenPost() {
       });
   };
 
-  const toggleLike = () => {
-    setLiked(!liked);
+  const toggleLike =  useCallback(async () => {
+  const token = localStorage.getItem("token");
+  
+
+  if (!token || !user) {
+    toast.error("Please login to like posts");
+    return;
+  }
+
+  const config = {
+    headers: { Authorization: `Bearer ${token}` }
   };
 
-  const AddComment = async () => {
+  try {
+    setLiked(!liked);
+    const response = await toggleLikeAPI(id, config);
+    const data = await response.data;
+    if (data.success) {
+      setLiked(data.isLiked);
+      setPost(prev => {
+        const currentUserId = user?._id; 
+        if (!currentUserId) return prev;
+
+        const newLikes = data.isLiked 
+          ? [...(prev.like || []), currentUserId] 
+          : (prev.like || []).filter(item => {
+              const itemID = typeof item === 'string' ? item : item?._id;
+              return itemID !== currentUserId;
+            });
+        
+        return { ...prev, like: newLikes };
+      });
+    }
+  } catch (error) {
+    setLiked(!liked);
+    toast.error("Failed to update like");
+    console.error("Like error:", error);
+  }
+  }, [id, user, liked]);
+
+  const AddComment = useCallback(async () => {
     if (newComment.trim() === "") {
       toast.error("Comment cannot be empty");
       return;
@@ -102,7 +148,7 @@ function OpenPost() {
     try {
       setCommenting(true);
       const token = localStorage.getItem("token");
-      const res = await addComment(
+      await addComment(
         post._id,
         { comment: newComment },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -116,9 +162,9 @@ function OpenPost() {
     } finally {
       setCommenting(false);
     }
-  };
+  }, [newComment, post, fetchComments]);
 
-  const commentDeleted = async (commentId) => {
+  const commentDeleted = useCallback(async (commentId) => {
     if (!window.confirm("Are you sure you want to delete this comment?"))
       return;
 
@@ -133,12 +179,12 @@ function OpenPost() {
       toast.error(error.response?.data?.message || "Failed to delete comment");
       console.error("Failed to delete comment:", error);
     }
-  };
+  }, [fetchComments]);
 
   useEffect(() => {
     fetchData();
     fetchComments();
-  }, [id]);
+  }, [fetchData, fetchComments]);
 
   if (loading) {
     return (
@@ -179,7 +225,7 @@ function OpenPost() {
               <div className="flex items-center space-x-2 text-blue-600">
                 <UserIcon size={18} />
                 <span className="font-semibold">
-                  {post.owner?.username || "Anonymous"}
+                  {post.owner?.name || "Anonymous"}
                 </span>
               </div>
 
@@ -213,7 +259,7 @@ function OpenPost() {
             </p>
           </div>
 
-          {/* Action Buttons */}
+          {/* Ac  tion Buttons */}
           <div className="px-6 py-4 border-t border-gray-200">
             <div className="flex items-center space-x-6">
               <button
@@ -225,7 +271,7 @@ function OpenPost() {
                 }`}
               >
                 <Heart size={20} className={liked ? "fill-current" : ""} />
-                <span className="font-medium">{liked ? "Liked" : "Like"}</span>
+                <span className="font-medium">{post.like?.length || 0} {liked ? "Liked" : "Like"}</span>
               </button>
 
               <button className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-all">
@@ -319,7 +365,7 @@ function OpenPost() {
                             <UserIcon size={16} className="text-white" />
                           </div>
                           <span className="font-semibold text-gray-900">
-                            {c.user?.username || "Anonymous"}
+                            {c.user?.name || "Anonymous"}
                           </span>
                         </div>
                         <p className="text-gray-700 ml-10">{c.comment}</p>

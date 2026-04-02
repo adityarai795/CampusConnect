@@ -24,14 +24,15 @@ const PostsSchema = new mongoose.Schema({
   like: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Like",
+      // ref: "Like",
+      ref: "User",
     },
   ],
-});
+}, { timestamps: true });
 
 PostsSchema.post("findOneAndDelete", async (post) => {
-  if (post) {
-    await mongoose.model("Comment").deleteMany({ _id: { $in: post.comment } });
+  if (post && post.comment.length > 0) {
+    await mongoose.model("Comment").deleteMany({ _id: { $in: post.comments } });
   }
 });
 
