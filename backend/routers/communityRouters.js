@@ -10,6 +10,7 @@ const {
   AddPost,
   ViewAllPost,
   ViewOnePost,
+  ViewMyPosts,
   UpdatePost,
   DeletePost,
   likeReview,
@@ -38,11 +39,13 @@ router.post("/post/addPost", auth,uploads.single("image"), AddPost);
 
 router.get("/post/viewall", ViewAllPost);
 
+router.get("/post/myposts", auth, ViewMyPosts);
+
 router.get("/post/:id", ViewOnePost);
 
 router.patch("/post/:id/update", auth, uploads.single("image"), UpdatePost);
 
-router.delete("/post/:id/delete", DeletePost);
+router.delete("/post/:id/delete",auth, DeletePost);
 
 router.post("/addcomment/:postId", auth, addComment);
 
@@ -50,5 +53,5 @@ router.get("/showallPostComments/:id", showComments);
 
 router.delete("/deleteComment/:id",auth, deleteComment);
 
-router.get("/likes/:reviewId", likeReview);
+router.post("/post/:postId/like",auth, likeReview);
 module.exports = router;
