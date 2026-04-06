@@ -5,7 +5,7 @@ const User = require("../models/UsersSchema");
 const { oauth2Client } = require("../utils/googleAuth");
 const CampusAmbassador = require("../models/ambassadorSchema");
 
-const { welcomeEmail,ambassadorApprovalEmail } = require("../utils/email.js");
+const { welcomeEmail, ambassadorApprovalEmail } = require("../utils/email.js");
 // Helper function to generate unique ABC ID
 const generateAbcId = () => {
   return "ABC" + Date.now() + Math.floor(Math.random() * 1000);
@@ -223,16 +223,57 @@ module.exports.getuser = async (req, res) => {
 
 module.exports.showalluser = async (req, res) => {
   try {
-    const users = await User.find();
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const skip = (page - 1) * limit;
+    const users = await User.find()
+      .limit(limit)
+      .skip(skip)
+      .sort({ createdAt: -1 });
     return res.status(200).json({ users });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
+module.exports.createUser = async (req, res) => {
+  try {
+    const userData = req.body;
 
+    if (!userData.email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
 
-module.exports.getAmbassadors = async (req, res) => { 
+    const existingUser = await User.findOne({ email: userData.email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const newUser = await User.create({
+      name: userData.name,
+      email: userData.email,
+      mobileno: userData.mobileno,
+      role: userData.role || "user",
+      studentCategory: userData.studentCategory || "college",
+      authProviders: {
+        local: {
+          enabled: false,
+          password: null,
+        },
+        google: {
+          enabled: false,
+          googleId: null,
+        },
+      },
+    });
+
+    return res.status(201).json({ message: "User created", user: newUser });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+module.exports.getAmbassadors = async (req, res) => {
   try {
     const ambassadors = await CampusAmbassador.find();
     return res.status(200).json({ ambassadors });
@@ -241,18 +282,19 @@ module.exports.getAmbassadors = async (req, res) => {
   }
 };
 
-module.exports.createAmbassador = async (req, res) => { 
+module.exports.createAmbassador = async (req, res) => {
   try {
     const ambassadorData = req.body;
     const newAmbassador = await CampusAmbassador.create(ambassadorData);
-    return res.status(201).json({ message: "Ambassador created", ambassador: newAmbassador });
+    return res
+      .status(201)
+      .json({ message: "Ambassador created", ambassador: newAmbassador });
   } catch (error) {
     res.status(400).json({ error: error.message });
-  } 
+  }
 };
 
-
-module.exports.approveAmbassador = async (req, res) => { 
+module.exports.approveAmbassador = async (req, res) => {
   try {
     const { id } = req.params;
     const ambassador = await CampusAmbassador.findById(id);
@@ -260,16 +302,121 @@ module.exports.approveAmbassador = async (req, res) => {
       return res.status(404).json({ message: "Ambassador not found" });
     }
     const email = ambassador.email;
-    const user= await User.findOne({email:email});
-    if(!user){
-      return res.status(404).json({ message: "User not found for this ambassador email" });
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: "User not found for this ambassador email" });
     }
     user.role = "ambassador";
     await user.save();
     ambassador.status = "approved";
     await ambassador.save();
-    await ambassadorApprovalEmail(email, ambassador.name);  
+    await ambassadorApprovalEmail(email, ambassador.name);
     return res.status(200).json({ message: "Ambassador approved", ambassador });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+module.exports.updateAmbassador = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedAmbassador = await CampusAmbassador.findByIdAndUpdate(
+      id,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (!updatedAmbassador) {
+      return res.status(404).json({ message: "Ambassador not found" });
+    }
+
+    return res
+      .status(200)
+      .json({
+        message: "Ambassador updated successfully",
+        ambassador: updatedAmbassador,
+      });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+module.exports.rejectAmbassador = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ambassador = await CampusAmbassador.findById(id);
+
+    if (!ambassador) {
+      return res.status(404).json({ message: "Ambassador not found" });
+    }
+
+    ambassador.status = "rejected";
+    await ambassador.save();
+    return res.status(200).json({ message: "Ambassador rejected", ambassador });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+module.exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = { ...req.body };
+
+    if (updateData.authProviders?.local?.password) {
+      updateData.authProviders.local.password = await bcrypt.hash(
+        updateData.authProviders.local.password,
+        10,
+      );
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "User updated successfully", user: updatedUser });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+module.exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedUser = await User.findByIdAndDelete(id);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+module.exports.deleteAmbassador = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedAmbassador = await CampusAmbassador.findByIdAndDelete(id);
+
+    if (!deletedAmbassador) {
+      return res.status(404).json({ message: "Ambassador not found" });
+    }
+
+    return res.status(200).json({ message: "Ambassador deleted successfully" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

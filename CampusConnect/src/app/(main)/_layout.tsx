@@ -13,21 +13,21 @@ import Job from "./job";
 import Result from "./result";
 
 // Import stack screens
-import Resume from "./stack/resume";
-import MarketPlace from "./stack/marketplace";
-import ProductDetails from "./stack/productDetails";
-import MarketplaceUploadProduct from "./stack/marketplaceUploadProduct";
-import Quiz from "./stack/quiz";
-import Ambassador from "./stack/ambassador";
+import Resume from "./stack/resume/resume";
+import MarketPlace from "./stack/marketplace/marketplace";
+import ProductDetails from "./stack/marketplace/productDetails";
+import MarketplaceUploadProduct from "./stack/marketplace/marketplaceUploadProduct";
+import Quiz from "./stack/placementkit/quiz";
+import Ambassador from "./stack/ambassador/ambassador";
 import Roadmap from "./stack/roadmap";
-import Resources from "./stack/resources";
-import Help from "./stack/help";
-import About from "./stack/about";
-import FAQ from "./stack/faq";
-import Profile from "./stack/profile";
-import CommunityPostDetails from "./stack/communityPostDetails";
-import CommunityMyPosts from "./stack/communityMyPosts";
-import CommunityCreatePost from "./stack/communityCreatePost";
+import Resources from "./stack/placementkit/resources";
+import Help from "./stack/supports/help";
+import About from "./stack/supports/about";
+import FAQ from "./stack/supports/faq";
+import Profile from "./stack/profile/profile";
+import CommunityPostDetails from "./community/communityPostDetails";
+import CommunityMyPosts from "./community/communityMyPosts";
+import CommunityCreatePost from "./community/communityCreatePost";
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -128,7 +128,7 @@ export default function MainLayout() {
         name="marketplaceUploadProduct"
         component={MarketplaceUploadProduct}
       />
-      <Drawer.Screen name="quiz" component={Quiz} />
+      <Drawer.Screen name="PlacementKit" component={Quiz} />
       <Drawer.Screen name="ambassador" component={Ambassador} />
       <Drawer.Screen name="roadmap" component={Roadmap} />
       <Drawer.Screen name="resources" component={Resources} />

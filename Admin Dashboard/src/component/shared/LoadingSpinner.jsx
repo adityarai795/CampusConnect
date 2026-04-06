@@ -1,7 +1,12 @@
 import React from "react";
 import { Loader } from "lucide-react";
 
-export const LoadingSpinner = ({ size = "md", text = "Loading..." }) => {
+export const LoadingSpinner = ({
+  size = "md",
+  text = "Loading...",
+  message,
+}) => {
+  const label = message || text;
   const sizeClasses = {
     sm: "w-4 h-4",
     md: "w-8 h-8",
@@ -11,7 +16,7 @@ export const LoadingSpinner = ({ size = "md", text = "Loading..." }) => {
   return (
     <div className="flex flex-col items-center justify-center gap-2">
       <Loader className={`${sizeClasses[size]} animate-spin text-blue-600`} />
-      {text && <p className="text-gray-600 text-sm">{text}</p>}
+      {label && <p className="text-gray-600 text-sm">{label}</p>}
     </div>
   );
 };

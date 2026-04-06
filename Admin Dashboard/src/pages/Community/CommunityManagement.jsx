@@ -1,302 +1,300 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Search, Flag, Trash2 } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Eye, Plus, Search } from "lucide-react";
+import { toast } from "react-toastify";
 import adminAPI from "../../api/adminAPI";
 import DataTable from "../../component/shared/DataTable";
 import Pagination from "../../component/shared/Pagination";
-import Alert from "../../component/shared/Alert";
-import { PageLoader } from "../../component/shared/LoadingSpinner";
 import AdminModal from "../../component/shared/AdminModal";
-import {
-  fetchPostsRequest,
-  fetchPostsSuccess,
-  fetchPostsFailure,
-  setPostStatusFilter,
-  setPostPage,
-} from "../../redux/reducers/communityReducer";
+import { PageLoader } from "../../component/shared/LoadingSpinner";
 
-const CommunityManagement = () => {
-  const dispatch = useDispatch();
-  const { posts, loading, pagination, filters } = useSelector(
-    (state) => state.community,
-  );
+const initialFormState = {
+  title: "",
+  description: "",
+  collage: "",
+};
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertData, setAlertData] = useState({ type: "success", message: "" });
-  const [flagReason, setFlagReason] = useState("");
+function CommunityManagement() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
+  const [viewingPost, setViewingPost] = useState(null);
+  const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
     loadPosts();
-  }, [pagination.page, filters.status]);
+  }, [page]);
 
   const loadPosts = async () => {
-    dispatch(fetchPostsRequest());
     try {
-      const response = await adminAPI.community.getAll(
-        pagination.page,
-        pagination.limit,
-      );
-      dispatch(
-        fetchPostsSuccess({
-          posts: response.data.data || [],
-          pagination: {
-            page: pagination.page,
-            limit: pagination.limit,
-            total: response.data.total || 0,
-          },
-        }),
-      );
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || "Failed to load posts";
-      dispatch(fetchPostsFailure(errorMsg));
-      showErrorAlert(errorMsg);
+      setLoading(true);
+      const response = await adminAPI.community.getAll(page, limit);
+      const data = response.data?.posts || response.data?.data || [];
+      setPosts(Array.isArray(data) ? data : []);
+      setTotal(response.data?.total || data.length || 0);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to load posts");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const showErrorAlert = (message) => {
-    setAlertData({ type: "error", message });
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 5000);
+  const openCreateModal = () => {
+    setEditingPost(null);
+    setFormData(initialFormState);
+    setModalOpen(true);
   };
 
-  const showSuccessAlert = (message) => {
-    setAlertData({ type: "success", message });
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 5000);
+  const openEditModal = (post) => {
+    setEditingPost(post);
+    setFormData({
+      title: post.title || "",
+      description: post.description || "",
+      collage: post.collage || "",
+    });
+    setModalOpen(true);
   };
 
-  const handleViewPost = (post) => {
-    setSelectedPost(post);
-    setIsModalOpen(true);
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingPost(null);
+    setFormData(initialFormState);
   };
 
-  const handleApprove = async (post) => {
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     try {
-      await adminAPI.community.approvePending(post._id);
-      showSuccessAlert("Post approved");
+      if (editingPost) {
+        await adminAPI.community.update(editingPost._id, formData);
+        toast.success("Post updated successfully");
+      } else {
+        await adminAPI.community.create(formData);
+        toast.success("Post created successfully");
+      }
+
+      closeModal();
       loadPosts();
-    } catch (err) {
-      showErrorAlert("Failed to approve post");
-    }
-  };
-
-  const handleFlag = async (post) => {
-    if (!flagReason.trim()) {
-      showErrorAlert("Please provide a reason for flagging");
-      return;
-    }
-
-    try {
-      await adminAPI.community.flagPost(post._id, flagReason);
-      showSuccessAlert("Post flagged");
-      setIsModalOpen(false);
-      setFlagReason("");
-      loadPosts();
-    } catch (err) {
-      showErrorAlert("Failed to flag post");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to save post");
     }
   };
 
   const handleDelete = async (post) => {
-    if (!window.confirm("Are you sure you want to delete this post?")) return;
+    if (!window.confirm("Delete this post?")) return;
+
     try {
       await adminAPI.community.delete(post._id);
-      showSuccessAlert("Post deleted");
+      toast.success("Post deleted successfully");
       loadPosts();
-    } catch (err) {
-      showErrorAlert("Failed to delete post");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete post");
     }
   };
 
+  const filteredPosts = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return posts;
+    return posts.filter((post) => {
+      const searchableText = [post.title, post.description, post.collage]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return searchableText.includes(query);
+    });
+  }, [posts, search]);
+
   const columns = [
+    { key: "title", label: "Title" },
+    { key: "collage", label: "College" },
     {
-      key: "title",
-      label: "Title",
-      render: (title) => title || "Untitled",
+      key: "like",
+      label: "Likes",
+      render: (likes) => likes?.length || 0,
     },
     {
-      key: "author",
-      label: "Author",
-      render: (author) => author?.name || "Anonymous",
-    },
-    {
-      key: "status",
-      label: "Status",
-      render: (status) => (
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            status === "approved"
-              ? "bg-green-100 text-green-800"
-              : status === "flagged"
-                ? "bg-red-100 text-red-800"
-                : "bg-yellow-100 text-yellow-800"
-          }`}
-        >
-          {status}
-        </span>
-      ),
-    },
-    {
-      key: "content",
-      label: "Preview",
-      render: (content) => content?.substring(0, 50) + "..." || "-",
+      key: "comment",
+      label: "Comments",
+      render: (comments) => comments?.length || 0,
     },
     {
       key: "createdAt",
-      label: "Posted",
-      render: (date) => new Date(date).toLocaleDateString(),
+      label: "Created",
+      render: (date) => (date ? new Date(date).toLocaleDateString() : "-"),
     },
   ];
+
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   if (loading && posts.length === 0) {
     return <PageLoader />;
   }
 
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          Community Moderation
-        </h1>
-
-        {/* Alerts */}
-        {showAlert && (
-          <Alert
-            type={alertData.type}
-            message={alertData.message}
-            onClose={() => setShowAlert(false)}
-          />
-        )}
-
-        {/* Filters */}
-        <div className="mb-6">
-          <select
-            value={filters.status}
-            onChange={(e) => dispatch(setPostStatusFilter(e.target.value))}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    <div className="space-y-6">
+      <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-200">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Community Management
+            </h1>
+            <p className="text-slate-500">
+              Moderate posts and manage community content.
+            </p>
+          </div>
+          <button
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
-            <option value="all">All Posts</option>
-            <option value="pending">Pending Approval</option>
-            <option value="approved">Approved</option>
-            <option value="flagged">Flagged</option>
-          </select>
+            <Plus size={18} />
+            Add Post
+          </button>
         </div>
 
-        {/* Table */}
+        <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <Search size={18} className="text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search posts"
+            className="w-full bg-transparent outline-none"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-white shadow-sm border border-slate-200">
         <DataTable
           columns={columns}
-          data={posts}
+          data={filteredPosts}
           loading={loading}
-          onView={handleViewPost}
+          onView={(post) => setViewingPost(post)}
+          onEdit={openEditModal}
+          onDelete={handleDelete}
           noDataMessage="No posts found"
-        />
-
-        {/* Pagination */}
-        <Pagination
-          page={pagination.page}
-          totalPages={totalPages}
-          onPageChange={(page) => dispatch(setPostPage(page))}
-          loading={loading}
         />
       </div>
 
-      {/* Post Detail Modal */}
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        loading={loading}
+      />
+
       <AdminModal
-        isOpen={isModalOpen}
-        title="Post Details"
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedPost(null);
-          setFlagReason("");
-        }}
-        size="lg"
+        isOpen={modalOpen}
+        title={editingPost ? "Edit Post" : "Add Post"}
+        onClose={closeModal}
+        size="xl"
         footer={
-          selectedPost && (
-            <>
-              <button
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setSelectedPost(null);
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Close
-              </button>
-              {selectedPost.status === "pending" && (
-                <button
-                  onClick={() => handleApprove(selectedPost)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  Approve
-                </button>
-              )}
-              <button
-                onClick={() => handleDelete(selectedPost)}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
-              >
-                <Trash2 size={18} />
-                Delete
-              </button>
-            </>
-          )
+          <>
+            <button
+              type="button"
+              onClick={closeModal}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
+            >
+              {editingPost ? "Update" : "Create"}
+            </button>
+          </>
         }
       >
-        {selectedPost && (
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {selectedPost.title}
-              </h2>
-              <div className="flex gap-4 text-sm text-gray-600 mb-4">
-                <span>By {selectedPost.author?.name || "Anonymous"}</span>
-                <span>
-                  {new Date(selectedPost.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <Field
+            label="Title"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            required
+          />
+          <Field
+            label="College"
+            name="collage"
+            value={formData.collage}
+            onChange={handleChange}
+          />
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              Description
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows="5"
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+              placeholder="Post description"
+            />
+          </div>
+        </form>
+      </AdminModal>
 
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-gray-900">{selectedPost.content}</p>
-            </div>
-
-            <div>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  selectedPost.status === "approved"
-                    ? "bg-green-100 text-green-800"
-                    : selectedPost.status === "flagged"
-                      ? "bg-red-100 text-red-800"
-                      : "bg-yellow-100 text-yellow-800"
-                }`}
-              >
-                {selectedPost.status}
-              </span>
-            </div>
-
-            {selectedPost.status !== "approved" && (
-              <div className="border-t pt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Flag Reason (if flagging)
-                </label>
-                <textarea
-                  value={flagReason}
-                  onChange={(e) => setFlagReason(e.target.value)}
-                  rows="2"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Reason for flagging (optional)"
-                />
-              </div>
-            )}
+      <AdminModal
+        isOpen={Boolean(viewingPost)}
+        title={viewingPost?.title || "Post Details"}
+        onClose={() => setViewingPost(null)}
+        size="xl"
+        footer={
+          <button
+            type="button"
+            onClick={() => setViewingPost(null)}
+            className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
+          >
+            Close
+          </button>
+        }
+      >
+        {viewingPost && (
+          <div className="space-y-4 text-slate-700">
+            <p>
+              <span className="font-semibold">College:</span>{" "}
+              {viewingPost.collage || "-"}
+            </p>
+            <p>
+              <span className="font-semibold">Likes:</span>{" "}
+              {viewingPost.like?.length || 0}
+            </p>
+            <p>
+              <span className="font-semibold">Comments:</span>{" "}
+              {viewingPost.comment?.length || 0}
+            </p>
+            <p className="whitespace-pre-wrap">
+              <span className="font-semibold">Description:</span>{" "}
+              {viewingPost.description || "-"}
+            </p>
           </div>
         )}
       </AdminModal>
     </div>
   );
-};
+}
+
+const Field = ({ label, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <input
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    />
+  </div>
+);
 
 export default CommunityManagement;

@@ -42,9 +42,28 @@ module.exports.deleteCodingProblem = async (req, res) => {
   }
 };
 
+module.exports.updateCodingProblem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedProblem = await Problem.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
+    if (!updatedProblem) {
+      return res.status(404).json({ message: "Problem not found" });
+    }
 
-
+    res
+      .status(200)
+      .json({
+        message: "Coding Problem updated successfully",
+        problem: updatedProblem,
+      });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
 // Quiz Problem Controllers will be added here in future
 module.exports.getallQuizProblem = async (req, res) => {
@@ -61,33 +80,33 @@ module.exports.getallQuizProblem = async (req, res) => {
   }
 };
 
-
 // Additional Quiz Problem controllers can be added here
 module.exports.addQuizProblem = async (req, res) => {
   // Implementation for adding quiz problem
-}
+};
 
 module.exports.deleteQuizProblem = async (req, res) => {
   // Implementation for deleting quiz problem
-}
+};
 
 module.exports.updateQuizProblem = async (req, res) => {
   // Implementation for updating quiz problem
-}
-
+};
 
 module.exports.filterQuizProblem = async (req, res) => {
   // Implementation for filtering quiz problems
-}
-
+};
 
 module.exports.getMyProgress = async (req, res) => {
   const { id } = req.user._id;
   try {
     const totalProblems = await Problem.countDocuments({ userId: id });
-    const solvedProblems = await Problem.countDocuments({ userId: id, status: 'solved' });
+    const solvedProblems = await Problem.countDocuments({
+      userId: id,
+      status: "solved",
+    });
     res.status(200).json({ totalProblems, solvedProblems });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
-}
+};

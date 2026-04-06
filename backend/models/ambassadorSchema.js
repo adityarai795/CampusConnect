@@ -41,13 +41,6 @@ const ambassadorSchema = new mongoose.Schema(
     mobileNumber: {
       type: String,
       required: true,
-      validate: {
-        validator: function (v) {
-          return /^[6-9]\d{9}$/.test(v);
-        },
-        message: (props) =>
-          `${props.value} valid Indian mobile number nahi hai`,
-      },
     },
 
     academicDetails: academicSchema,
@@ -64,11 +57,6 @@ const ambassadorSchema = new mongoose.Schema(
       max: 168,
     },
 
-    motivation: {
-      type: String,
-      required: true,
-      minlength: 20,
-    },
 
     socialMediaHandles: {
       linkedin: {

@@ -1,431 +1,302 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchUsersRequest,
-  fetchUsersSuccess,
-  fetchUsersFailure,
-  updateUserRequest,
-  updateUserSuccess,
-  updateUserFailure,
-  deleteUserRequest,
-  deleteUserSuccess,
-  deleteUserFailure,
-  selectUser,
-  clearSelectedUser,
-  setPage,
-  setFilter,
-} from "../../redux/reducers/userReducer";
+import React, { useEffect, useMemo, useState } from "react";
+import { Search, Plus } from "lucide-react";
+import { toast } from "react-toastify";
 import adminAPI from "../../api/adminAPI";
 import DataTable from "../../component/shared/DataTable";
-import AdminModal from "../../component/shared/AdminModal";
 import Pagination from "../../component/shared/Pagination";
-import Alert from "../../component/shared/Alert";
-import LoadingSpinner from "../../component/shared/LoadingSpinner";
-import { Search, Edit2, Trash2, Users } from "lucide-react";
-import { toast } from "react-toastify";
+import AdminModal from "../../component/shared/AdminModal";
+import { PageLoader } from "../../component/shared/LoadingSpinner";
+import axios from "axios";
 
-const UserManagement = () => {
-  const dispatch = useDispatch();
-  const {
-    items: users,
-    loading,
-    error,
-    pagination,
-    filters,
-    selectedItem,
-  } = useSelector((state) => state.users);
+const initialFormState = {
+  name: "",
+  email: "",
+  mobileno: "",
+  role: "user",
+  studentCategory: "college",
+};
 
-  const [showModal, setShowModal] = useState(false);
+export default function UserManagement() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    role: "user",
-    branch: "",
-    semester: "",
-  });
+  const [formData, setFormData] = useState(initialFormState);
 
-  // Fetch users
   useEffect(() => {
-    fetchUsers();
-  }, [pagination.page, filters.search, filters.role]);
+    loadUsers();
+  }, [page]);
 
-  const fetchUsers = async () => {
+  const loadUsers = async () => {
     try {
-      dispatch(fetchUsersRequest());
-      const response = await adminAPI.users.getAll(
-        pagination.page,
-        pagination.limit,
-        filters.role,
-      );
-      dispatch(
-        fetchUsersSuccess({
-          data: response.data.users || response.data,
-          total: response.data.total || response.data.length,
-        }),
-      );
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message;
-      dispatch(fetchUsersFailure(errorMsg));
-      toast.error("Failed to fetch users");
+      setLoading(true);
+      const response = await adminAPI.users.getAll(page, limit);
+      // const response = await axios.get(
+      //   "http://localhost:3000/auth/showalluser",
+      //   {
+      //     params: { page, limit },
+      //   },
+      // );
+      const data = response.data?.users || response.data?.data || [];
+      setUsers(Array.isArray(data) ? data : []);
+      setTotal(response.data?.total || data.length || 0);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to load users");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Open modal for edit
-  const handleEdit = (user) => {
+  const openCreateModal = () => {
+    setEditingUser(null);
+    setFormData(initialFormState);
+    setModalOpen(true);
+  };
+
+  const openEditModal = (user) => {
     setEditingUser(user);
     setFormData({
       name: user.name || "",
       email: user.email || "",
+      mobileno: user.mobileno || "",
       role: user.role || "user",
-      branch: user.branch || "",
-      semester: user.semester || "",
+      studentCategory: user.studentCategory || "college",
     });
-    setShowModal(true);
+    setModalOpen(true);
   };
 
-  // Open modal for delete confirmation
-  const handleDeleteClick = (user) => {
-    setUserToDelete(user);
-    setShowDeleteModal(true);
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingUser(null);
+    setFormData(initialFormState);
   };
 
-  // Confirm delete
-  const handleConfirmDelete = async () => {
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     try {
-      dispatch(deleteUserRequest());
-      await adminAPI.users.delete(userToDelete._id);
-      dispatch(deleteUserSuccess(userToDelete._id));
+      if (editingUser) {
+        await adminAPI.users.update(editingUser._id, formData);
+        toast.success("User updated successfully");
+      } else {
+        await adminAPI.users.create(formData);
+        toast.success("User created successfully");
+      }
+
+      closeModal();
+      loadUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to save user");
+    }
+  };
+
+  const handleDelete = async (user) => {
+    if (!window.confirm("Delete this user?")) return;
+
+    try {
+      await adminAPI.users.delete(user._id);
       toast.success("User deleted successfully");
-      setShowDeleteModal(false);
-      setUserToDelete(null);
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message;
-      dispatch(deleteUserFailure(errorMsg));
-      toast.error("Failed to delete user");
+      loadUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete user");
     }
   };
 
-  // Handle update
-  const handleUpdate = async () => {
-    if (!formData.name || !formData.email) {
-      toast.error("Name and email are required");
-      return;
-    }
-
-    try {
-      dispatch(updateUserRequest());
-      const response = await adminAPI.users.update(editingUser._id, formData);
-      dispatch(updateUserSuccess(response.data));
-      toast.success("User updated successfully");
-      setShowModal(false);
-      setEditingUser(null);
-      setFormData({
-        name: "",
-        email: "",
-        role: "user",
-        branch: "",
-        semester: "",
-      });
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message;
-      dispatch(updateUserFailure(errorMsg));
-      toast.error(errorMsg);
-    }
-  };
-
-  // Handle input change
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const filteredUsers = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return users;
+    return users.filter((user) => {
+      const searchableText = [
+        user.name,
+        user.email,
+        user.mobileno,
+        user.role,
+        user.studentCategory,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return searchableText.includes(query);
+    });
+  }, [users, search]);
 
   const columns = [
+    { key: "name", label: "Name" },
+    { key: "email", label: "Email" },
+    { key: "mobileno", label: "Mobile" },
+    { key: "role", label: "Role" },
+    { key: "studentCategory", label: "Category" },
     {
-      header: "Name",
-      render: (user) => (
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-bold">
-            {user.name?.charAt(0)?.toUpperCase()}
-          </div>
-          <span className="font-medium text-gray-800">{user.name}</span>
-        </div>
-      ),
+      key: "authProviders",
+      label: "Login",
+      render: (authProviders) =>
+        authProviders?.local?.enabled
+          ? "Local"
+          : authProviders?.google?.enabled
+            ? "Google"
+            : "-",
     },
     {
-      header: "Email",
-      render: (user) => (
-        <span className="text-gray-600 text-sm">{user.email}</span>
-      ),
-    },
-    {
-      header: "Role",
-      render: (user) => (
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            user.role === "admin"
-              ? "bg-red-100 text-red-800"
-              : user.role === "teacher"
-                ? "bg-purple-100 text-purple-800"
-                : "bg-blue-100 text-blue-800"
-          }`}
-        >
-          {user.role}
-        </span>
-      ),
-    },
-    {
-      header: "Branch",
-      render: (user) => (
-        <span className="text-gray-600 text-sm">{user.branch || "N/A"}</span>
-      ),
-    },
-    {
-      header: "Semester",
-      render: (user) => (
-        <span className="text-gray-600 text-sm">{user.semester || "N/A"}</span>
-      ),
+      key: "createdAt",
+      label: "Created",
+      render: (date) => (date ? new Date(date).toLocaleDateString() : "-"),
     },
   ];
 
-  const actions = [
-    {
-      label: "Edit",
-      icon: Edit2,
-      onClick: handleEdit,
-      color: "text-blue-600",
-    },
-    {
-      label: "Delete",
-      icon: Trash2,
-      onClick: handleDeleteClick,
-      color: "text-red-600",
-    },
-  ];
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  if (loading && users.length === 0) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
-            <Users className="text-white" size={24} />
-          </div>
+      <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-200">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">
+            <h1 className="text-3xl font-bold text-slate-900">
               User Management
             </h1>
-            <p className="text-gray-600">Manage all registered users</p>
+            <p className="text-slate-500">Edit and remove platform users.</p>
           </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search users..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={filters.search}
-              onChange={(e) => dispatch(setFilter({ search: e.target.value }))}
-            />
-          </div>
-          <select
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={filters.role}
-            onChange={(e) => dispatch(setFilter({ role: e.target.value }))}
+          <button
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
-            <option value="all">All Roles</option>
-            <option value="user">User</option>
-            <option value="teacher">Teacher</option>
-            <option value="admin">Admin</option>
-          </select>
+            <Plus size={18} />
+            Add User
+          </button>
+        </div>
+
+        <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <Search size={18} className="text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search users"
+            className="w-full bg-transparent outline-none"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
         </div>
       </div>
 
-      {/* Alert */}
-      {error && <Alert type="error" message={error} />}
+      <div className="rounded-2xl bg-white shadow-sm border border-slate-200">
+        <DataTable
+          columns={columns}
+          data={filteredUsers}
+          loading={loading}
+          onEdit={openEditModal}
+          onDelete={handleDelete}
+          noDataMessage="No users found"
+        />
+      </div>
 
-      {/* Loading */}
-      {loading ? (
-        <LoadingSpinner message="Loading users..." />
-      ) : (
-        <>
-          {/* Data Table */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {users.length > 0 ? (
-              <DataTable
-                columns={columns}
-                data={users}
-                actions={actions}
-                onRowClick={(user) => dispatch(selectUser(user))}
-              />
-            ) : (
-              <div className="p-12 text-center">
-                <Users className="mx-auto text-gray-300 mb-4" size={48} />
-                <p className="text-gray-500">No users found</p>
-              </div>
-            )}
-          </div>
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        loading={loading}
+      />
 
-          {/* Pagination */}
-          <Pagination
-            current={pagination.page}
-            total={Math.ceil(pagination.total / pagination.limit)}
-            onPageChange={(page) => dispatch(setPage(page))}
-          />
-        </>
-      )}
-
-      {/* Edit Modal */}
       <AdminModal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setEditingUser(null);
-          setFormData({
-            name: "",
-            email: "",
-            role: "user",
-            branch: "",
-            semester: "",
-          });
-        }}
-        title="Edit User"
-        size="md"
+        isOpen={modalOpen}
+        title={editingUser ? "Edit User" : "Add User"}
+        onClose={closeModal}
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={closeModal}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
+            >
+              {editingUser ? "Update" : "Create"}
+            </button>
+          </>
+        }
       >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name
-            </label>
-            <input
-              type="text"
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field
+              label="Name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
+            <Field
+              label="Email"
               name="email"
+              type="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role
-            </label>
-            <select
+            <Field
+              label="Mobile"
+              name="mobileno"
+              value={formData.mobileno}
+              onChange={handleChange}
+            />
+            <Field
+              label="Role"
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="user">User</option>
-              <option value="teacher">Teacher</option>
-              <option value="admin">Admin</option>
-            </select>
+            />
+            <SelectField
+              label="Category"
+              name="studentCategory"
+              value={formData.studentCategory}
+              onChange={handleChange}
+              options={["school", "college"]}
+            />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Branch
-              </label>
-              <input
-                type="text"
-                name="branch"
-                value={formData.branch}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Semester
-              </label>
-              <input
-                type="text"
-                name="semester"
-                value={formData.semester}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-          <div className="flex gap-3 pt-4">
-            <button
-              onClick={handleUpdate}
-              disabled={loading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-            >
-              {loading ? "Updating..." : "Update User"}
-            </button>
-            <button
-              onClick={() => {
-                setShowModal(false);
-                setEditingUser(null);
-              }}
-              className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </AdminModal>
-
-      {/* Delete Confirmation Modal */}
-      <AdminModal
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setUserToDelete(null);
-        }}
-        title="Confirm Delete"
-        size="sm"
-      >
-        <div className="space-y-4">
-          <p className="text-gray-700">
-            Are you sure you want to delete{" "}
-            <strong>{userToDelete?.name}</strong>? This action cannot be undone.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={handleConfirmDelete}
-              disabled={loading}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-            >
-              {loading ? "Deleting..." : "Delete"}
-            </button>
-            <button
-              onClick={() => {
-                setShowDeleteModal(false);
-                setUserToDelete(null);
-              }}
-              className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+        </form>
       </AdminModal>
     </div>
   );
-};
+}
 
-export default UserManagement;
+const Field = ({ label, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <input
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    />
+  </div>
+);
+
+const SelectField = ({ label, options, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <select
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    >
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
+  </div>
+);

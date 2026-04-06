@@ -1,388 +1,332 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useEffect, useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
+import { toast } from "react-toastify";
 import adminAPI from "../../api/adminAPI";
 import DataTable from "../../component/shared/DataTable";
 import Pagination from "../../component/shared/Pagination";
-import Alert from "../../component/shared/Alert";
-import { PageLoader } from "../../component/shared/LoadingSpinner";
 import AdminModal from "../../component/shared/AdminModal";
-import {
-  fetchProblemsRequest,
-  fetchProblemsSuccess,
-  fetchProblemsFailure,
-  setProblemSearchFilter,
-  setProblemDifficultyFilter,
-  setProblemPage,
-} from "../../redux/reducers/problemReducer";
+import { PageLoader } from "../../component/shared/LoadingSpinner";
+
+const initialFormState = {
+  problem: "",
+  topic: "",
+  link: "",
+  level: "easy",
+  status: true,
+  tags: "",
+};
 
 const ProblemManagement = () => {
-  const dispatch = useDispatch();
-  const { items, loading, pagination, filters } = useSelector(
-    (state) => state.problems,
-  );
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertData, setAlertData] = useState({ type: "success", message: "" });
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    difficulty: "medium",
-    category: "",
-    examples: "",
-    constraints: "",
-    solution: "",
-  });
+  const [problems, setProblems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingProblem, setEditingProblem] = useState(null);
+  const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
     loadProblems();
-  }, [pagination.page, filters.search, filters.difficulty]);
+  }, [page]);
 
   const loadProblems = async () => {
-    dispatch(fetchProblemsRequest());
     try {
-      const response = await adminAPI.problems.getAll(
-        pagination.page,
-        pagination.limit,
-        filters.difficulty,
-      );
-      dispatch(
-        fetchProblemsSuccess({
-          problems: response.data.data || [],
-          pagination: {
-            page: pagination.page,
-            limit: pagination.limit,
-            total: response.data.total || 0,
-          },
-        }),
-      );
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || "Failed to load problems";
-      dispatch(fetchProblemsFailure(errorMsg));
-      showErrorAlert(errorMsg);
+      setLoading(true);
+      const response = await adminAPI.problems.getAll(page, limit);
+      const data = response.data?.problem || response.data?.data || [];
+      setProblems(Array.isArray(data) ? data : []);
+      setTotal(response.data?.total || data.length || 0);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to load problems");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const showErrorAlert = (message) => {
-    setAlertData({ type: "error", message });
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 5000);
+  const openCreateModal = () => {
+    setEditingProblem(null);
+    setFormData(initialFormState);
+    setModalOpen(true);
   };
 
-  const showSuccessAlert = (message) => {
-    setAlertData({ type: "success", message });
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 5000);
+  const openEditModal = (problem) => {
+    setEditingProblem(problem);
+    setFormData({
+      problem: problem.problem || "",
+      topic: problem.topic || "",
+      link: problem.link || "",
+      level: problem.level || "easy",
+      status: Boolean(problem.status),
+      tags: Array.isArray(problem.tags) ? problem.tags.join(", ") : "",
+    });
+    setModalOpen(true);
   };
 
-  const handleOpenModal = (problem = null) => {
-    if (problem) {
-      setEditingItem(problem);
-      setFormData({
-        title: problem.title || "",
-        description: problem.description || "",
-        difficulty: problem.difficulty || "medium",
-        category: problem.category || "",
-        examples: problem.examples || "",
-        constraints: problem.constraints || "",
-        solution: problem.solution || "",
-      });
-    } else {
-      setEditingItem(null);
-      setFormData({
-        title: "",
-        description: "",
-        difficulty: "medium",
-        category: "",
-        examples: "",
-        constraints: "",
-        solution: "",
-      });
-    }
-    setIsModalOpen(true);
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingProblem(null);
+    setFormData(initialFormState);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingItem(null);
+  const handleChange = (event) => {
+    const { name, value, type, checked } = event.target;
+    setFormData((previous) => ({
+      ...previous,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    const payload = {
+      ...formData,
+      tags: formData.tags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+    };
+
     try {
-      if (editingItem) {
-        await adminAPI.problems.update(editingItem._id, formData);
-        showSuccessAlert("Problem updated successfully");
+      if (editingProblem) {
+        await adminAPI.problems.update(editingProblem._id, payload);
+        toast.success("Problem updated successfully");
       } else {
-        await adminAPI.problems.create(formData);
-        showSuccessAlert("Problem created successfully");
+        await adminAPI.problems.create(payload);
+        toast.success("Problem created successfully");
       }
-      handleCloseModal();
+
+      closeModal();
       loadProblems();
-    } catch (err) {
-      showErrorAlert(err.response?.data?.message || "Failed to save problem");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to save problem");
     }
   };
 
   const handleDelete = async (problem) => {
-    if (!window.confirm("Are you sure you want to delete this problem?"))
-      return;
+    if (!window.confirm("Delete this problem?")) return;
+
     try {
       await adminAPI.problems.delete(problem._id);
-      showSuccessAlert("Problem deleted successfully");
+      toast.success("Problem deleted successfully");
       loadProblems();
-    } catch (err) {
-      showErrorAlert(err.response?.data?.message || "Failed to delete problem");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete problem");
     }
   };
 
+  const filteredProblems = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return problems;
+    return problems.filter((problem) => {
+      const searchableText = [
+        problem.problem,
+        problem.topic,
+        problem.level,
+        problem.link,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return searchableText.includes(query);
+    });
+  }, [problems, search]);
+
   const columns = [
-    { key: "title", label: "Title" },
-    { key: "category", label: "Category" },
+    { key: "problem", label: "Problem" },
+    { key: "topic", label: "Topic" },
+    { key: "level", label: "Level" },
     {
-      key: "difficulty",
-      label: "Difficulty",
-      render: (diff) => (
+      key: "status",
+      label: "Status",
+      render: (status) => (
         <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            diff === "easy"
-              ? "bg-green-100 text-green-800"
-              : diff === "medium"
-                ? "bg-yellow-100 text-yellow-800"
-                : "bg-red-100 text-red-800"
-          }`}
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${status ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}`}
         >
-          {diff}
+          {status ? "Active" : "Inactive"}
         </span>
       ),
     },
     {
-      key: "description",
-      label: "Description",
-      render: (desc) => desc?.substring(0, 40) + "..." || "-",
-    },
-    {
-      key: "createdAt",
-      label: "Created",
-      render: (date) => new Date(date).toLocaleDateString(),
+      key: "link",
+      label: "Link",
+      render: (link) => (
+        <a
+          href={link}
+          target="_blank"
+          rel="noreferrer"
+          className="text-indigo-600 underline"
+        >
+          Open
+        </a>
+      ),
     },
   ];
 
-  if (loading && items.length === 0) {
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  if (loading && problems.length === 0) {
     return <PageLoader />;
   }
 
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Coding Problem Management
-          </h1>
+    <div className="space-y-6">
+      <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-200">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Coding Problem Management
+            </h1>
+            <p className="text-slate-500">
+              Create and manage coding challenge records.
+            </p>
+          </div>
           <button
-            onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
-            <Plus size={20} />
+            <Plus size={18} />
             Add Problem
           </button>
         </div>
 
-        {/* Alerts */}
-        {showAlert && (
-          <Alert
-            type={alertData.type}
-            message={alertData.message}
-            onClose={() => setShowAlert(false)}
+        <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <Search size={18} className="text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search problems"
+            className="w-full bg-transparent outline-none"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
           />
-        )}
-
-        {/* Filters */}
-        <div className="mb-6 flex gap-2 flex-wrap">
-          <div className="flex-1 min-w-[250px] relative">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search problems..."
-              value={filters.search}
-              onChange={(e) => dispatch(setProblemSearchFilter(e.target.value))}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <select
-            value={filters.difficulty}
-            onChange={(e) =>
-              dispatch(setProblemDifficultyFilter(e.target.value))
-            }
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All Difficulty</option>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-          </select>
         </div>
+      </div>
 
-        {/* Table */}
+      <div className="rounded-2xl bg-white shadow-sm border border-slate-200">
         <DataTable
           columns={columns}
-          data={items}
+          data={filteredProblems}
           loading={loading}
-          onEdit={handleOpenModal}
+          onEdit={openEditModal}
           onDelete={handleDelete}
-          noDataMessage="No problems found"
-        />
-
-        {/* Pagination */}
-        <Pagination
-          page={pagination.page}
-          totalPages={totalPages}
-          onPageChange={(page) => dispatch(setProblemPage(page))}
-          loading={loading}
+          noDataMessage="No coding problems found"
         />
       </div>
 
-      {/* Modal */}
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        loading={loading}
+      />
+
       <AdminModal
-        isOpen={isModalOpen}
-        title={editingItem ? "Edit Problem" : "Add New Problem"}
-        onClose={handleCloseModal}
+        isOpen={modalOpen}
+        title={editingProblem ? "Edit Problem" : "Add Problem"}
+        onClose={closeModal}
         size="2xl"
         footer={
           <>
             <button
-              onClick={handleCloseModal}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              type="button"
+              onClick={closeModal}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleSubmit}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
             >
-              {editingItem ? "Update" : "Add"} Problem
+              {editingProblem ? "Update" : "Create"}
             </button>
           </>
         }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title *
-            </label>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field
+              label="Problem"
+              name="problem"
+              value={formData.problem}
+              onChange={handleChange}
+              required
+            />
+            <Field
+              label="Topic"
+              name="topic"
+              value={formData.topic}
+              onChange={handleChange}
+              required
+            />
+            <Field
+              label="Link"
+              name="link"
+              value={formData.link}
+              onChange={handleChange}
+              required
+            />
+            <SelectField
+              label="Level"
+              name="level"
+              value={formData.level}
+              onChange={handleChange}
+              options={["easy", "medium", "hard"]}
+            />
+          </div>
+          <Field
+            label="Tags"
+            name="tags"
+            value={formData.tags}
+            onChange={handleChange}
+            placeholder="comma separated tags"
+          />
+          <label className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700">
             <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Problem title"
+              type="checkbox"
+              name="status"
+              checked={formData.status}
+              onChange={handleChange}
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
-              </label>
-              <input
-                type="text"
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., Arrays, Strings"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Difficulty
-              </label>
-              <select
-                name="difficulty"
-                value={formData.difficulty}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description *
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              required
-              rows="3"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Problem description"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Examples
-            </label>
-            <textarea
-              name="examples"
-              value={formData.examples}
-              onChange={handleInputChange}
-              rows="3"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Examples (e.g., Input/Output)"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Constraints
-            </label>
-            <textarea
-              name="constraints"
-              value={formData.constraints}
-              onChange={handleInputChange}
-              rows="2"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Problem constraints"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Solution (Optional)
-            </label>
-            <textarea
-              name="solution"
-              value={formData.solution}
-              onChange={handleInputChange}
-              rows="3"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Solution or hints"
-            />
-          </div>
+            Active
+          </label>
         </form>
       </AdminModal>
     </div>
   );
 };
+
+const Field = ({ label, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <input
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    />
+  </div>
+);
+
+const SelectField = ({ label, options, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <select
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    >
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
+  </div>
+);
 
 export default ProblemManagement;

@@ -1,50 +1,247 @@
-module.exports.addCodingProblem = async (req, res) => { };
+const CodingProblem = require("../models/CodingProblemSchema.js");
+const Quiz = require("../models/quizQuestionSchema.js");
+const Project = require("../models/ProjectIdeaSchema.js");
 
-module.exports.getCodingProblem=async (req, res) => { };
+module.exports.addCodingProblem = async (req, res) => {
+  try {
+    const createdProblem = await CodingProblem.create(req.body);
+    res
+      .status(201)
+      .json({
+        message: "Coding problem created successfully",
+        problem: createdProblem,
+      });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-module.exports.updateCodingProblem= async (req, res) => { };
+module.exports.getCodingProblem = async (req, res) => {
+  try {
+    const problem = await CodingProblem.find().sort({ _id: -1 });
+    res.status(200).json({ problem });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+module.exports.updateCodingProblem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedProblem = await CodingProblem.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedProblem) {
+      return res.status(404).json({ message: "Coding problem not found" });
+    }
+
+    res
+      .status(200)
+      .json({
+        message: "Coding problem updated successfully",
+        problem: updatedProblem,
+      });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+module.exports.deleteCodingProblem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedProblem = await CodingProblem.findByIdAndDelete(id);
+
+    if (!deletedProblem) {
+      return res.status(404).json({ message: "Coding problem not found" });
+    }
+
+    res.status(200).json({ message: "Coding problem deleted successfully" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
 // Quiz Question Controllers
-module.exports.addQuizQuestion = async (req, res) => { };
+module.exports.addQuizQuestion = async (req, res) => {
+  try {
+    const createdQuiz = await Quiz.create(req.body);
+    res
+      .status(201)
+      .json({
+        message: "Quiz question created successfully",
+        quiz: createdQuiz,
+      });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-module.exports.getQuizQuestions = async (req, res) => { };
+module.exports.getQuizQuestions = async (req, res) => {
+  try {
+    const quizQuestions = await Quiz.find().sort({ _id: -1 });
+    res.status(200).json({ quizQuestions });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-module.exports.updateQuizQuestion = async (req, res) => { };
+module.exports.updateQuizQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedQuiz = await Quiz.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
+    if (!updatedQuiz) {
+      return res.status(404).json({ message: "Quiz question not found" });
+    }
+
+    res
+      .status(200)
+      .json({
+        message: "Quiz question updated successfully",
+        quiz: updatedQuiz,
+      });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+module.exports.deleteQuizQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedQuiz = await Quiz.findByIdAndDelete(id);
+
+    if (!deletedQuiz) {
+      return res.status(404).json({ message: "Quiz question not found" });
+    }
+
+    res.status(200).json({ message: "Quiz question deleted successfully" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
 // Project Idea Controllers
+module.exports.addProjectIdea = async (req, res) => {
+  try {
+    const createdProject = await Project.create(req.body);
+    res
+      .status(201)
+      .json({
+        message: "Project idea created successfully",
+        project: createdProject,
+      });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-module.exports.addProjectIdea = async (req, res) => { };
+module.exports.getProjectIdeas = async (req, res) => {
+  try {
+    const projects = await Project.find().sort({ _id: -1 });
+    res.status(200).json({ projects });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-module.exports.getProjectIdeas = async (req, res) => { };
+module.exports.updateProjectIdea = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedProject = await Project.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
+    if (!updatedProject) {
+      return res.status(404).json({ message: "Project idea not found" });
+    }
 
-module.exports.searchResourcesOnPractice = async (req, res) => {};
+    res
+      .status(200)
+      .json({
+        message: "Project idea updated successfully",
+        project: updatedProject,
+      });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-module.exports.filterPracticeResources = async (req, res) => { };
+module.exports.deleteProjectIdea = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedProject = await Project.findByIdAndDelete(id);
 
+    if (!deletedProject) {
+      return res.status(404).json({ message: "Project idea not found" });
+    }
 
+    res.status(200).json({ message: "Project idea deleted successfully" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
+module.exports.searchResourcesOnPractice = async (req, res) => {
+  try {
+    res.status(200).json({ message: "Search not implemented yet" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
+module.exports.filterPracticeResources = async (req, res) => {
+  try {
+    res.status(200).json({ message: "Filter not implemented yet" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-// RoadMap Controllers
-module.exports.addRoadMap= async (req, res) => { };
+module.exports.addRoadMap = async (req, res) => {
+  try {
+    res.status(200).json({ message: "Roadmap endpoint is not managed here" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-module.exports.getRoadMaps = async (req, res) => { };
+module.exports.getRoadMaps = async (req, res) => {
+  try {
+    res.status(200).json({ roadmaps: [] });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-module.exports.getRoadMapById = async (req, res) => { };
+module.exports.getRoadMapById = async (req, res) => {
+  try {
+    res.status(200).json({ message: "Roadmap endpoint is not managed here" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-module.exports.searchRoadMaps = async (req, res) => { };
-
-
+module.exports.searchRoadMaps = async (req, res) => {
+  try {
+    res.status(200).json({ message: "Roadmap search is not implemented here" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
 module.exports.getMyProgress = async (req, res) => {
-  const { id } = req.user._id;
   try {
-    const totalProblems = await Problem.countDocuments({ userId: id });
-    const solvedProblems = await Problem.countDocuments({
-      userId: id,
-      status: "solved",
+    const userId = req.user._id;
+    const totalProblems = await CodingProblem.countDocuments({});
+    const solvedProblems = await CodingProblem.countDocuments({
+      userId,
+      status: true,
     });
     res.status(200).json({ totalProblems, solvedProblems });
   } catch (error) {
@@ -52,5 +249,14 @@ module.exports.getMyProgress = async (req, res) => {
   }
 };
 
-module.exports.updateMyProgress = async (req, res) => { };
-
+module.exports.updateMyProgress = async (req, res) => {
+  try {
+    res
+      .status(200)
+      .json({
+        message: "Progress updates are not stored in this admin module",
+      });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

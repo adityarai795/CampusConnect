@@ -1,757 +1,905 @@
-import React, { useState } from "react";
-import { 
-  User, Mail, Phone, MapPin, Linkedin, Github, Globe, 
-  Plus, Minus, Download, RotateCcw, Layout, Palette,
-  Briefcase, GraduationCap, Award, Code, FileText
+import React, { useState, useRef } from "react";
+import {
+  Plus,
+  Download,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  Briefcase,
+  GraduationCap,
+  User,
+  Mail,
+  Phone,
+  FileText,
+  Code,
+  Award,
+  FolderGit2,
+  Info,
 } from "lucide-react";
+import html2pdf from "html2pdf.js";
 
-export default function ResumeBuilder() {
-  const [activeTemplate, setActiveTemplate] = useState("modern");
-  const [colorScheme, setColorScheme] = useState("blue");
-  
-  const [data, setData] = useState({
-    // Personal Info
-    name: "",
-    email: "",
-    phone: "",
-    location: "",
-    linkedin: "",
-    github: "",
-    portfolio: "",
-    
-    // Career
-    careerObjective: "",
-    
-    // Arrays
-    skills: [""],
-    education: [{ degree: "", institution: "", year: "", gpa: "" }],
-    experience: [{ title: "", company: "", duration: "", description: "" }],
-    projects: [{ title: "", tech: "", description: "", link: "" }],
-    certificates: [{ title: "", issuer: "", date: "", link: "" }],
+function ResumeBuilder() {
+  // Personal Info
+  const [personalInfo, setPersonalInfo] = useState({
+    name: "Alex Johnson",
+    role: "Senior Frontend Developer",
+    email: "alex.johnson@example.com",
+    phone: "+1 (555) 123-4567",
+    summary:
+      "Results-driven Frontend Developer with 6+ years of experience building responsive web applications. Expertise in React, TypeScript, and modern CSS frameworks.",
   });
 
-  const colorSchemes = {
-    blue: { primary: "bg-blue-600", light: "bg-blue-50", text: "text-blue-600", border: "border-blue-600" },
-    purple: { primary: "bg-purple-600", light: "bg-purple-50", text: "text-purple-600", border: "border-purple-600" },
-    green: { primary: "bg-green-600", light: "bg-green-50", text: "text-green-600", border: "border-green-600" },
-    orange: { primary: "bg-orange-600", light: "bg-orange-50", text: "text-orange-600", border: "border-orange-600" },
-    gray: { primary: "bg-gray-700", light: "bg-gray-50", text: "text-gray-700", border: "border-gray-700" }
+  // Skills
+  const [skills, setSkills] = useState(
+    "React.js, TypeScript, Node.js, Tailwind CSS, Next.js, GraphQL, Jest, Docker",
+  );
+
+  // Experiences
+  const [experiences, setExperiences] = useState([
+    {
+      id: "exp1",
+      title: "Senior Frontend Developer",
+      company: "TechCorp Solutions",
+      startDate: "2021",
+      endDate: "Present",
+      description:
+        "Lead frontend development for enterprise dashboard, improved performance by 40%, mentored 3 junior developers, implemented component library.",
+    },
+    {
+      id: "exp2",
+      title: "Frontend Developer",
+      company: "Creative Digital Agency",
+      startDate: "2018",
+      endDate: "2021",
+      description:
+        "Developed responsive websites for 20+ clients, collaborated with design team, implemented SEO best practices, reduced load time by 25%.",
+    },
+  ]);
+
+  // Educations
+  const [educations, setEducations] = useState([
+    {
+      id: "edu1",
+      degree: "B.Sc. in Computer Science",
+      institution: "University of Technology",
+      startDate: "2014",
+      endDate: "2018",
+      description: "Graduated with Honors, GPA: 3.8/4.0",
+    },
+  ]);
+
+  // Certifications
+  const [certifications, setCertifications] = useState([
+    {
+      id: "cert1",
+      name: "AWS Certified Solutions Architect",
+      issuer: "Amazon Web Services",
+      date: "2023",
+      credentialId: "AWS-12345",
+    },
+    {
+      id: "cert2",
+      name: "Professional Scrum Master I",
+      issuer: "Scrum.org",
+      date: "2022",
+      credentialId: "PSM-98765",
+    },
+  ]);
+
+  // Projects
+  const [projects, setProjects] = useState([
+    {
+      id: "proj1",
+      name: "E-Commerce Dashboard",
+      technologies: "React, Redux, Node.js, MongoDB",
+      description:
+        "Built a full-stack admin dashboard with real-time inventory tracking, sales analytics, and user management. Reduced page load time by 35%.",
+      link: "",
+      date: "2023",
+    },
+    {
+      id: "proj2",
+      name: "Portfolio Generator",
+      technologies: "Next.js, Tailwind CSS, Framer Motion",
+      description:
+        "Developed a dynamic portfolio generator for developers with drag-and-drop sections and one-click PDF export. Used by 500+ users.",
+      link: "",
+      date: "2024",
+    },
+  ]);
+
+  const previewRef = useRef(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  // Personal Info Handlers
+  const handlePersonalChange = (e) => {
+    const { name, value } = e.target;
+    setPersonalInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  const currentColor = colorSchemes[colorScheme];
+  // Skills Handler
+  const handleSkillsChange = (e) => setSkills(e.target.value);
 
-  const handleChange = (field, value) => {
-    setData({ ...data, [field]: value });
+  // ---- Experience Handlers ----
+  const addExperience = () => {
+    setExperiences([
+      ...experiences,
+      {
+        id: Date.now().toString(),
+        title: "",
+        company: "",
+        startDate: "",
+        endDate: "",
+        description: "",
+      },
+    ]);
+  };
+  const updateExperience = (id, field, value) => {
+    setExperiences(
+      experiences.map((exp) =>
+        exp.id === id ? { ...exp, [field]: value } : exp,
+      ),
+    );
+  };
+  const removeExperience = (id) => {
+    setExperiences(experiences.filter((exp) => exp.id !== id));
+  };
+  const moveExperience = (id, direction) => {
+    const index = experiences.findIndex((exp) => exp.id === id);
+    if (
+      (direction === "up" && index === 0) ||
+      (direction === "down" && index === experiences.length - 1)
+    )
+      return;
+    const newExperiences = [...experiences];
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    [newExperiences[index], newExperiences[swapIndex]] = [
+      newExperiences[swapIndex],
+      newExperiences[index],
+    ];
+    setExperiences(newExperiences);
   };
 
-  const handleArrayChange = (field, index, value, subField) => {
-    const updated = [...data[field]];
-    if (subField) {
-      updated[index][subField] = value;
-    } else {
-      updated[index] = value;
+  // ---- Education Handlers ----
+  const addEducation = () => {
+    setEducations([
+      ...educations,
+      {
+        id: Date.now().toString(),
+        degree: "",
+        institution: "",
+        startDate: "",
+        endDate: "",
+        description: "",
+      },
+    ]);
+  };
+  const updateEducation = (id, field, value) => {
+    setEducations(
+      educations.map((edu) =>
+        edu.id === id ? { ...edu, [field]: value } : edu,
+      ),
+    );
+  };
+  const removeEducation = (id) => {
+    setEducations(educations.filter((edu) => edu.id !== id));
+  };
+  const moveEducation = (id, direction) => {
+    const index = educations.findIndex((edu) => edu.id === id);
+    if (
+      (direction === "up" && index === 0) ||
+      (direction === "down" && index === educations.length - 1)
+    )
+      return;
+    const newEducations = [...educations];
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    [newEducations[index], newEducations[swapIndex]] = [
+      newEducations[swapIndex],
+      newEducations[index],
+    ];
+    setEducations(newEducations);
+  };
+
+  // ---- Certification Handlers ----
+  const addCertification = () => {
+    setCertifications([
+      ...certifications,
+      {
+        id: Date.now().toString(),
+        name: "",
+        issuer: "",
+        date: "",
+        credentialId: "",
+      },
+    ]);
+  };
+  const updateCertification = (id, field, value) => {
+    setCertifications(
+      certifications.map((cert) =>
+        cert.id === id ? { ...cert, [field]: value } : cert,
+      ),
+    );
+  };
+  const removeCertification = (id) => {
+    setCertifications(certifications.filter((cert) => cert.id !== id));
+  };
+  const moveCertification = (id, direction) => {
+    const index = certifications.findIndex((cert) => cert.id === id);
+    if (
+      (direction === "up" && index === 0) ||
+      (direction === "down" && index === certifications.length - 1)
+    )
+      return;
+    const newCerts = [...certifications];
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    [newCerts[index], newCerts[swapIndex]] = [
+      newCerts[swapIndex],
+      newCerts[index],
+    ];
+    setCertifications(newCerts);
+  };
+
+  // ---- Project Handlers ----
+  const addProject = () => {
+    setProjects([
+      ...projects,
+      {
+        id: Date.now().toString(),
+        name: "",
+        technologies: "",
+        description: "",
+        link: "",
+        date: "",
+      },
+    ]);
+  };
+  const updateProject = (id, field, value) => {
+    setProjects(
+      projects.map((proj) =>
+        proj.id === id ? { ...proj, [field]: value } : proj,
+      ),
+    );
+  };
+  const removeProject = (id) => {
+    setProjects(projects.filter((proj) => proj.id !== id));
+  };
+  const moveProject = (id, direction) => {
+    const index = projects.findIndex((proj) => proj.id === id);
+    if (
+      (direction === "up" && index === 0) ||
+      (direction === "down" && index === projects.length - 1)
+    )
+      return;
+    const newProjects = [...projects];
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    [newProjects[index], newProjects[swapIndex]] = [
+      newProjects[swapIndex],
+      newProjects[index],
+    ];
+    setProjects(newProjects);
+  };
+
+  // PDF Download
+  const downloadPDF = async () => {
+    if (!previewRef.current) return;
+    setIsGeneratingPDF(true);
+    const element = previewRef.current;
+    const opt = {
+      margin: [0.5, 0.5, 0.5, 0.5],
+      filename: `${personalInfo.name.replace(/\s/g, "_")}_Resume.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, letterRendering: true, useCORS: true },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+    };
+    try {
+      await html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+    } finally {
+      setIsGeneratingPDF(false);
     }
-    setData({ ...data, [field]: updated });
   };
 
-  const addField = (field, template) => {
-    setData({ ...data, [field]: [...data[field], template || ""] });
-  };
-
-  const removeField = (field, index) => {
-    const updated = [...data[field]];
-    updated.splice(index, 1);
-    setData({ ...data, [field]: updated });
-  };
-
-  const resetForm = () => {
-    setData({
-      name: "", email: "", phone: "", location: "", linkedin: "", github: "", portfolio: "",
-      careerObjective: "",
-      skills: [""],
-      education: [{ degree: "", institution: "", year: "", gpa: "" }],
-      experience: [{ title: "", company: "", duration: "", description: "" }],
-      projects: [{ title: "", tech: "", description: "", link: "" }],
-      certificates: [{ title: "", issuer: "", date: "", link: "" }],
-    });
-  };
-
-  const downloadPDF = () => {
-    window.print();
-  };
-
-  // Modern Template
-  const ModernTemplate = () => (
-    <div className="bg-white p-8 min-h-[297mm]">
-      {/* Header */}
-      <div className={`${currentColor.primary} text-white p-8 -m-8 mb-6`}>
-        <h1 className="text-4xl font-bold mb-2">{data.name || "Your Name"}</h1>
-        <div className="flex flex-wrap gap-4 text-sm">
-          {data.email && <span className="flex items-center gap-1"><Mail className="w-4 h-4" />{data.email}</span>}
-          {data.phone && <span className="flex items-center gap-1"><Phone className="w-4 h-4" />{data.phone}</span>}
-          {data.location && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{data.location}</span>}
-        </div>
-        <div className="flex flex-wrap gap-4 text-sm mt-2">
-          {data.linkedin && <span className="flex items-center gap-1"><Linkedin className="w-4 h-4" />{data.linkedin}</span>}
-          {data.github && <span className="flex items-center gap-1"><Github className="w-4 h-4" />{data.github}</span>}
-          {data.portfolio && <span className="flex items-center gap-1"><Globe className="w-4 h-4" />{data.portfolio}</span>}
-        </div>
-      </div>
-
-      {/* Career Objective */}
-      {data.careerObjective && (
-        <section className="mb-6">
-          <h2 className={`text-xl font-bold ${currentColor.text} mb-2 pb-1 border-b-2 ${currentColor.border}`}>
-            Career Objective
-          </h2>
-          <p className="text-gray-700 text-sm leading-relaxed">{data.careerObjective}</p>
-        </section>
-      )}
-
-      {/* Education */}
-      {data.education.some(e => e.degree) && (
-        <section className="mb-6">
-          <h2 className={`text-xl font-bold ${currentColor.text} mb-3 pb-1 border-b-2 ${currentColor.border}`}>
-            Education
-          </h2>
-          {data.education.filter(e => e.degree).map((edu, idx) => (
-            <div key={idx} className="mb-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-bold text-gray-800">{edu.degree}</h3>
-                  <p className="text-gray-600 text-sm">{edu.institution}</p>
-                </div>
-                <div className="text-right text-sm">
-                  {edu.year && <p className="text-gray-600">{edu.year}</p>}
-                  {edu.gpa && <p className="text-gray-700 font-semibold">GPA: {edu.gpa}</p>}
-                </div>
-              </div>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {/* Experience */}
-      {data.experience.some(e => e.title) && (
-        <section className="mb-6">
-          <h2 className={`text-xl font-bold ${currentColor.text} mb-3 pb-1 border-b-2 ${currentColor.border}`}>
-            Experience
-          </h2>
-          {data.experience.filter(e => e.title).map((exp, idx) => (
-            <div key={idx} className="mb-4">
-              <div className="flex justify-between items-start mb-1">
-                <h3 className="font-bold text-gray-800">{exp.title}</h3>
-                <span className="text-sm text-gray-600">{exp.duration}</span>
-              </div>
-              <p className="text-gray-600 text-sm mb-1">{exp.company}</p>
-              <p className="text-gray-700 text-sm">{exp.description}</p>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {/* Projects */}
-      {data.projects.some(p => p.title) && (
-        <section className="mb-6">
-          <h2 className={`text-xl font-bold ${currentColor.text} mb-3 pb-1 border-b-2 ${currentColor.border}`}>
-            Projects
-          </h2>
-          {data.projects.filter(p => p.title).map((proj, idx) => (
-            <div key={idx} className="mb-3">
-              <div className="flex justify-between items-start">
-                <h3 className="font-bold text-gray-800">{proj.title}</h3>
-                {proj.link && <span className="text-xs text-blue-600">{proj.link}</span>}
-              </div>
-              {proj.tech && <p className="text-sm text-gray-600 italic">Tech: {proj.tech}</p>}
-              <p className="text-sm text-gray-700 mt-1">{proj.description}</p>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {/* Skills */}
-      {data.skills.some(s => s) && (
-        <section className="mb-6">
-          <h2 className={`text-xl font-bold ${currentColor.text} mb-2 pb-1 border-b-2 ${currentColor.border}`}>
-            Skills
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {data.skills.filter(Boolean).map((skill, idx) => (
-              <span key={idx} className={`${currentColor.light} ${currentColor.text} px-3 py-1 rounded-full text-sm font-medium`}>
-                {skill}
-              </span>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Certificates */}
-      {data.certificates.some(c => c.title) && (
-        <section className="mb-6">
-          <h2 className={`text-xl font-bold ${currentColor.text} mb-3 pb-1 border-b-2 ${currentColor.border}`}>
-            Certifications
-          </h2>
-          {data.certificates.filter(c => c.title).map((cert, idx) => (
-            <div key={idx} className="mb-2">
-              <div className="flex justify-between">
-                <h3 className="font-semibold text-gray-800">{cert.title}</h3>
-                <span className="text-sm text-gray-600">{cert.date}</span>
-              </div>
-              <p className="text-sm text-gray-600">{cert.issuer}</p>
-            </div>
-          ))}
-        </section>
-      )}
-    </div>
-  );
-
-  // Classic Template
-  const ClassicTemplate = () => (
-    <div className="bg-white p-8 min-h-[297mm]">
-      {/* Header */}
-      <div className="text-center border-b-4 border-gray-800 pb-4 mb-6">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">{data.name || "Your Name"}</h1>
-        <div className="text-sm text-gray-600 space-x-3">
-          {data.email && <span>{data.email}</span>}
-          {data.phone && <span>•</span>}
-          {data.phone && <span>{data.phone}</span>}
-          {data.location && <span>•</span>}
-          {data.location && <span>{data.location}</span>}
-        </div>
-        <div className="text-sm text-gray-600 mt-1 space-x-3">
-          {data.linkedin && <span>{data.linkedin}</span>}
-          {data.github && data.linkedin && <span>•</span>}
-          {data.github && <span>{data.github}</span>}
-        </div>
-      </div>
-
-      {data.careerObjective && (
-        <section className="mb-6">
-          <h2 className="text-lg font-bold text-gray-800 uppercase mb-2 border-b border-gray-400">
-            Professional Summary
-          </h2>
-          <p className="text-gray-700 text-sm">{data.careerObjective}</p>
-        </section>
-      )}
-
-      {data.education.some(e => e.degree) && (
-        <section className="mb-6">
-          <h2 className="text-lg font-bold text-gray-800 uppercase mb-3 border-b border-gray-400">
-            Education
-          </h2>
-          {data.education.filter(e => e.degree).map((edu, idx) => (
-            <div key={idx} className="mb-3">
-              <div className="flex justify-between">
-                <span className="font-bold">{edu.degree}</span>
-                <span className="text-sm">{edu.year}</span>
-              </div>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>{edu.institution}</span>
-                {edu.gpa && <span>GPA: {edu.gpa}</span>}
-              </div>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {data.experience.some(e => e.title) && (
-        <section className="mb-6">
-          <h2 className="text-lg font-bold text-gray-800 uppercase mb-3 border-b border-gray-400">
-            Experience
-          </h2>
-          {data.experience.filter(e => e.title).map((exp, idx) => (
-            <div key={idx} className="mb-4">
-              <div className="flex justify-between mb-1">
-                <span className="font-bold">{exp.title}</span>
-                <span className="text-sm">{exp.duration}</span>
-              </div>
-              <p className="text-sm italic text-gray-600 mb-1">{exp.company}</p>
-              <p className="text-sm text-gray-700">{exp.description}</p>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {data.projects.some(p => p.title) && (
-        <section className="mb-6">
-          <h2 className="text-lg font-bold text-gray-800 uppercase mb-3 border-b border-gray-400">
-            Projects
-          </h2>
-          {data.projects.filter(p => p.title).map((proj, idx) => (
-            <div key={idx} className="mb-3">
-              <h3 className="font-bold">{proj.title}</h3>
-              {proj.tech && <p className="text-xs text-gray-600 italic">{proj.tech}</p>}
-              <p className="text-sm text-gray-700">{proj.description}</p>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {data.skills.some(s => s) && (
-        <section className="mb-6">
-          <h2 className="text-lg font-bold text-gray-800 uppercase mb-2 border-b border-gray-400">
-            Skills
-          </h2>
-          <p className="text-sm text-gray-700">{data.skills.filter(Boolean).join(" • ")}</p>
-        </section>
-      )}
-
-      {data.certificates.some(c => c.title) && (
-        <section className="mb-6">
-          <h2 className="text-lg font-bold text-gray-800 uppercase mb-3 border-b border-gray-400">
-            Certifications
-          </h2>
-          {data.certificates.filter(c => c.title).map((cert, idx) => (
-            <div key={idx} className="mb-2 flex justify-between">
-              <div>
-                <span className="font-semibold">{cert.title}</span>
-                <span className="text-sm text-gray-600"> - {cert.issuer}</span>
-              </div>
-              <span className="text-sm text-gray-600">{cert.date}</span>
-            </div>
-          ))}
-        </section>
-      )}
-    </div>
-  );
+  // Helper for skills array
+  const skillsArray = skills
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-20 pb-10">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Resume Builder</h1>
-          <p className="text-gray-600">Create your professional resume in minutes</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
+      {/* Header */}
+      <div className="max-w-[1400px] mx-auto mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-600 p-2 rounded-xl">
+            <FileText className="text-white" size={24} />
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+            ATS-Friendly Resume Builder
+          </h1>
         </div>
+        <button
+          onClick={downloadPDF}
+          disabled={isGeneratingPDF}
+          className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-xl hover:bg-blue-700 transition-all shadow-md disabled:opacity-70"
+        >
+          <Download size={18} />
+          {isGeneratingPDF ? "Generating PDF..." : "Download Resume (PDF)"}
+        </button>
+      </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Form Section */}
-          <div className="lg:w-5/12">
-            <div className="bg-white rounded-2xl shadow-xl p-6 sticky top-4">
-              {/* Customization */}
-              <div className="mb-6 pb-6 border-b">
-                <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <Palette className="w-5 h-5" />
-                  Customize
-                </h3>
-                
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Template</label>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setActiveTemplate("modern")}
-                      className={`flex-1 py-2 px-3 rounded-lg border-2 transition ${
-                        activeTemplate === "modern" 
-                          ? "border-blue-500 bg-blue-50 text-blue-700" 
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      Modern
-                    </button>
-                    <button
-                      onClick={() => setActiveTemplate("classic")}
-                      className={`flex-1 py-2 px-3 rounded-lg border-2 transition ${
-                        activeTemplate === "classic" 
-                          ? "border-blue-500 bg-blue-50 text-blue-700" 
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      Classic
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Color Scheme</label>
-                  <div className="flex gap-2">
-                    {Object.keys(colorSchemes).map(color => (
-                      <button
-                        key={color}
-                        onClick={() => setColorScheme(color)}
-                        className={`w-10 h-10 rounded-lg ${colorSchemes[color].primary} transition transform hover:scale-110 ${
-                          colorScheme === color ? "ring-2 ring-offset-2 ring-gray-400" : ""
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                {/* Personal Info */}
-                <div>
-                  <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <User className="w-5 h-5" />
-                    Personal Information
-                  </h3>
-                  <input
-                    type="text"
-                    placeholder="Full Name"
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg mb-2 focus:border-blue-400 focus:outline-none"
-                    value={data.name}
-                    onChange={(e) => handleChange("name", e.target.value)}
-                  />
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg mb-2 focus:border-blue-400 focus:outline-none"
-                    value={data.email}
-                    onChange={(e) => handleChange("email", e.target.value)}
-                  />
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      type="tel"
-                      placeholder="Phone"
-                      className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-400 focus:outline-none"
-                      value={data.phone}
-                      onChange={(e) => handleChange("phone", e.target.value)}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Location"
-                      className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-400 focus:outline-none"
-                      value={data.location}
-                      onChange={(e) => handleChange("location", e.target.value)}
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="LinkedIn URL"
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg mt-2 mb-2 focus:border-blue-400 focus:outline-none"
-                    value={data.linkedin}
-                    onChange={(e) => handleChange("linkedin", e.target.value)}
-                  />
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      type="text"
-                      placeholder="GitHub"
-                      className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-400 focus:outline-none"
-                      value={data.github}
-                      onChange={(e) => handleChange("github", e.target.value)}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Portfolio"
-                      className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-400 focus:outline-none"
-                      value={data.portfolio}
-                      onChange={(e) => handleChange("portfolio", e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                {/* Career Objective */}
-                <div>
-                  <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    Career Objective
-                  </h3>
-                  <textarea
-                    placeholder="Brief career objective or professional summary..."
-                    className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-400 focus:outline-none resize-none"
-                    rows="3"
-                    value={data.careerObjective}
-                    onChange={(e) => handleChange("careerObjective", e.target.value)}
-                  />
-                </div>
-
-                {/* Education */}
-                <div>
-                  <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <GraduationCap className="w-5 h-5" />
-                    Education
-                  </h3>
-                  {data.education.map((edu, idx) => (
-                    <div key={idx} className="bg-gray-50 p-3 rounded-lg mb-2">
-                      <input
-                        type="text"
-                        placeholder="Degree"
-                        className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:border-blue-400 focus:outline-none"
-                        value={edu.degree}
-                        onChange={(e) => handleArrayChange("education", idx, e.target.value, "degree")}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Institution"
-                        className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:border-blue-400 focus:outline-none"
-                        value={edu.institution}
-                        onChange={(e) => handleArrayChange("education", idx, e.target.value, "institution")}
-                      />
-                      <div className="grid grid-cols-2 gap-2 mb-2">
-                        <input
-                          type="text"
-                          placeholder="Year"
-                          className="px-3 py-2 border border-gray-300 rounded focus:border-blue-400 focus:outline-none"
-                          value={edu.year}
-                          onChange={(e) => handleArrayChange("education", idx, e.target.value, "year")}
-                        />
-                        <input
-                          type="text"
-                          placeholder="GPA"
-                          className="px-3 py-2 border border-gray-300 rounded focus:border-blue-400 focus:outline-none"
-                          value={edu.gpa}
-                          onChange={(e) => handleArrayChange("education", idx, e.target.value, "gpa")}
-                        />
-                      </div>
-                      <button
-                        onClick={() => removeField("education", idx)}
-                        className="text-red-600 text-sm flex items-center gap-1 hover:text-red-700"
-                      >
-                        <Minus className="w-4 h-4" /> Remove
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => addField("education", { degree: "", institution: "", year: "", gpa: "" })}
-                    className="text-blue-600 text-sm flex items-center gap-1 hover:text-blue-700"
-                  >
-                    <Plus className="w-4 h-4" /> Add Education
-                  </button>
-                </div>
-
-                {/* Experience */}
-                <div>
-                  <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <Briefcase className="w-5 h-5" />
-                    Experience
-                  </h3>
-                  {data.experience.map((exp, idx) => (
-                    <div key={idx} className="bg-gray-50 p-3 rounded-lg mb-2">
-                      <input
-                        type="text"
-                        placeholder="Job Title"
-                        className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:border-blue-400 focus:outline-none"
-                        value={exp.title}
-                        onChange={(e) => handleArrayChange("experience", idx, e.target.value, "title")}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Company"
-                        className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:border-blue-400 focus:outline-none"
-                        value={exp.company}
-                        onChange={(e) => handleArrayChange("experience", idx, e.target.value, "company")}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Duration (e.g., Jan 2023 - Present)"
-                        className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:border-blue-400 focus:outline-none"
-                        value={exp.duration}
-                        onChange={(e) => handleArrayChange("experience", idx, e.target.value, "duration")}
-                      />
-                      <textarea
-                        placeholder="Description"
-                        className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:border-blue-400 focus:outline-none resize-none"
-                        rows="2"
-                        value={exp.description}
-                        onChange={(e) => handleArrayChange("experience", idx, e.target.value, "description")}
-                      />
-                      <button
-                        onClick={() => removeField("experience", idx)}
-                        className="text-red-600 text-sm flex items-center gap-1 hover:text-red-700"
-                      >
-                        <Minus className="w-4 h-4" /> Remove
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => addField("experience", { title: "", company: "", duration: "", description: "" })}
-                    className="text-blue-600 text-sm flex items-center gap-1 hover:text-blue-700"
-                  >
-                    <Plus className="w-4 h-4" /> Add Experience
-                  </button>
-                </div>
-
-                {/* Projects */}
-                <div>
-                  <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <Code className="w-5 h-5" />
-                    Projects
-                  </h3>
-                  {data.projects.map((proj, idx) => (
-                    <div key={idx} className="bg-gray-50 p-3 rounded-lg mb-2">
-                      <input
-                        type="text"
-                        placeholder="Project Title"
-                        className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:border-blue-400 focus:outline-none"
-                        value={proj.title}
-                        onChange={(e) => handleArrayChange("projects", idx, e.target.value, "title")}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Technologies Used"
-                        className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:border-blue-400 focus:outline-none"
-                        value={proj.tech}
-                        onChange={(e) => handleArrayChange("projects", idx, e.target.value, "tech")}
-                      />
-                      <textarea
-                        placeholder="Description"
-                        className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:border-blue-400 focus:outline-none resize-none"
-                        rows="2"
-                        value={proj.description}
-                        onChange={(e) => handleArrayChange("projects", idx, e.target.value, "description")}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Project Link (optional)"
-                        className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:border-blue-400 focus:outline-none"
-                        value={proj.link}
-                        onChange={(e) => handleArrayChange("projects", idx, e.target.value, "link")}
-                      />
-                      <button
-                        onClick={() => removeField("projects", idx)}
-                        className="text-red-600 text-sm flex items-center gap-1 hover:text-red-700"
-                      >
-                        <Minus className="w-4 h-4" /> Remove
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => addField("projects", { title: "", tech: "", description: "", link: "" })}
-                    className="text-blue-600 text-sm flex items-center gap-1 hover:text-blue-700"
-                  >
-                    <Plus className="w-4 h-4" /> Add Project
-                  </button>
-                </div>
-
-                {/* Skills */}
-                <div>
-                  <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <Code className="w-5 h-5" />
-                    Skills
-                  </h3>
-                  {data.skills.map((skill, idx) => (
-                    <div key={idx} className="flex gap-2 mb-2">
-                      <input
-                        type="text"
-                        placeholder="Skill (e.g., React, Python)"
-                        className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-400 focus:outline-none"
-                        value={skill}
-                        onChange={(e) => handleArrayChange("skills", idx, e.target.value)}
-                      />
-                      <button
-                        onClick={() => removeField("skills", idx)}
-                        className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => addField("skills")}
-                    className="text-blue-600 text-sm flex items-center gap-1 hover:text-blue-700"
-                  >
-                    <Plus className="w-4 h-4" /> Add Skill
-                  </button>
-                </div>
-
-                {/* Certificates */}
-                <div>
-                  <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <Award className="w-5 h-5" />
-                    Certifications
-                  </h3>
-                  {data.certificates.map((cert, idx) => (
-                    <div key={idx} className="bg-gray-50 p-3 rounded-lg mb-2">
-                      <input
-                        type="text"
-                        placeholder="Certificate Title"
-                        className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:border-blue-400 focus:outline-none"
-                        value={cert.title}
-                        onChange={(e) => handleArrayChange("certificates", idx, e.target.value, "title")}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Issuing Organization"
-                        className="w-full px-3 py-2 border border-gray-300 rounded mb-2 focus:border-blue-400 focus:outline-none"
-                        value={cert.issuer}
-                        onChange={(e) => handleArrayChange("certificates", idx, e.target.value, "issuer")}
-                      />
-                      <div className="grid grid-cols-2 gap-2 mb-2">
-                        <input
-                          type="text"
-                          placeholder="Date"
-                          className="px-3 py-2 border border-gray-300 rounded focus:border-blue-400 focus:outline-none"
-                          value={cert.date}
-                          onChange={(e) => handleArrayChange("certificates", idx, e.target.value, "date")}
-                        />
-                        <input
-                          type="text"
-                          placeholder="Link (optional)"
-                          className="px-3 py-2 border border-gray-300 rounded focus:border-blue-400 focus:outline-none"
-                          value={cert.link}
-                          onChange={(e) => handleArrayChange("certificates", idx, e.target.value, "link")}
-                        />
-                      </div>
-                      <button
-                        onClick={() => removeField("certificates", idx)}
-                        className="text-red-600 text-sm flex items-center gap-1 hover:text-red-700"
-                      >
-                        <Minus className="w-4 h-4" /> Remove
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => addField("certificates", { title: "", issuer: "", date: "", link: "" })}
-                    className="text-blue-600 text-sm flex items-center gap-1 hover:text-blue-700"
-                  >
-                    <Plus className="w-4 h-4" /> Add Certificate
-                  </button>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="mt-6 pt-6 border-t flex gap-3">
-                <button
-                  onClick={downloadPDF}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition flex items-center justify-center gap-2"
-                >
-                  <Download className="w-5 h-5" />
-                  Download PDF
-                </button>
-                <button
-                  onClick={resetForm}
-                  className="px-6 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition flex items-center gap-2"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                </button>
-              </div>
+      <div className="max-w-[1400px] mx-auto grid lg:grid-cols-2 gap-8">
+        {/* LEFT SIDE - FORMS */}
+        <div className="space-y-6">
+          {/* Personal Information */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex items-center gap-2 mb-5 pb-2 border-b border-gray-200">
+              <User size={20} className="text-blue-600" />
+              <h2 className="text-xl font-semibold">Personal Information</h2>
+            </div>
+            <div className="grid gap-4">
+              <input
+                name="name"
+                value={personalInfo.name}
+                onChange={handlePersonalChange}
+                placeholder="Full Name"
+                className="input-field"
+              />
+              <input
+                name="role"
+                value={personalInfo.role}
+                onChange={handlePersonalChange}
+                placeholder="Professional Title (e.g., Senior Frontend Developer)"
+                className="input-field"
+              />
+              <input
+                name="email"
+                value={personalInfo.email}
+                onChange={handlePersonalChange}
+                placeholder="Email"
+                className="input-field"
+              />
+              <input
+                name="phone"
+                value={personalInfo.phone}
+                onChange={handlePersonalChange}
+                placeholder="Phone"
+                className="input-field"
+              />
             </div>
           </div>
 
-          {/* Preview Section */}
-          <div className="lg:w-7/12">
-            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Layout className="w-5 h-5" />
-                  <span className="font-semibold">Preview</span>
-                </div>
-                <span className="text-sm opacity-90">{activeTemplate === "modern" ? "Modern" : "Classic"} Template</span>
+          {/* Summary */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex items-center gap-2 mb-5 pb-2 border-b border-gray-200">
+              <FileText size={20} className="text-blue-600" />
+              <h2 className="text-xl font-semibold">Professional Summary</h2>
+            </div>
+            <textarea
+              name="summary"
+              value={personalInfo.summary}
+              onChange={handlePersonalChange}
+              rows={4}
+              placeholder="Write a compelling summary (include keywords relevant to your target role)..."
+              className="input-field resize-none"
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              💡 Tip: Use keywords from job descriptions to improve ATS score.
+            </p>
+          </div>
+
+          {/* Skills */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex items-center gap-2 mb-5 pb-2 border-b border-gray-200">
+              <Code size={20} className="text-blue-600" />
+              <h2 className="text-xl font-semibold">Skills</h2>
+            </div>
+            <input
+              value={skills}
+              onChange={handleSkillsChange}
+              placeholder="React, Node.js, Python, AWS, ..."
+              className="input-field"
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              Separate skills with commas. Include both hard and soft skills.
+            </p>
+          </div>
+
+          {/* Work Experience */}
+          <SectionCard
+            title="Work Experience"
+            icon={<Briefcase size={20} />}
+            onAdd={addExperience}
+            items={experiences}
+            renderItem={(exp, idx) => (
+              <DynamicCard
+                item={exp}
+                idx={idx}
+                total={experiences.length}
+                onUpdate={updateExperience}
+                onRemove={removeExperience}
+                onMoveUp={() => moveExperience(exp.id, "up")}
+                onMoveDown={() => moveExperience(exp.id, "down")}
+                fields={[
+                  { name: "title", placeholder: "Job Title", type: "text" },
+                  {
+                    name: "company",
+                    placeholder: "Company Name",
+                    type: "text",
+                  },
+                  {
+                    name: "startDate",
+                    placeholder: "Start Year",
+                    type: "text",
+                  },
+                  {
+                    name: "endDate",
+                    placeholder: "End Year (or Present)",
+                    type: "text",
+                  },
+                  {
+                    name: "description",
+                    placeholder: "Key achievements & responsibilities",
+                    type: "textarea",
+                    rows: 3,
+                  },
+                ]}
+              />
+            )}
+          />
+
+     
+          {/* Education */}
+          <SectionCard
+            title="Education"
+            icon={<GraduationCap size={20} />}
+            onAdd={addEducation}
+            items={educations}
+            renderItem={(edu, idx) => (
+              <DynamicCard
+                item={edu}
+                idx={idx}
+                total={educations.length}
+                onUpdate={updateEducation}
+                onRemove={removeEducation}
+                onMoveUp={() => moveEducation(edu.id, "up")}
+                onMoveDown={() => moveEducation(edu.id, "down")}
+                fields={[
+                  {
+                    name: "degree",
+                    placeholder: "Degree / Certification",
+                    type: "text",
+                  },
+                  {
+                    name: "institution",
+                    placeholder: "Institution Name",
+                    type: "text",
+                  },
+                  {
+                    name: "startDate",
+                    placeholder: "Start Year",
+                    type: "text",
+                  },
+                  { name: "endDate", placeholder: "End Year", type: "text" },
+                  {
+                    name: "description",
+                    placeholder: "Honors, GPA, relevant coursework",
+                    type: "textarea",
+                    rows: 2,
+                  },
+                ]}
+              />
+            )}
+          />
+
+          {/* Certifications */}
+          <SectionCard
+            title="Certifications"
+            icon={<Award size={20} />}
+            onAdd={addCertification}
+            items={certifications}
+            renderItem={(cert, idx) => (
+              <DynamicCard
+                item={cert}
+                idx={idx}
+                total={certifications.length}
+                onUpdate={updateCertification}
+                onRemove={removeCertification}
+                onMoveUp={() => moveCertification(cert.id, "up")}
+                onMoveDown={() => moveCertification(cert.id, "down")}
+                fields={[
+                  {
+                    name: "name",
+                    placeholder: "Certification Name",
+                    type: "text",
+                  },
+                  {
+                    name: "issuer",
+                    placeholder: "Issuing Organization",
+                    type: "text",
+                  },
+                  {
+                    name: "date",
+                    placeholder: "Date Obtained (e.g., 2023)",
+                    type: "text",
+                  },
+                  {
+                    name: "credentialId",
+                    placeholder: "Credential ID (optional)",
+                    type: "text",
+                  },
+                ]}
+              />
+            )}
+          />
+
+          {/* Projects */}
+          <SectionCard
+            title="Projects"
+            icon={<FolderGit2 size={20} />}
+            onAdd={addProject}
+            items={projects}
+            renderItem={(proj, idx) => (
+              <DynamicCard
+                item={proj}
+                idx={idx}
+                total={projects.length}
+                onUpdate={updateProject}
+                onRemove={removeProject}
+                onMoveUp={() => moveProject(proj.id, "up")}
+                onMoveDown={() => moveProject(proj.id, "down")}
+                fields={[
+                  { name: "name", placeholder: "Project Name", type: "text" },
+                  {
+                    name: "technologies",
+                    placeholder: "Technologies used (comma separated)",
+                    type: "text",
+                  },
+                  { name: "date", placeholder: "Year / Period", type: "text" },
+                  {
+                    name: "description",
+                    placeholder: "Project description, your role, outcomes",
+                    type: "textarea",
+                    rows: 3,
+                  },
+                  {
+                    name: "link",
+                    placeholder: "Live demo / GitHub link (optional)",
+                    type: "text",
+                  },
+                ]}
+              />
+            )}
+          />
+
+          <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+            <div className="flex gap-2 items-start">
+              <Info size={18} className="text-blue-600 mt-0.5" />
+              <div className="text-sm text-gray-700">
+                <p className="font-semibold mb-1">ATS-Friendly Tips:</p>
+                <ul className="list-disc list-inside space-y-1 text-xs">
+                  <li>
+                    Use standard section headings (e.g., "Work Experience",
+                    "Education")
+                  </li>
+                  <li>
+                    Include keywords from job descriptions in your summary and
+                    skills
+                  </li>
+                  <li>Avoid images, tables, and columns in your resume</li>
+                  <li>
+                    Use bullet points for achievements (start with action verbs)
+                  </li>
+                  <li>Save as PDF (this tool does it for you)</li>
+                </ul>
               </div>
-              <div id="resume-preview" className="overflow-auto" style={{ maxHeight: "calc(100vh - 200px)" }}>
-                {activeTemplate === "modern" ? <ModernTemplate /> : <ClassicTemplate />}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT SIDE - PREVIEW */}
+        <div className="lg:sticky lg:top-8 h-fit">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-3">
+              <h2 className="text-white font-semibold">
+                Live Resume Preview (ATS Optimized)
+              </h2>
+            </div>
+            <div
+              ref={previewRef}
+              className="p-8 bg-white"
+              style={{
+                fontFamily: "'Inter', 'Arial', 'Helvetica', sans-serif",
+              }}
+            >
+              <div className="max-w-2xl mx-auto">
+                {/* Header */}
+                <div className="text-center border-b-2 border-blue-600 pb-4 mb-5">
+                  <h1 className="text-3xl font-bold text-gray-800">
+                    {personalInfo.name || "Your Name"}
+                  </h1>
+                  <p className="text-lg text-blue-600 font-medium mt-1">
+                    {personalInfo.role || "Professional Title"}
+                  </p>
+                  <div className="flex justify-center gap-4 text-sm text-gray-600 mt-3 flex-wrap">
+                    <span>{personalInfo.email}</span>
+                    <span>{personalInfo.phone}</span>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                {personalInfo.summary && (
+                  <div className="mb-5">
+                    <h2 className="text-md font-semibold text-gray-800 border-l-4 border-blue-600 pl-3 mb-2">
+                      Professional Summary
+                    </h2>
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      {personalInfo.summary}
+                    </p>
+                  </div>
+                )}
+
+                {/* Skills */}
+                {skillsArray.length > 0 && (
+                  <div className="mb-5">
+                    <h2 className="text-md font-semibold text-gray-800 border-l-4 border-blue-600 pl-3 mb-2">
+                      Skills
+                    </h2>
+                    <div className="flex flex-wrap gap-2">
+                      {skillsArray.map((skill, idx) => (
+                        <span
+                          key={idx}
+                          className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-xs font-medium"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Work Experience */}
+                {experiences.filter((e) => e.title || e.company).length > 0 && (
+                  <div className="mb-5">
+                    <h2 className="text-md font-semibold text-gray-800 border-l-4 border-blue-600 pl-3 mb-3">
+                      Work Experience
+                    </h2>
+                    {experiences.map(
+                      (exp) =>
+                        (exp.title || exp.company) && (
+                          <div key={exp.id} className="mb-4">
+                            <div className="flex justify-between items-baseline flex-wrap gap-2">
+                              <h3 className="font-semibold">
+                                {exp.title} {exp.company && `at ${exp.company}`}
+                              </h3>
+                              <span className="text-xs text-gray-500">
+                                {exp.startDate} - {exp.endDate}
+                              </span>
+                            </div>
+                            {exp.description && (
+                              <p className="text-sm text-gray-600 mt-1 whitespace-pre-line">
+                                {exp.description}
+                              </p>
+                            )}
+                          </div>
+                        ),
+                    )}
+                  </div>
+                )}
+
+                {/* Projects */}
+                {projects.filter((p) => p.name).length > 0 && (
+                  <div className="mb-5">
+                    <h2 className="text-md font-semibold text-gray-800 border-l-4 border-blue-600 pl-3 mb-3">
+                      Projects
+                    </h2>
+                    {projects.map(
+                      (proj) =>
+                        proj.name && (
+                          <div key={proj.id} className="mb-4">
+                            <div className="flex justify-between items-baseline flex-wrap gap-2">
+                              <h3 className="font-semibold">{proj.name}</h3>
+                              <span className="text-xs text-gray-500">
+                                {proj.date}
+                              </span>
+                            </div>
+                            {proj.technologies && (
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                Tech: {proj.technologies}
+                              </p>
+                            )}
+                            {proj.description && (
+                              <p className="text-sm text-gray-600 mt-1">
+                                {proj.description}
+                              </p>
+                            )}
+                            {proj.link && (
+                              <a
+                                href={proj.link}
+                                className="text-xs text-blue-600 hover:underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {proj.link}
+                              </a>
+                            )}
+                          </div>
+                        ),
+                    )}
+                  </div>
+                )}
+
+                {/* Education */}
+                {educations.filter((e) => e.degree || e.institution).length >
+                  0 && (
+                  <div className="mb-5">
+                    <h2 className="text-md font-semibold text-gray-800 border-l-4 border-blue-600 pl-3 mb-3">
+                      Education
+                    </h2>
+                    {educations.map(
+                      (edu) =>
+                        (edu.degree || edu.institution) && (
+                          <div key={edu.id} className="mb-4">
+                            <div className="flex justify-between items-baseline flex-wrap gap-2">
+                              <h3 className="font-semibold">
+                                {edu.degree}{" "}
+                                {edu.institution && `- ${edu.institution}`}
+                              </h3>
+                              <span className="text-xs text-gray-500">
+                                {edu.startDate} - {edu.endDate}
+                              </span>
+                            </div>
+                            {edu.description && (
+                              <p className="text-sm text-gray-600 mt-1">
+                                {edu.description}
+                              </p>
+                            )}
+                          </div>
+                        ),
+                    )}
+                  </div>
+                )}
+
+                {/* Certifications */}
+                {certifications.filter((c) => c.name).length > 0 && (
+                  <div className="mb-5">
+                    <h2 className="text-md font-semibold text-gray-800 border-l-4 border-blue-600 pl-3 mb-3">
+                      Certifications
+                    </h2>
+                    {certifications.map(
+                      (cert) =>
+                        cert.name && (
+                          <div key={cert.id} className="mb-2">
+                            <div className="flex justify-between items-baseline flex-wrap gap-2">
+                              <span className="font-medium text-sm">
+                                {cert.name}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {cert.date}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-600">
+                              {cert.issuer}{" "}
+                              {cert.credentialId &&
+                                `· ID: ${cert.credentialId}`}
+                            </p>
+                          </div>
+                        ),
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Print Styles */}
-      <style>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          #resume-preview, #resume-preview * {
-            visibility: visible;
-          }
-          #resume-preview {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-        }
-      `}</style>
     </div>
   );
 }
+
+// Helper Components for cleaner code
+const SectionCard = ({ title, icon, onAdd, items, renderItem }) => (
+  <div className="bg-white rounded-2xl shadow-lg p-6">
+    <div className="flex items-center justify-between mb-5 pb-2 border-b border-gray-200">
+      <div className="flex items-center gap-2">
+        {icon}
+        <h2 className="text-xl font-semibold">{title}</h2>
+      </div>
+      <button
+        onClick={onAdd}
+        className="flex items-center gap-1 text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition"
+      >
+        <Plus size={16} /> Add
+      </button>
+    </div>
+    <div className="space-y-4">
+      {items.map((item, idx) => renderItem(item, idx))}
+      {items.length === 0 && (
+        <p className="text-center text-gray-400 py-4">
+          No {title.toLowerCase()} added.
+        </p>
+      )}
+    </div>
+  </div>
+);
+
+const DynamicCard = ({
+  item,
+  idx,
+  total,
+  onUpdate,
+  onRemove,
+  onMoveUp,
+  onMoveDown,
+  fields,
+}) => (
+  <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+    <div className="flex justify-between items-center mb-3">
+      <span className="text-sm font-medium text-gray-500">#{idx + 1}</span>
+      <div className="flex gap-1">
+        <button
+          onClick={onMoveUp}
+          disabled={idx === 0}
+          className="p-1 disabled:opacity-30"
+        >
+          <ArrowUp size={16} className="text-gray-500 hover:text-blue-600" />
+        </button>
+        <button
+          onClick={onMoveDown}
+          disabled={idx === total - 1}
+          className="p-1 disabled:opacity-30"
+        >
+          <ArrowDown size={16} className="text-gray-500 hover:text-blue-600" />
+        </button>
+        <button onClick={onRemove} className="p-1">
+          <Trash2 size={16} className="text-gray-500 hover:text-red-600" />
+        </button>
+      </div>
+    </div>
+    <div className="grid gap-3">
+      {fields.map((field) =>
+        field.type === "textarea" ? (
+          <textarea
+            key={field.name}
+            value={item[field.name] || ""}
+            onChange={(e) => onUpdate(item.id, field.name, e.target.value)}
+            placeholder={field.placeholder}
+            rows={field.rows || 2}
+            className="input-field resize-none"
+          />
+        ) : (
+          <input
+            key={field.name}
+            type={field.type}
+            value={item[field.name] || ""}
+            onChange={(e) => onUpdate(item.id, field.name, e.target.value)}
+            placeholder={field.placeholder}
+            className="input-field"
+          />
+        ),
+      )}
+    </div>
+  </div>
+);
+
+// Global input styles (add to your global CSS or use Tailwind)
+// The classes below assume Tailwind CSS is configured.
+// If not, replace with regular CSS classes.
+const style = document.createElement("style");
+style.textContent = `
+  .input-field {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .input-field:focus {
+    border-color: #3b82f6;
+    ring: 2px solid #3b82f6;
+  }
+`;
+document.head.appendChild(style);
+
+export default ResumeBuilder;

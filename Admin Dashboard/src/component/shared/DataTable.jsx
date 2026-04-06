@@ -8,6 +8,7 @@ const DataTable = ({
   onEdit,
   onDelete,
   onView,
+  actions,
   noDataMessage = "No data found",
 }) => {
   if (loading) {
@@ -36,10 +37,13 @@ const DataTable = ({
                 key={col.key}
                 className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
               >
-                {col.label}
+                {col.label || col.header}
               </th>
             ))}
-            {(onEdit || onDelete || onView) && (
+            {(onEdit ||
+              onDelete ||
+              onView ||
+              (actions && actions.length > 0)) && (
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Actions
               </th>
@@ -62,7 +66,10 @@ const DataTable = ({
                     : row[col.key]?.toString() || "-"}
                 </td>
               ))}
-              {(onEdit || onDelete || onView) && (
+              {(onEdit ||
+                onDelete ||
+                onView ||
+                (actions && actions.length > 0)) && (
                 <td className="px-6 py-3">
                   <div className="flex gap-2">
                     {onView && (
@@ -92,6 +99,19 @@ const DataTable = ({
                         <Trash2 size={16} />
                       </button>
                     )}
+                    {actions?.map((action) => {
+                      const ActionIcon = action.icon;
+                      return (
+                        <button
+                          key={action.label}
+                          onClick={() => action.onClick(row)}
+                          className={`p-2 rounded transition-colors hover:bg-gray-50 ${action.color || "text-gray-600"}`}
+                          title={action.label}
+                        >
+                          <ActionIcon size={16} />
+                        </button>
+                      );
+                    })}
                   </div>
                 </td>
               )}

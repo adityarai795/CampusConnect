@@ -65,6 +65,26 @@ module.exports.deletePost = async (req, res) => {
   }
 };
 
+module.exports.updateJob = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedJob = await Job.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedJob) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Job updated successfully", job: updatedJob });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports.applyJob = async (req, res) => {
   try {
     const { id } = req.params;

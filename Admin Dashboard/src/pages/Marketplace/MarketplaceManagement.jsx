@@ -1,508 +1,310 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchProductsRequest,
-  fetchProductsSuccess,
-  fetchProductsFailure,
-  createProductRequest,
-  createProductSuccess,
-  createProductFailure,
-  updateProductRequest,
-  updateProductSuccess,
-  updateProductFailure,
-  deleteProductRequest,
-  deleteProductSuccess,
-  deleteProductFailure,
-  setPage,
-  setFilter,
-} from "../../redux/reducers/marketplaceReducer";
+import React, { useEffect, useMemo, useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { toast } from "react-toastify";
 import adminAPI from "../../api/adminAPI";
 import DataTable from "../../component/shared/DataTable";
-import AdminModal from "../../component/shared/AdminModal";
 import Pagination from "../../component/shared/Pagination";
-import Alert from "../../component/shared/Alert";
-import LoadingSpinner from "../../component/shared/LoadingSpinner";
-import { Search, Plus, Edit2, Trash2, ShoppingCart } from "lucide-react";
-import { toast } from "react-toastify";
+import AdminModal from "../../component/shared/AdminModal";
+import { PageLoader } from "../../component/shared/LoadingSpinner";
 
-const MarketplaceManagement = () => {
-  const dispatch = useDispatch();
-  const {
-    items: products,
-    loading,
-    error,
-    pagination,
-    filters,
-  } = useSelector((state) => state.marketplace);
+const initialFormState = {
+  title: "",
+  category: "",
+  price: "",
+  description: "",
+  location: "",
+  imageUrl: "",
+};
 
-  const [showModal, setShowModal] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+function MarketplaceManagement() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [productToDelete, setProductToDelete] = useState(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    category: "",
-    price: "",
-    quantity: "",
-    seller: "",
-    image: "",
-    status: "active",
-  });
+  const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
-    fetchProducts();
-  }, [pagination.page, filters.search, filters.category]);
+    loadProducts();
+  }, [page]);
 
-  const fetchProducts = async () => {
+  const loadProducts = async () => {
     try {
-      dispatch(fetchProductsRequest());
-      const response = await adminAPI.marketplace.getAll(
-        pagination.page,
-        pagination.limit,
-      );
-      dispatch(
-        fetchProductsSuccess({
-          data: response.data.data || response.data,
-          total: response.data.total || response.data.length,
-        }),
-      );
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message;
-      dispatch(fetchProductsFailure(errorMsg));
-      toast.error("Failed to fetch products");
+      setLoading(true);
+      const response = await adminAPI.marketplace.getAll(page, limit);
+      const data = Array.isArray(response.data)
+        ? response.data
+        : response.data?.data || response.data?.message || [];
+      setProducts(Array.isArray(data) ? data : []);
+      setTotal(response.data?.total || data.length || 0);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to load products");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleOpenModal = () => {
-    setIsEditing(false);
+  const openCreateModal = () => {
     setEditingProduct(null);
-    setFormData({
-      name: "",
-      description: "",
-      category: "",
-      price: "",
-      quantity: "",
-      seller: "",
-      image: "",
-      status: "active",
-    });
-    setShowModal(true);
+    setFormData(initialFormState);
+    setModalOpen(true);
   };
 
-  const handleEdit = (product) => {
-    setIsEditing(true);
+  const openEditModal = (product) => {
     setEditingProduct(product);
     setFormData({
-      name: product.name || "",
-      description: product.description || "",
+      title: product.title || "",
       category: product.category || "",
-      price: product.price || "",
-      quantity: product.quantity || "",
-      seller: product.seller || "",
-      image: product.image || "",
-      status: product.status || "active",
+      price: product.price ?? "",
+      description: product.description || "",
+      location: product.location || "",
+      imageUrl: product.imageUrl || "",
     });
-    setShowModal(true);
+    setModalOpen(true);
   };
 
-  const handleDeleteClick = (product) => {
-    setProductToDelete(product);
-    setShowDeleteModal(true);
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingProduct(null);
+    setFormData(initialFormState);
   };
 
-  const handleConfirmDelete = async () => {
-    try {
-      dispatch(deleteProductRequest());
-      await adminAPI.marketplace.delete(productToDelete._id);
-      dispatch(deleteProductSuccess(productToDelete._id));
-      toast.success("Product deleted successfully");
-      setShowDeleteModal(false);
-      setProductToDelete(null);
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message;
-      dispatch(deleteProductFailure(errorMsg));
-      toast.error("Failed to delete product");
-    }
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
-  const handleSubmit = async () => {
-    if (!formData.name || !formData.price) {
-      toast.error("Name and price are required");
-      return;
-    }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const payload = {
+      ...formData,
+      price: Number(formData.price),
+    };
 
     try {
-      if (isEditing) {
-        dispatch(updateProductRequest());
-        const response = await adminAPI.marketplace.update(
-          editingProduct._id,
-          formData,
-        );
-        dispatch(updateProductSuccess(response.data));
+      if (editingProduct) {
+        await adminAPI.marketplace.update(editingProduct._id, payload);
         toast.success("Product updated successfully");
       } else {
-        dispatch(createProductRequest());
-        const response = await adminAPI.marketplace.create(formData);
-        dispatch(createProductSuccess(response.data));
+        await adminAPI.marketplace.create(payload);
         toast.success("Product created successfully");
       }
-      setShowModal(false);
-      setFormData({
-        name: "",
-        description: "",
-        category: "",
-        price: "",
-        quantity: "",
-        seller: "",
-        image: "",
-        status: "active",
-      });
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message;
-      if (isEditing) {
-        dispatch(updateProductFailure(errorMsg));
-      } else {
-        dispatch(createProductFailure(errorMsg));
-      }
-      toast.error(errorMsg);
+
+      closeModal();
+      loadProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to save product");
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleDelete = async (product) => {
+    if (!window.confirm("Delete this product?")) return;
+
+    try {
+      await adminAPI.marketplace.delete(product._id);
+      toast.success("Product deleted successfully");
+      loadProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete product");
+    }
   };
+
+  const filteredProducts = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return products;
+    return products.filter((product) => {
+      const searchableText = [
+        product.title,
+        product.category,
+        product.location,
+        product.description,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return searchableText.includes(query);
+    });
+  }, [products, search]);
 
   const columns = [
     {
-      header: "Product",
-      render: (product) => (
-        <div className="flex items-center gap-2">
-          {product.image && (
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-8 h-8 rounded object-cover"
-            />
-          )}
-          <div>
-            <span className="font-medium text-gray-800 block">
-              {product.name}
-            </span>
-            <span className="text-xs text-gray-500">{product.category}</span>
-          </div>
-        </div>
+      key: "imageUrl",
+      label: "Image",
+      render: (imageUrl, product) => (
+        <img
+          src={imageUrl}
+          alt={product.title}
+          className="h-12 w-12 rounded-lg object-cover"
+        />
       ),
     },
+    { key: "title", label: "Title" },
+    { key: "category", label: "Category" },
     {
-      header: "Price",
-      render: (product) => (
-        <span className="font-semibold text-gray-800">₹{product.price}</span>
-      ),
+      key: "price",
+      label: "Price",
+      render: (price) => `₹${price}`,
     },
+    { key: "location", label: "Location" },
     {
-      header: "Quantity",
-      render: (product) => (
-        <span className="text-gray-600 text-sm">
-          {product.quantity || "N/A"}
-        </span>
-      ),
-    },
-    {
-      header: "Seller",
-      render: (product) => (
-        <span className="text-gray-600 text-sm">{product.seller || "N/A"}</span>
-      ),
-    },
-    {
-      header: "Status",
-      render: (product) => (
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            product.status === "active"
-              ? "bg-green-100 text-green-800"
-              : "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {product.status}
-        </span>
-      ),
+      key: "createdAt",
+      label: "Created",
+      render: (date) => (date ? new Date(date).toLocaleDateString() : "-"),
     },
   ];
 
-  const actions = [
-    {
-      label: "Edit",
-      icon: Edit2,
-      onClick: handleEdit,
-      color: "text-blue-600",
-    },
-    {
-      label: "Delete",
-      icon: Trash2,
-      onClick: handleDeleteClick,
-      color: "text-red-600",
-    },
-  ];
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  if (loading && products.length === 0) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg">
-            <ShoppingCart className="text-white" size={24} />
-          </div>
+      <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-200">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              Marketplace Products
+            <h1 className="text-3xl font-bold text-slate-900">
+              Marketplace Management
             </h1>
-            <p className="text-gray-600">Manage all marketplace products</p>
+            <p className="text-slate-500">
+              Manage marketplace product listings.
+            </p>
           </div>
+          <button
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
+          >
+            <Plus size={18} />
+            Add Product
+          </button>
         </div>
-        <button
-          onClick={handleOpenModal}
-          className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-        >
-          <Plus size={20} />
-          Add Product
-        </button>
-      </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              value={filters.search}
-              onChange={(e) => dispatch(setFilter({ search: e.target.value }))}
-            />
-          </div>
+        <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <Search size={18} className="text-slate-400" />
           <input
             type="text"
-            placeholder="Filter by category..."
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            value={filters.category}
-            onChange={(e) => dispatch(setFilter({ category: e.target.value }))}
+            placeholder="Search products"
+            className="w-full bg-transparent outline-none"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
           />
         </div>
       </div>
 
-      {/* Alert */}
-      {error && <Alert type="error" message={error} />}
+      <div className="rounded-2xl bg-white shadow-sm border border-slate-200">
+        <DataTable
+          columns={columns}
+          data={filteredProducts}
+          loading={loading}
+          onEdit={openEditModal}
+          onDelete={handleDelete}
+          noDataMessage="No products found"
+        />
+      </div>
 
-      {/* Loading */}
-      {loading ? (
-        <LoadingSpinner message="Loading products..." />
-      ) : (
-        <>
-          {/* Data Table */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {products.length > 0 ? (
-              <DataTable columns={columns} data={products} actions={actions} />
-            ) : (
-              <div className="p-12 text-center">
-                <ShoppingCart
-                  className="mx-auto text-gray-300 mb-4"
-                  size={48}
-                />
-                <p className="text-gray-500">No products found</p>
-              </div>
-            )}
-          </div>
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        loading={loading}
+      />
 
-          {/* Pagination */}
-          <Pagination
-            current={pagination.page}
-            total={Math.ceil(pagination.total / pagination.limit)}
-            onPageChange={(page) => dispatch(setPage(page))}
-          />
-        </>
-      )}
-
-      {/* Add/Edit Modal */}
       <AdminModal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setIsEditing(false);
-          setEditingProduct(null);
-        }}
-        title={isEditing ? "Edit Product" : "Add New Product"}
-        size="lg"
+        isOpen={modalOpen}
+        title={editingProduct ? "Edit Product" : "Add Product"}
+        onClose={closeModal}
+        size="2xl"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={closeModal}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
+            >
+              {editingProduct ? "Update" : "Create"}
+            </button>
+          </>
+        }
       >
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Name *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price *
-              </label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
-              </label>
-              <input
-                type="text"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Quantity
-              </label>
-              <input
-                type="number"
-                name="quantity"
-                value={formData.quantity}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Seller
-            </label>
-            <input
-              type="text"
-              name="seller"
-              value={formData.seller}
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field
+              label="Title"
+              name="title"
+              value={formData.title}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              required
+            />
+            <Field
+              label="Category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
+            />
+            <Field
+              label="Price"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              type="number"
+              min="0"
+              required
+            />
+            <Field
+              label="Location"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
             />
           </div>
+          <Field
+            label="Image URL"
+            name="imageUrl"
+            value={formData.imageUrl}
+            onChange={handleChange}
+          />
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Image URL
-            </label>
-            <input
-              type="url"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Description
             </label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-              rows="3"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              rows="5"
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+              placeholder="Product description"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status
-            </label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-          <div className="flex gap-3 pt-4">
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-            >
-              {loading ? "Saving..." : "Save Product"}
-            </button>
-            <button
-              onClick={() => {
-                setShowModal(false);
-                setIsEditing(false);
-                setEditingProduct(null);
-              }}
-              className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </AdminModal>
-
-      {/* Delete Confirmation Modal */}
-      <AdminModal
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setProductToDelete(null);
-        }}
-        title="Confirm Delete"
-        size="sm"
-      >
-        <div className="space-y-4">
-          <p className="text-gray-700">
-            Are you sure you want to delete{" "}
-            <strong>{productToDelete?.name}</strong>? This action cannot be
-            undone.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={handleConfirmDelete}
-              disabled={loading}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-            >
-              {loading ? "Deleting..." : "Delete"}
-            </button>
-            <button
-              onClick={() => {
-                setShowDeleteModal(false);
-                setProductToDelete(null);
-              }}
-              className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+        </form>
       </AdminModal>
     </div>
   );
-};
+}
+
+const Field = ({ label, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <input
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    />
+  </div>
+);
 
 export default MarketplaceManagement;

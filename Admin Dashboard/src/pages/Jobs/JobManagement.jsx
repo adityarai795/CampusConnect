@@ -1,456 +1,380 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Plus, Search, Users } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Eye, Plus, Search } from "lucide-react";
+import { toast } from "react-toastify";
 import adminAPI from "../../api/adminAPI";
 import DataTable from "../../component/shared/DataTable";
 import Pagination from "../../component/shared/Pagination";
-import Alert from "../../component/shared/Alert";
-import { PageLoader } from "../../component/shared/LoadingSpinner";
 import AdminModal from "../../component/shared/AdminModal";
-import {
-  fetchJobsRequest,
-  fetchJobsSuccess,
-  fetchJobsFailure,
-  setJobSearchFilter,
-  setJobStatusFilter,
-  setJobPage,
-  setApplicants,
-} from "../../redux/reducers/jobReducer";
+import { PageLoader } from "../../component/shared/LoadingSpinner";
 
-const JobManagement = () => {
-  const dispatch = useDispatch();
-  const { items, loading, error, pagination, filters, applicants } =
-    useSelector((state) => state.jobs);
+const initialFormState = {
+  title: "",
+  company: "",
+  description: "",
+  category: "IT",
+  location: "",
+  experience: "",
+  JobType: "Full Time",
+  link: "",
+  expired: false,
+};
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [applicantsModalOpen, setApplicantsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertData, setAlertData] = useState({ type: "success", message: "" });
-  const [formData, setFormData] = useState({
-    title: "",
-    company: "",
-    description: "",
-    requirements: "",
-    salary: "",
-    location: "",
-    jobType: "Full-time",
-    status: "active",
-  });
+function JobManagement() {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingJob, setEditingJob] = useState(null);
+  const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
     loadJobs();
-  }, [pagination.page, filters.search, filters.status]);
+  }, [page]);
 
   const loadJobs = async () => {
-    dispatch(fetchJobsRequest());
     try {
-      const response = await adminAPI.jobs.getAll(
-        pagination.page,
-        pagination.limit,
-        filters.status,
+      setLoading(true);
+      const response = await adminAPI.jobs.getAll(page, limit);
+      const data =
+        response.data?.message ||
+        response.data?.jobs ||
+        response.data?.data ||
+        [];
+      setJobs(Array.isArray(data) ? data : []);
+      setTotal(
+        response.data?.total ||
+          response.data?.pagination?.total ||
+          data.length ||
+          0,
       );
-      dispatch(
-        fetchJobsSuccess({
-          jobs: response.data.data || [],
-          pagination: {
-            page: pagination.page,
-            limit: pagination.limit,
-            total: response.data.total || 0,
-          },
-        }),
-      );
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || "Failed to load jobs";
-      dispatch(fetchJobsFailure(errorMsg));
-      showErrorAlert(errorMsg);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to load jobs");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const showErrorAlert = (message) => {
-    setAlertData({ type: "error", message });
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 5000);
+  const openCreateModal = () => {
+    setEditingJob(null);
+    setFormData(initialFormState);
+    setModalOpen(true);
   };
 
-  const showSuccessAlert = (message) => {
-    setAlertData({ type: "success", message });
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 5000);
+  const openEditModal = (job) => {
+    setEditingJob(job);
+    setFormData({
+      title: job.title || "",
+      company: job.company || "",
+      description: job.description || "",
+      category: job.category || "IT",
+      location: job.location || "",
+      experience: job.experience || "",
+      JobType: job.JobType || "Full Time",
+      link: job.link || "",
+      expired: Boolean(job.expired),
+    });
+    setModalOpen(true);
   };
 
-  const handleOpenModal = (job = null) => {
-    if (job) {
-      setEditingItem(job);
-      setFormData({
-        title: job.title || "",
-        company: job.company || "",
-        description: job.description || "",
-        requirements: job.requirements || "",
-        salary: job.salary || "",
-        location: job.location || "",
-        jobType: job.jobType || "Full-time",
-        status: job.status || "active",
-      });
-    } else {
-      setEditingItem(null);
-      setFormData({
-        title: "",
-        company: "",
-        description: "",
-        requirements: "",
-        salary: "",
-        location: "",
-        jobType: "Full-time",
-        status: "active",
-      });
-    }
-    setIsModalOpen(true);
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingJob(null);
+    setFormData(initialFormState);
   };
 
-  const handleViewApplicants = async (job) => {
+  const handleChange = (event) => {
+    const { name, value, type, checked } = event.target;
+    setFormData((previous) => ({
+      ...previous,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     try {
-      const response = await adminAPI.jobs.getApplicants(job._id);
-      dispatch(setApplicants(response.data.data || []));
-      setApplicantsModalOpen(true);
-    } catch (err) {
-      showErrorAlert("Failed to load applicants");
-    }
-  };
+      const payload = {
+        ...formData,
+        expired: Boolean(formData.expired),
+      };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setApplicantsModalOpen(false);
-    setEditingItem(null);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (editingItem) {
-        await adminAPI.jobs.update(editingItem._id, formData);
-        showSuccessAlert("Job updated successfully");
+      if (editingJob) {
+        await adminAPI.jobs.update(editingJob._id, payload);
+        toast.success("Job updated successfully");
       } else {
-        await adminAPI.jobs.create(formData);
-        showSuccessAlert("Job created successfully");
+        await adminAPI.jobs.create(payload);
+        toast.success("Job created successfully");
       }
-      handleCloseModal();
+
+      closeModal();
       loadJobs();
-    } catch (err) {
-      showErrorAlert(err.response?.data?.message || "Failed to save job");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to save job");
     }
   };
 
   const handleDelete = async (job) => {
-    if (!window.confirm("Are you sure you want to delete this job?")) return;
+    if (!window.confirm("Delete this job post?")) {
+      return;
+    }
+
     try {
       await adminAPI.jobs.delete(job._id);
-      showSuccessAlert("Job deleted successfully");
+      toast.success("Job deleted successfully");
       loadJobs();
-    } catch (err) {
-      showErrorAlert(err.response?.data?.message || "Failed to delete job");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete job");
     }
   };
+
+  const filteredJobs = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return jobs;
+    return jobs.filter((job) => {
+      const searchableText = [
+        job.title,
+        job.company,
+        job.category,
+        job.location,
+        job.JobType,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return searchableText.includes(query);
+    });
+  }, [jobs, search]);
 
   const columns = [
     { key: "title", label: "Job Title" },
     { key: "company", label: "Company" },
+    { key: "category", label: "Category" },
     { key: "location", label: "Location" },
-    { key: "jobType", label: "Type" },
+    { key: "JobType", label: "Type" },
     {
-      key: "salary",
-      label: "Salary",
-      render: (salary) => (salary ? `₹${salary}` : "Not specified"),
-    },
-    {
-      key: "status",
+      key: "expired",
       label: "Status",
-      render: (status) => (
+      render: (expired) => (
         <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            status === "active"
-              ? "bg-green-100 text-green-800"
-              : status === "expired"
-                ? "bg-red-100 text-red-800"
-                : "bg-gray-100 text-gray-800"
-          }`}
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${expired ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}
         >
-          {status}
+          {expired ? "Closed" : "Active"}
         </span>
       ),
     },
     {
-      key: "createdAt",
+      key: "jobPostedOn",
       label: "Posted",
-      render: (date) => new Date(date).toLocaleDateString(),
+      render: (date) => (date ? new Date(date).toLocaleDateString() : "-"),
     },
   ];
 
-  if (loading && items.length === 0) {
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  if (loading && jobs.length === 0) {
     return <PageLoader />;
   }
 
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Job Management</h1>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm border border-slate-200">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Job Management
+            </h1>
+            <p className="text-slate-500">
+              Create, edit, and remove job listings.
+            </p>
+          </div>
           <button
-            onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
-            <Plus size={20} />
-            Post New Job
+            <Plus size={18} />
+            Post Job
           </button>
         </div>
 
-        {/* Alerts */}
-        {showAlert && (
-          <Alert
-            type={alertData.type}
-            message={alertData.message}
-            onClose={() => setShowAlert(false)}
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <Search size={18} className="text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search jobs by title, company, category, or location"
+            className="w-full bg-transparent outline-none"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
           />
-        )}
-
-        {/* Filters */}
-        <div className="mb-6 flex gap-2 flex-wrap">
-          <div className="flex-1 min-w-[250px] relative">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search jobs..."
-              value={filters.search}
-              onChange={(e) => dispatch(setJobSearchFilter(e.target.value))}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <select
-            value={filters.status}
-            onChange={(e) => dispatch(setJobStatusFilter(e.target.value))}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="expired">Expired</option>
-            <option value="draft">Draft</option>
-          </select>
         </div>
+      </div>
 
-        {/* Table */}
+      <div className="rounded-2xl bg-white shadow-sm border border-slate-200">
         <DataTable
           columns={columns}
-          data={items}
+          data={filteredJobs}
           loading={loading}
-          onEdit={handleOpenModal}
+          onView={(job) =>
+            job.link && window.open(job.link, "_blank", "noreferrer")
+          }
+          onEdit={openEditModal}
           onDelete={handleDelete}
-          onView={(job) => handleViewApplicants(job)}
           noDataMessage="No jobs found"
-        />
-
-        {/* Pagination */}
-        <Pagination
-          page={pagination.page}
-          totalPages={totalPages}
-          onPageChange={(page) => dispatch(setJobPage(page))}
-          loading={loading}
         />
       </div>
 
-      {/* Job Form Modal */}
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        loading={loading}
+      />
+
       <AdminModal
-        isOpen={isModalOpen}
-        title={editingItem ? "Edit Job" : "Post New Job"}
-        onClose={handleCloseModal}
+        isOpen={modalOpen}
+        title={editingJob ? "Edit Job" : "Add Job"}
+        onClose={closeModal}
         size="2xl"
         footer={
           <>
             <button
-              onClick={handleCloseModal}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              type="button"
+              onClick={closeModal}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleSubmit}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
             >
-              {editingItem ? "Update" : "Post"} Job
+              {editingJob ? "Update" : "Create"}
             </button>
           </>
         }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Job Title *
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field
+              label="Title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+            />
+            <Field
+              label="Company"
+              name="company"
+              value={formData.company}
+              onChange={handleChange}
+            />
+            <Field
+              label="Location"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+            />
+            <Field
+              label="Experience"
+              name="experience"
+              value={formData.experience}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <SelectField
+              label="Category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              options={["IT", "Marketing", "Finance", "HR", "Sales", "Other"]}
+            />
+            <SelectField
+              label="Job Type"
+              name="JobType"
+              value={formData.JobType}
+              onChange={handleChange}
+              options={[
+                "InternShip",
+                "Part time",
+                "Full Time",
+                "Virtual",
+                "Remote",
+              ]}
+            />
+            <div className="rounded-xl border border-slate-200 px-4 py-3">
+              <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  name="expired"
+                  checked={formData.expired}
+                  onChange={handleChange}
+                />
+                Closed / Expired
               </label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., Software Engineer"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company *
-              </label>
-              <input
-                type="text"
-                name="company"
-                value={formData.company}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Company name"
-              />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location
-              </label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="City/Remote"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Job Type
-              </label>
-              <select
-                name="jobType"
-                value={formData.jobType}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
-                <option value="Contract">Contract</option>
-                <option value="Internship">Internship</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Salary (Optional)
-              </label>
-              <input
-                type="text"
-                name="salary"
-                value={formData.salary}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., 5-8 LPA"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="active">Active</option>
-                <option value="draft">Draft</option>
-                <option value="expired">Expired</option>
-              </select>
-            </div>
-          </div>
+          <Field
+            label="Application Link"
+            name="link"
+            value={formData.link}
+            onChange={handleChange}
+          />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description *
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              Description
             </label>
             <textarea
               name="description"
               value={formData.description}
-              onChange={handleInputChange}
+              onChange={handleChange}
+              rows="5"
               required
-              rows="4"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
               placeholder="Job description"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Requirements
-            </label>
-            <textarea
-              name="requirements"
-              value={formData.requirements}
-              onChange={handleInputChange}
-              rows="3"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Required skills and qualifications (comma-separated)"
             />
           </div>
         </form>
       </AdminModal>
-
-      {/* Applicants Modal */}
-      <AdminModal
-        isOpen={applicantsModalOpen}
-        title="Job Applicants"
-        onClose={handleCloseModal}
-        size="lg"
-      >
-        <div className="space-y-4">
-          {applicants.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No applicants yet</p>
-          ) : (
-            <div className="space-y-3">
-              {applicants.map((applicant) => (
-                <div
-                  key={applicant._id}
-                  className="p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">
-                        {applicant.name}
-                      </h3>
-                      <p className="text-sm text-gray-600">{applicant.email}</p>
-                      <p className="text-sm text-gray-600">{applicant.phone}</p>
-                    </div>
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                      {applicant.status || "Pending"}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </AdminModal>
     </div>
   );
-};
+}
+
+const Field = ({ label, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <input
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    />
+  </div>
+);
+
+const SelectField = ({ label, options, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <select
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    >
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
+  </div>
+);
 
 export default JobManagement;

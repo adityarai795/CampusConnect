@@ -186,6 +186,9 @@ function PlacementPrep() {
             {[
               { id: "problems", label: "Coding Problems", icon: Code },
               { id: "quizzes", label: "Quizzes", icon: Brain },
+              { id: "interviews", label: "Interviews Questions", icon: Clock },
+              { id: "projects", label: "Project Ideas", icon: BookOpen },
+
               { id: "progress", label: "My Progress", icon: BarChart3 },
             ].map((tab) => {
               const Icon = tab.icon;
@@ -339,7 +342,6 @@ function PlacementPrep() {
             </div>
           </div>
         )}
-
 
         {/* Quizzes Tab */}
         {activeTab === "quizzes" && (

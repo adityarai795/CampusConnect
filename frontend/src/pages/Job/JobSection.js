@@ -158,7 +158,7 @@ function JobSection() {
       const jobsData = response.data.message;
       setJobs(jobsData);
       setFilteredJobs(jobsData);
-      // toast.success("Jobs loaded successfully!");
+      toast.success("Jobs loaded successfully!");
     } catch (error) {
       toast.error(error?.message || "Failed to load jobs");
       console.error("Error fetching jobs:", error);

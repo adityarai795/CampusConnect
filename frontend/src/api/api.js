@@ -7,8 +7,9 @@ export const BASE_URL =
   process.env.NODE_ENV === "production" ? PROD_BASE_URL : DEV_BASE_URL;
 
 const API = axios.create({
-  // baseURL: BASE_URL,
-  baseURL: "https://api.collegeconnect.me/",
+  baseURL: DEV_BASE_URL,
+
+  // baseURL: "https://api.collegeconnect.me/",
   headers: {
     "Content-Type": "application/json",
   },

@@ -6,7 +6,6 @@ import Hero from "./Hero";
 import {
   ShoppingBag,
   FileText,
-  Code,
   GraduationCap,
   BookOpen,
   Briefcase,
@@ -23,14 +22,14 @@ const features = [
     link: "/marketplace",
   },
   {
+    title: "Placement kit",
+    icon: <GraduationCap className="w-6 h-6" />,
+    link: "/showcoding",
+  },
+  {
     title: "Resume Builder",
     icon: <FileText className="w-6 h-6" />,
     link: "/resume",
-  },
-  {
-    title: "Quiz/Coding",
-    icon: <Code className="w-6 h-6" />,
-    link: "/showcoding",
   },
   {
     title: "University Result",
@@ -57,7 +56,7 @@ const features = [
     icon: <Users className="w-6 h-6" />,
     link: "/ambassadors",
   },
-  ];
+];
   
   return (
     <>

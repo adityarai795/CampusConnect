@@ -1,614 +1,352 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchRoadmapsRequest,
-  fetchRoadmapsSuccess,
-  fetchRoadmapsFailure,
-  createRoadmapRequest,
-  createRoadmapSuccess,
-  createRoadmapFailure,
-  updateRoadmapRequest,
-  updateRoadmapSuccess,
-  updateRoadmapFailure,
-  deleteRoadmapRequest,
-  deleteRoadmapSuccess,
-  deleteRoadmapFailure,
-  setPage,
-  setFilter,
-} from "../../redux/reducers/roadmapReducer";
+import React, { useEffect, useMemo, useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { toast } from "react-toastify";
 import adminAPI from "../../api/adminAPI";
 import DataTable from "../../component/shared/DataTable";
-import AdminModal from "../../component/shared/AdminModal";
 import Pagination from "../../component/shared/Pagination";
-import Alert from "../../component/shared/Alert";
-import LoadingSpinner from "../../component/shared/LoadingSpinner";
-import { Search, Plus, Edit2, Trash2, Map, Eye } from "lucide-react";
-import { toast } from "react-toastify";
+import AdminModal from "../../component/shared/AdminModal";
+import { PageLoader } from "../../component/shared/LoadingSpinner";
 
-const RoadmapManagement = () => {
-  const dispatch = useDispatch();
-  const {
-    items: roadmaps,
-    loading,
-    error,
-    pagination,
-    filters,
-  } = useSelector((state) => state.roadmaps);
+const initialFormState = {
+  title: "",
+  description: "",
+  category: "Frontend",
+  level: "Beginner",
+  thumbnail: "",
+  tags: "",
+  steps: "[]",
+};
 
-  const [showModal, setShowModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+function RoadmapManagement() {
+  const [roadmaps, setRoadmaps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
   const [editingRoadmap, setEditingRoadmap] = useState(null);
-  const [selectedRoadmapDetail, setSelectedRoadmapDetail] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [roadmapToDelete, setRoadmapToDelete] = useState(null);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    category: "",
-    difficulty: "beginner",
-    duration: "",
-    skills: "",
-    topics: "",
-    resources: "",
-  });
+  const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
-    fetchRoadmaps();
-  }, [pagination.page, filters.search, filters.difficulty]);
+    loadRoadmaps();
+  }, [page]);
 
-  const fetchRoadmaps = async () => {
+  const loadRoadmaps = async () => {
     try {
-      dispatch(fetchRoadmapsRequest());
-      const response = await adminAPI.roadmaps.getAll(
-        pagination.page,
-        pagination.limit,
-      );
-      dispatch(
-        fetchRoadmapsSuccess({
-          data: response.data.data || response.data,
-          total: response.data.total || response.data.length,
-        }),
-      );
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message;
-      dispatch(fetchRoadmapsFailure(errorMsg));
-      toast.error("Failed to fetch roadmaps");
+      setLoading(true);
+      const response = await adminAPI.roadmaps.getAll(page, limit);
+      const data = Array.isArray(response.data)
+        ? response.data
+        : response.data?.data || response.data?.message || [];
+      setRoadmaps(Array.isArray(data) ? data : []);
+      setTotal(response.data?.total || data.length || 0);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to load roadmaps");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleOpenModal = () => {
-    setIsEditing(false);
+  const openCreateModal = () => {
     setEditingRoadmap(null);
-    setFormData({
-      title: "",
-      description: "",
-      category: "",
-      difficulty: "beginner",
-      duration: "",
-      skills: "",
-      topics: "",
-      resources: "",
-    });
-    setShowModal(true);
+    setFormData(initialFormState);
+    setModalOpen(true);
   };
 
-  const handleEdit = (roadmap) => {
-    setIsEditing(true);
+  const openEditModal = (roadmap) => {
     setEditingRoadmap(roadmap);
     setFormData({
       title: roadmap.title || "",
       description: roadmap.description || "",
-      category: roadmap.category || "",
-      difficulty: roadmap.difficulty || "beginner",
-      duration: roadmap.duration || "",
-      skills: roadmap.skills?.join(", ") || "",
-      topics: roadmap.topics?.join(", ") || "",
-      resources: roadmap.resources?.join(", ") || "",
+      category: roadmap.category || "Frontend",
+      level: roadmap.level || "Beginner",
+      thumbnail: roadmap.thumbnail || "",
+      tags: Array.isArray(roadmap.tags) ? roadmap.tags.join(", ") : "",
+      steps: JSON.stringify(roadmap.steps || [], null, 2),
     });
-    setShowModal(true);
+    setModalOpen(true);
   };
 
-  const handleViewDetail = (roadmap) => {
-    setSelectedRoadmapDetail(roadmap);
-    setShowDetailModal(true);
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingRoadmap(null);
+    setFormData(initialFormState);
   };
 
-  const handleDeleteClick = (roadmap) => {
-    setRoadmapToDelete(roadmap);
-    setShowDeleteModal(true);
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
-  const handleConfirmDelete = async () => {
-    try {
-      dispatch(deleteRoadmapRequest());
-      await adminAPI.roadmaps.delete(roadmapToDelete._id);
-      dispatch(deleteRoadmapSuccess(roadmapToDelete._id));
-      toast.success("Roadmap deleted successfully");
-      setShowDeleteModal(false);
-      setRoadmapToDelete(null);
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message;
-      dispatch(deleteRoadmapFailure(errorMsg));
-      toast.error("Failed to delete roadmap");
-    }
+  const parseSteps = (value) => {
+    if (!value.trim()) return [];
+    return JSON.parse(value);
   };
 
-  const handleSubmit = async () => {
-    if (!formData.title || !formData.category) {
-      toast.error("Title and category are required");
-      return;
-    }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
     try {
-      const dataToSend = {
+      const payload = {
         ...formData,
-        skills: formData.skills
-          ? formData.skills.split(",").map((s) => s.trim())
-          : [],
-        topics: formData.topics
-          ? formData.topics.split(",").map((t) => t.trim())
-          : [],
-        resources: formData.resources
-          ? formData.resources.split(",").map((r) => r.trim())
-          : [],
+        tags: formData.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean),
+        steps: parseSteps(formData.steps),
       };
 
-      if (isEditing) {
-        dispatch(updateRoadmapRequest());
-        const response = await adminAPI.roadmaps.update(
-          editingRoadmap._id,
-          dataToSend,
-        );
-        dispatch(updateRoadmapSuccess(response.data));
+      if (editingRoadmap) {
+        await adminAPI.roadmaps.update(editingRoadmap._id, payload);
         toast.success("Roadmap updated successfully");
       } else {
-        dispatch(createRoadmapRequest());
-        const response = await adminAPI.roadmaps.create(dataToSend);
-        dispatch(createRoadmapSuccess(response.data));
+        await adminAPI.roadmaps.create(payload);
         toast.success("Roadmap created successfully");
       }
-      setShowModal(false);
-      setFormData({
-        title: "",
-        description: "",
-        category: "",
-        difficulty: "beginner",
-        duration: "",
-        skills: "",
-        topics: "",
-        resources: "",
-      });
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message;
-      if (isEditing) {
-        dispatch(updateRoadmapFailure(errorMsg));
-      } else {
-        dispatch(createRoadmapFailure(errorMsg));
-      }
-      toast.error(errorMsg);
+
+      closeModal();
+      loadRoadmaps();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to save roadmap",
+      );
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleDelete = async (roadmap) => {
+    if (!window.confirm("Delete this roadmap?")) return;
+
+    try {
+      await adminAPI.roadmaps.delete(roadmap._id);
+      toast.success("Roadmap deleted successfully");
+      loadRoadmaps();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete roadmap");
+    }
   };
 
+  const filteredRoadmaps = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return roadmaps;
+    return roadmaps.filter((roadmap) => {
+      const searchableText = [
+        roadmap.title,
+        roadmap.description,
+        roadmap.category,
+        roadmap.level,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return searchableText.includes(query);
+    });
+  }, [roadmaps, search]);
+
   const columns = [
+    { key: "title", label: "Title" },
+    { key: "category", label: "Category" },
+    { key: "level", label: "Level" },
     {
-      header: "Roadmap Title",
-      render: (roadmap) => (
-        <div>
-          <span className="font-medium text-gray-800 block">
-            {roadmap.title}
-          </span>
-          <span className="text-xs text-gray-500">{roadmap.category}</span>
-        </div>
-      ),
+      key: "steps",
+      label: "Steps",
+      render: (steps) => steps?.length || 0,
     },
     {
-      header: "Difficulty",
-      render: (roadmap) => (
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            roadmap.difficulty === "beginner"
-              ? "bg-green-100 text-green-800"
-              : roadmap.difficulty === "intermediate"
-                ? "bg-yellow-100 text-yellow-800"
-                : "bg-red-100 text-red-800"
-          }`}
-        >
-          {roadmap.difficulty}
-        </span>
-      ),
-    },
-    {
-      header: "Duration",
-      render: (roadmap) => (
-        <span className="text-gray-600 text-sm">
-          {roadmap.duration || "N/A"}
-        </span>
-      ),
-    },
-    {
-      header: "Topics",
-      render: (roadmap) => (
-        <div className="flex flex-wrap gap-1">
-          {roadmap.topics?.slice(0, 2).map((topic, idx) => (
-            <span
-              key={idx}
-              className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs"
-            >
-              {topic}
-            </span>
-          ))}
-          {roadmap.topics?.length > 2 && (
-            <span className="text-gray-600 text-xs">
-              +{roadmap.topics.length - 2} more
-            </span>
-          )}
-        </div>
-      ),
+      key: "createdAt",
+      label: "Created",
+      render: (date) => (date ? new Date(date).toLocaleDateString() : "-"),
     },
   ];
 
-  const actions = [
-    {
-      label: "View",
-      icon: Eye,
-      onClick: handleViewDetail,
-      color: "text-green-600",
-    },
-    {
-      label: "Edit",
-      icon: Edit2,
-      onClick: handleEdit,
-      color: "text-blue-600",
-    },
-    {
-      label: "Delete",
-      icon: Trash2,
-      onClick: handleDeleteClick,
-      color: "text-red-600",
-    },
-  ];
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  if (loading && roadmaps.length === 0) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg">
-            <Map className="text-white" size={24} />
-          </div>
+      <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-200">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">
+            <h1 className="text-3xl font-bold text-slate-900">
               Roadmap Management
             </h1>
-            <p className="text-gray-600">Manage learning roadmaps and paths</p>
+            <p className="text-slate-500">
+              Create structured learning roadmaps.
+            </p>
           </div>
-        </div>
-        <button
-          onClick={handleOpenModal}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-        >
-          <Plus size={20} />
-          Add Roadmap
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search roadmaps..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              value={filters.search}
-              onChange={(e) => dispatch(setFilter({ search: e.target.value }))}
-            />
-          </div>
-          <select
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={filters.difficulty}
-            onChange={(e) =>
-              dispatch(setFilter({ difficulty: e.target.value }))
-            }
+          <button
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
-            <option value="all">All Difficulties</option>
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced</option>
-          </select>
+            <Plus size={18} />
+            Create Roadmap
+          </button>
+        </div>
+
+        <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <Search size={18} className="text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search roadmaps"
+            className="w-full bg-transparent outline-none"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
         </div>
       </div>
 
-      {/* Alert */}
-      {error && <Alert type="error" message={error} />}
+      <div className="rounded-2xl bg-white shadow-sm border border-slate-200">
+        <DataTable
+          columns={columns}
+          data={filteredRoadmaps}
+          loading={loading}
+          onEdit={openEditModal}
+          onDelete={handleDelete}
+          noDataMessage="No roadmaps found"
+        />
+      </div>
 
-      {/* Loading */}
-      {loading ? (
-        <LoadingSpinner message="Loading roadmaps..." />
-      ) : (
-        <>
-          {/* Data Table */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {roadmaps.length > 0 ? (
-              <DataTable columns={columns} data={roadmaps} actions={actions} />
-            ) : (
-              <div className="p-12 text-center">
-                <Map className="mx-auto text-gray-300 mb-4" size={48} />
-                <p className="text-gray-500">No roadmaps found</p>
-              </div>
-            )}
-          </div>
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        loading={loading}
+      />
 
-          {/* Pagination */}
-          <Pagination
-            current={pagination.page}
-            total={Math.ceil(pagination.total / pagination.limit)}
-            onPageChange={(page) => dispatch(setPage(page))}
-          />
-        </>
-      )}
-
-      {/* Add/Edit Modal */}
       <AdminModal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setIsEditing(false);
-          setEditingRoadmap(null);
-        }}
-        title={isEditing ? "Edit Roadmap" : "Add New Roadmap"}
-        size="lg"
+        isOpen={modalOpen}
+        title={editingRoadmap ? "Edit Roadmap" : "Add Roadmap"}
+        onClose={closeModal}
+        size="2xl"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={closeModal}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
+            >
+              {editingRoadmap ? "Update" : "Create"}
+            </button>
+          </>
+        }
       >
-        <div className="space-y-4 max-h-96 overflow-y-auto">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title *
-            </label>
-            <input
-              type="text"
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field
+              label="Title"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
             />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category *
-              </label>
-              <input
-                type="text"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Difficulty
-              </label>
-              <select
-                name="difficulty"
-                value={formData.difficulty}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Duration (e.g., 12 weeks)
-            </label>
-            <input
-              type="text"
-              name="duration"
-              value={formData.duration}
+            <SelectField
+              label="Category"
+              name="category"
+              value={formData.category}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              options={[
+                "Frontend",
+                "Backend",
+                "Full Stack",
+                "DSA",
+                "DevOps",
+                "Mobile",
+                "AI/ML",
+              ]}
+            />
+            <SelectField
+              label="Level"
+              name="level"
+              value={formData.level}
+              onChange={handleChange}
+              options={["Beginner", "Intermediate", "Advanced"]}
+            />
+            <Field
+              label="Thumbnail"
+              name="thumbnail"
+              value={formData.thumbnail}
+              onChange={handleChange}
             />
           </div>
+          <Field
+            label="Tags"
+            name="tags"
+            value={formData.tags}
+            onChange={handleChange}
+            placeholder="comma separated tags"
+          />
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Description
             </label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-              rows="3"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              rows="4"
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+              placeholder="Roadmap description"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Skills (comma-separated)
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              Steps JSON
             </label>
-            <input
-              type="text"
-              name="skills"
-              value={formData.skills}
+            <textarea
+              name="steps"
+              value={formData.steps}
               onChange={handleChange}
-              placeholder="e.g., JavaScript, React, Node.js"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              rows="10"
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 font-mono text-sm outline-none focus:border-indigo-500"
+              placeholder='[{"title":"Step 1","description":"Learn basics","order":1}]'
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Topics (comma-separated)
-            </label>
-            <input
-              type="text"
-              name="topics"
-              value={formData.topics}
-              onChange={handleChange}
-              placeholder="e.g., Basics, Advanced, Projects"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Resources (comma-separated URLs)
-            </label>
-            <input
-              type="text"
-              name="resources"
-              value={formData.resources}
-              onChange={handleChange}
-              placeholder="e.g., https://example.com, https://docs.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div className="flex gap-3 pt-4">
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-            >
-              {loading ? "Saving..." : "Save Roadmap"}
-            </button>
-            <button
-              onClick={() => {
-                setShowModal(false);
-                setIsEditing(false);
-                setEditingRoadmap(null);
-              }}
-              className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </AdminModal>
-
-      {/* Detail View Modal */}
-      {selectedRoadmapDetail && (
-        <AdminModal
-          isOpen={showDetailModal}
-          onClose={() => {
-            setShowDetailModal(false);
-            setSelectedRoadmapDetail(null);
-          }}
-          title={selectedRoadmapDetail.title}
-          size="lg"
-        >
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-gray-700 mb-2">Description</h3>
-              <p className="text-gray-600">
-                {selectedRoadmapDetail.description}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2">Category</h3>
-                <p className="text-gray-600">
-                  {selectedRoadmapDetail.category}
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2">Duration</h3>
-                <p className="text-gray-600">
-                  {selectedRoadmapDetail.duration || "N/A"}
-                </p>
-              </div>
-            </div>
-            {selectedRoadmapDetail.skills && (
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2">Skills</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedRoadmapDetail.skills.map((skill, idx) => (
-                    <span
-                      key={idx}
-                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            {selectedRoadmapDetail.topics && (
-              <div>
-                <h3 className="font-semibold text-gray-700 mb-2">Topics</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedRoadmapDetail.topics.map((topic, idx) => (
-                    <span
-                      key={idx}
-                      className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm"
-                    >
-                      {topic}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            <button
-              onClick={() => {
-                setShowDetailModal(false);
-                setSelectedRoadmapDetail(null);
-              }}
-              className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
-            >
-              Close
-            </button>
-          </div>
-        </AdminModal>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      <AdminModal
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setRoadmapToDelete(null);
-        }}
-        title="Confirm Delete"
-        size="sm"
-      >
-        <div className="space-y-4">
-          <p className="text-gray-700">
-            Are you sure you want to delete{" "}
-            <strong>{roadmapToDelete?.title}</strong>? This action cannot be
-            undone.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={handleConfirmDelete}
-              disabled={loading}
-              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-            >
-              {loading ? "Deleting..." : "Delete"}
-            </button>
-            <button
-              onClick={() => {
-                setShowDeleteModal(false);
-                setRoadmapToDelete(null);
-              }}
-              className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+        </form>
       </AdminModal>
     </div>
   );
-};
+}
+
+const Field = ({ label, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <input
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    />
+  </div>
+);
+
+const SelectField = ({ label, options, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <select
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    >
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
+  </div>
+);
 
 export default RoadmapManagement;

@@ -1,426 +1,348 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Plus, Search, Upload } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { toast } from "react-toastify";
 import adminAPI from "../../api/adminAPI";
 import DataTable from "../../component/shared/DataTable";
 import Pagination from "../../component/shared/Pagination";
-import Alert from "../../component/shared/Alert";
-import { PageLoader } from "../../component/shared/LoadingSpinner";
 import AdminModal from "../../component/shared/AdminModal";
-import {
-  fetchResourcesRequest,
-  fetchResourcesSuccess,
-  fetchResourcesFailure,
-  setSearchFilter,
-  setPage,
-} from "../../redux/reducers/resourceReducer";
+import { PageLoader } from "../../component/shared/LoadingSpinner";
 
-const ResourceManagement = () => {
-  const dispatch = useDispatch();
-  const { items, loading, error, pagination, filters } = useSelector(
-    (state) => state.resources,
-  );
+const initialFormState = {
+  title: "",
+  type: "Notes",
+  description: "",
+  link: "",
+  branch: "",
+  semester: "",
+  university: "",
+  tags: "",
+};
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertData, setAlertData] = useState({ type: "success", message: "" });
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    category: "",
-    branch: "",
-    year: "",
-    semester: "",
-    subject: "",
-    file: null,
-  });
+function ResourceTableManagement() {
+  const [resources, setResources] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingResource, setEditingResource] = useState(null);
+  const [formData, setFormData] = useState(initialFormState);
 
-  // Fetch resources
   useEffect(() => {
     loadResources();
-  }, [pagination.page, filters.search]);
+  }, [page]);
 
   const loadResources = async () => {
-    dispatch(fetchResourcesRequest());
     try {
-      const response = await adminAPI.resources.getAll(
-        pagination.page,
-        pagination.limit,
-        filters.search,
-      );
-      dispatch(
-        fetchResourcesSuccess({
-          resources: response.data.data || [],
-          pagination: {
-            page: pagination.page,
-            limit: pagination.limit,
-            total: response.data.total || 0,
-          },
-        }),
-      );
-    } catch (err) {
-      const errorMsg =
-        err.response?.data?.message || "Failed to load resources";
-      dispatch(fetchResourcesFailure(errorMsg));
-      showErrorAlert(errorMsg);
+      setLoading(true);
+      const response = await adminAPI.resources.getAll(page, limit, search);
+      const data =
+        response.data?.message ||
+        response.data?.resources ||
+        response.data?.data ||
+        [];
+      setResources(Array.isArray(data) ? data : []);
+      setTotal(response.data?.total || data.length || 0);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to load resources");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const showErrorAlert = (message) => {
-    setAlertData({ type: "error", message });
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 5000);
+  const openCreateModal = () => {
+    setEditingResource(null);
+    setFormData(initialFormState);
+    setModalOpen(true);
   };
 
-  const showSuccessAlert = (message) => {
-    setAlertData({ type: "success", message });
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 5000);
-  };
-
-  const handleOpenModal = (resource = null) => {
-    if (resource) {
-      setEditingItem(resource);
-      setFormData({
-        title: resource.title || "",
-        description: resource.description || "",
-        category: resource.category || "",
-        branch: resource.branch || "",
-        year: resource.year || "",
-        semester: resource.semester || "",
-        subject: resource.subject || "",
-      });
-    } else {
-      setEditingItem(null);
-      setFormData({
-        title: "",
-        description: "",
-        category: "",
-        branch: "",
-        year: "",
-        semester: "",
-        subject: "",
-        file: null,
-      });
-    }
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingItem(null);
+  const openEditModal = (resource) => {
+    setEditingResource(resource);
     setFormData({
-      title: "",
-      description: "",
-      category: "",
-      branch: "",
-      year: "",
-      semester: "",
-      subject: "",
-      file: null,
+      title: resource.title || "",
+      type: resource.type || "Notes",
+      description: resource.description || "",
+      link: resource.link || "",
+      branch: resource.branch || "",
+      semester: resource.semester || "",
+      university: resource.university || "",
+      tags: Array.isArray(resource.tags) ? resource.tags.join(", ") : "",
     });
+    setModalOpen(true);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
-    if (files) {
-      setFormData({ ...formData, [name]: files[0] });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingResource(null);
+    setFormData(initialFormState);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const payload = {
+      ...formData,
+      semester: formData.semester,
+      tags: formData.tags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+    };
+
     try {
-      const data = new FormData();
-      Object.keys(formData).forEach((key) => {
-        if (formData[key] !== null) {
-          data.append(key, formData[key]);
-        }
-      });
-
-      if (editingItem) {
-        await adminAPI.resources.update(editingItem._id, data);
-        showSuccessAlert("Resource updated successfully");
+      if (editingResource) {
+        await adminAPI.resources.update(editingResource._id, payload);
+        toast.success("Resource updated successfully");
       } else {
-        await adminAPI.resources.upload(data);
-        showSuccessAlert("Resource uploaded successfully");
+        await adminAPI.resources.create(payload);
+        toast.success("Resource created successfully");
       }
 
-      handleCloseModal();
+      closeModal();
       loadResources();
-    } catch (err) {
-      showErrorAlert(err.response?.data?.message || "Failed to save resource");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to save resource");
     }
   };
 
   const handleDelete = async (resource) => {
-    if (!window.confirm("Are you sure you want to delete this resource?"))
-      return;
+    if (!window.confirm("Delete this resource?")) return;
 
     try {
       await adminAPI.resources.delete(resource._id);
-      showSuccessAlert("Resource deleted successfully");
+      toast.success("Resource deleted successfully");
       loadResources();
-    } catch (err) {
-      showErrorAlert(
-        err.response?.data?.message || "Failed to delete resource",
-      );
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete resource");
     }
   };
 
+  const filteredResources = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return resources;
+    return resources.filter((resource) => {
+      const searchableText = [
+        resource.title,
+        resource.type,
+        resource.branch,
+        resource.university,
+        resource.description,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return searchableText.includes(query);
+    });
+  }, [resources, search]);
+
   const columns = [
     { key: "title", label: "Title" },
-    { key: "category", label: "Category" },
+    { key: "type", label: "Type" },
     { key: "branch", label: "Branch" },
-    {
-      key: "year",
-      label: "Year",
-      render: (year) => year || "-",
-    },
     {
       key: "semester",
       label: "Semester",
-      render: (sem) => sem || "-",
+      render: (semester) => (semester ? `Sem ${semester}` : "-"),
     },
-    {
-      key: "subject",
-      label: "Subject",
-      render: (subject) => subject || "-",
-    },
+    { key: "university", label: "University" },
     {
       key: "createdAt",
       label: "Created",
-      render: (date) => new Date(date).toLocaleDateString(),
+      render: (date) => (date ? new Date(date).toLocaleDateString() : "-"),
     },
   ];
 
-  if (loading && items.length === 0) {
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  if (loading && resources.length === 0) {
     return <PageLoader />;
   }
 
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Resource Management
-          </h1>
+    <div className="space-y-6">
+      <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-200">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Resource Management
+            </h1>
+            <p className="text-slate-500">
+              Manage notes, question papers, and learning resources.
+            </p>
+          </div>
           <button
-            onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
-            <Plus size={20} />
-            Upload Resource
+            <Plus size={18} />
+            Add Resource
           </button>
         </div>
 
-        {/* Alerts */}
-        {showAlert && (
-          <Alert
-            type={alertData.type}
-            message={alertData.message}
-            onClose={() => setShowAlert(false)}
+        <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <Search size={18} className="text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search resources"
+            className="w-full bg-transparent outline-none"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
           />
-        )}
-
-        {/* Search */}
-        <div className="mb-6 flex gap-2">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search resources..."
-              value={filters.search}
-              onChange={(e) => dispatch(setSearchFilter(e.target.value))}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
         </div>
+      </div>
 
-        {/* Table */}
+      <div className="rounded-2xl bg-white shadow-sm border border-slate-200">
         <DataTable
           columns={columns}
-          data={items}
+          data={filteredResources}
           loading={loading}
-          onEdit={handleOpenModal}
+          onEdit={openEditModal}
           onDelete={handleDelete}
+          onView={(resource) =>
+            resource.link && window.open(resource.link, "_blank", "noreferrer")
+          }
           noDataMessage="No resources found"
-        />
-
-        {/* Pagination */}
-        <Pagination
-          page={pagination.page}
-          totalPages={totalPages}
-          onPageChange={(page) => dispatch(setPage(page))}
-          loading={loading}
         />
       </div>
 
-      {/* Modal for Create/Edit */}
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        loading={loading}
+      />
+
       <AdminModal
-        isOpen={isModalOpen}
-        title={editingItem ? "Edit Resource" : "Upload New Resource"}
-        onClose={handleCloseModal}
-        size="lg"
+        isOpen={modalOpen}
+        title={editingResource ? "Edit Resource" : "Add Resource"}
+        onClose={closeModal}
+        size="2xl"
         footer={
           <>
             <button
-              onClick={handleCloseModal}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              type="button"
+              onClick={closeModal}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleSubmit}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
             >
-              <Upload size={18} />
-              {editingItem ? "Update" : "Upload"}
+              {editingResource ? "Update" : "Create"}
             </button>
           </>
         }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title *
-            </label>
-            <input
-              type="text"
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field
+              label="Title"
               name="title"
               value={formData.title}
-              onChange={handleInputChange}
+              onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Resource title"
+            />
+            <SelectField
+              label="Type"
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              options={[
+                "Notes",
+                "Question Paper",
+                "Youtube",
+                "Important Courses",
+              ]}
+            />
+            <Field
+              label="Branch"
+              name="branch"
+              value={formData.branch}
+              onChange={handleChange}
+            />
+            <Field
+              label="Semester"
+              name="semester"
+              value={formData.semester}
+              onChange={handleChange}
+            />
+            <Field
+              label="University"
+              name="university"
+              value={formData.university}
+              onChange={handleChange}
+            />
+            <Field
+              label="Link"
+              name="link"
+              value={formData.link}
+              onChange={handleChange}
             />
           </div>
-
+          <Field
+            label="Tags"
+            name="tags"
+            value={formData.tags}
+            onChange={handleChange}
+            placeholder="comma separated tags"
+          />
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Description
             </label>
             <textarea
               name="description"
               value={formData.description}
-              onChange={handleInputChange}
-              rows="3"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={handleChange}
+              rows="5"
+              required
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
               placeholder="Resource description"
             />
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
-              </label>
-              <input
-                type="text"
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., Notes, Books"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Branch
-              </label>
-              <input
-                type="text"
-                name="branch"
-                value={formData.branch}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., CSE, ECE"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Year
-              </label>
-              <select
-                name="year"
-                value={formData.year}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Year</option>
-                <option value="1">1st Year</option>
-                <option value="2">2nd Year</option>
-                <option value="3">3rd Year</option>
-                <option value="4">4th Year</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Semester
-              </label>
-              <select
-                name="semester"
-                value={formData.semester}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Semester</option>
-                <option value="1">1st</option>
-                <option value="2">2nd</option>
-                <option value="3">3rd</option>
-                <option value="4">4th</option>
-                <option value="5">5th</option>
-                <option value="6">6th</option>
-                <option value="7">7th</option>
-                <option value="8">8th</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Subject
-              </label>
-              <input
-                type="text"
-                name="subject"
-                value={formData.subject}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., Data Structures"
-              />
-            </div>
-          </div>
-
-          {!editingItem && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                File *
-              </label>
-              <input
-                type="file"
-                name="file"
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
-              />
-            </div>
-          )}
         </form>
       </AdminModal>
     </div>
   );
-};
+}
 
-export default ResourceManagement;
+const Field = ({ label, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <input
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    />
+  </div>
+);
+
+const SelectField = ({ label, options, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <select
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    >
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
+export default ResourceTableManagement;

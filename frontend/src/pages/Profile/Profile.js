@@ -23,6 +23,7 @@ import {
 import { useUser } from "../../context/UserContext";
 import { getProfile, updateProfile } from "../../api/profile";
 import { useNavigate } from "react-router-dom";
+import Activity from "./Activity";
 
 const EMPTY_ACADEMIC = {
   institutionType: "college",
@@ -223,7 +224,6 @@ function Profile() {
             </button>
           )}
         </div>
-
         {/* Basic Info Card */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
           <div className="flex items-center gap-2 mb-6">
@@ -290,7 +290,6 @@ function Profile() {
             </div>
           </div>
         </div>
-
         {/* Academic Details Card */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
           <div className="flex justify-between items-center mb-6">
@@ -336,7 +335,11 @@ function Profile() {
                 <select
                   value={item.institutionType}
                   onChange={(e) =>
-                    handleAcademicChange(index, "institutionType", e.target.value)
+                    handleAcademicChange(
+                      index,
+                      "institutionType",
+                      e.target.value,
+                    )
                   }
                   disabled={!isEditing}
                   className={`w-full px-4 py-3 rounded-lg border-2 ${
@@ -361,7 +364,11 @@ function Profile() {
                   type="text"
                   value={item.institutionName}
                   onChange={(e) =>
-                    handleAcademicChange(index, "institutionName", e.target.value)
+                    handleAcademicChange(
+                      index,
+                      "institutionName",
+                      e.target.value,
+                    )
                   }
                   disabled={!isEditing}
                   placeholder="Enter institution name"
@@ -465,7 +472,6 @@ function Profile() {
             </div>
           ))}
         </div>
-
         {/* Skills Section */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
           <div className="flex items-center gap-2 mb-6">
@@ -519,12 +525,13 @@ function Profile() {
             )}
           </div>
         </div>
-
         {/* Professional Links */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow">
           <div className="flex items-center gap-2 mb-6">
             <Link className="w-5 h-5 text-purple-600" />
-            <h2 className="text-xl font-bold text-gray-800">Professional Links</h2>
+            <h2 className="text-xl font-bold text-gray-800">
+              Professional Links
+            </h2>
           </div>
 
           <div className="space-y-4">
@@ -537,7 +544,8 @@ function Profile() {
 
               {/* Display existing certifications */}
               <div className="space-y-2 mb-3">
-                {profileData.certifications && profileData.certifications.length > 0 ? (
+                {profileData.certifications &&
+                profileData.certifications.length > 0 ? (
                   profileData.certifications.map((cert, index) => (
                     <div
                       key={index}
@@ -562,7 +570,9 @@ function Profile() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-400 text-sm">No certifications added yet</p>
+                  <p className="text-gray-400 text-sm">
+                    No certifications added yet
+                  </p>
                 )}
               </div>
 
@@ -573,7 +583,9 @@ function Profile() {
                     type="url"
                     value={newCertification}
                     onChange={(e) => setNewCertification(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleAddCertification()}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && handleAddCertification()
+                    }
                     className="flex-1 px-4 py-3 rounded-lg border-2 border-blue-300 bg-white focus:border-blue-500 focus:outline-none transition-all"
                     placeholder="https://certificate-url.com"
                   />
@@ -597,7 +609,9 @@ function Profile() {
                 <input
                   type="url"
                   value={profileData.socialLinks.linkedin}
-                  onChange={(e) => handleSocialLinkChange("linkedin", e.target.value)}
+                  onChange={(e) =>
+                    handleSocialLinkChange("linkedin", e.target.value)
+                  }
                   disabled={!isEditing}
                   className={`w-full px-4 py-3 rounded-lg border-2 ${
                     isEditing
@@ -616,7 +630,9 @@ function Profile() {
                 <input
                   type="url"
                   value={profileData.socialLinks.github}
-                  onChange={(e) => handleSocialLinkChange("github", e.target.value)}
+                  onChange={(e) =>
+                    handleSocialLinkChange("github", e.target.value)
+                  }
                   disabled={!isEditing}
                   className={`w-full px-4 py-3 rounded-lg border-2 ${
                     isEditing
@@ -635,7 +651,9 @@ function Profile() {
                 <input
                   type="url"
                   value={profileData.socialLinks.leetcode}
-                  onChange={(e) => handleSocialLinkChange("leetcode", e.target.value)}
+                  onChange={(e) =>
+                    handleSocialLinkChange("leetcode", e.target.value)
+                  }
                   disabled={!isEditing}
                   className={`w-full px-4 py-3 rounded-lg border-2 ${
                     isEditing
@@ -648,7 +666,6 @@ function Profile() {
             </div>
           </div>
         </div>
-
         {/* Action Buttons */}
         {isEditing && (
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
@@ -666,7 +683,6 @@ function Profile() {
             </button>
           </div>
         )}
-
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <button
@@ -708,7 +724,9 @@ function Profile() {
             </div>
           </button>
         </div>
-
+        {/* Acitvity */}
+          <Activity />
+         
         {/* Logout Section */}
         {!isEditing && (
           <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6">

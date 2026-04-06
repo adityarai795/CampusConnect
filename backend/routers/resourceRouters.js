@@ -4,6 +4,8 @@ const {
   uploadResource,
   viewResource,
   viewAll,
+  updateResource,
+  deleteResource,
 } = require("../controllers/resourceControllers");
 
 // POST /api/resource/upload
@@ -14,5 +16,9 @@ router.post("/viewResource", viewResource);
 
 //show all Data
 router.get("/showall", viewAll);
+
+router.put("/update/:id", updateResource);
+
+router.delete("/delete/:id", deleteResource);
 
 module.exports = router;

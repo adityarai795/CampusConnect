@@ -90,6 +90,9 @@ function ItemUploadForm() {
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g., MacBook Pro 2020"
               />
+              <span className="text-xs text-gray-500">
+                Provide a direct URL to your product image
+              </span>
             </div>
             {/* Price */}
             <div>

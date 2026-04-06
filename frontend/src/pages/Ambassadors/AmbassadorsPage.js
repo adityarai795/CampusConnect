@@ -1,44 +1,65 @@
 import  { useState } from 'react';
 import { DollarSign, Bot, Clock, Users, TrendingUp, Zap, CheckCircle, Play, ArrowRight } from 'lucide-react';
 import { createAmbassador } from '../../api/authrization';
+import { toast } from  'react-toastify'
 function AmbassadorsPage() {
   const [showApplicationForm, setShowApplicationForm] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    university: '',
-    graduationYear: '',
-    gpa: '',
-    availability: '',
-    socialMedia: '',
-    whyJoin: ''
-  });
+ const [formData, setFormData] = useState({
+   name: "",
+   email: "",
+   mobileNumber: "",
+   academicDetails: {
+     institutionName: "",
+     course: "",
+     branch: "",
+     year: "",
+   },
+   graduationYear: "",
+   weeklyAvailabilityHours: "",
+   motivation: "",
+   socialMediaHandles: {
+     linkedin: "",
+     instagram: "",
+     twitter: "",
+   },
+ });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async () => {
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.university) {
-      alert('Please fill in all required fields');
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.mobileNumber ||
+      !formData.academicDetails.institutionName
+    ) {
+      toast.info("Please fill in all required fields");
       return;
     }
-    await createAmbassador(formData);
-    alert('Application submitted successfully! We will contact you within 3-5 business days.');
-    setShowApplicationForm(false);
-    setFormData({
-      fullName: '',
-      email: '',
-      phone: '',
-      university: '',
-      graduationYear: '',
-      gpa: '',
-      availability: '',
-      socialMedia: '',
-      whyJoin: ''
-    });
+
+    try {
+      await createAmbassador(formData);
+      toast.success("Application submitted successfully!");
+
+      setShowApplicationForm(false);
+    } catch (err) {
+      toast.error("Something went wrong");
+    }
   };
 
   const benefits = [
@@ -107,161 +128,194 @@ function AmbassadorsPage() {
   ];
 
   if (showApplicationForm) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4">
-        <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Ambassador Application</h2>
-            <button
-              onClick={() => setShowApplicationForm(false)}
-              className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
-            >
-              ×
-            </button>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Full Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Aditya rai"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="john@university.edu"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phone Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="+1 (555) 000-0000"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                University <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="university"
-                value={formData.university}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="University of Example"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Expected Graduation Year
-                </label>
-                <input
-                  type="text"
-                  name="graduationYear"
-                  value={formData.graduationYear}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="2026"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Current GPA
-                </label>
-                <input
-                  type="text"
-                  name="gpa"
-                  value={formData.gpa}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="3.5"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Weekly Availability (hours)
-              </label>
-              <input
-                type="text"
-                name="availability"
-                value={formData.availability}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="15-20 hours/week"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Social Media Handles
-              </label>
-              <input
-                type="text"
-                name="socialMedia"
-                value={formData.socialMedia}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Instagram, LinkedIn, etc."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Why do you want to become a Campus Ambassador?
-              </label>
-              <textarea
-                name="whyJoin"
-                value={formData.whyJoin}
-                onChange={handleInputChange}
-                rows="4"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Tell us about your motivation, relevant experience, and what you hope to achieve..."
-              />
-            </div>
-
-            <button
-              onClick={handleSubmit}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition transform hover:scale-105 shadow-lg"
-            >
-              Submit Application
-            </button>
-          </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4">
+      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
+        
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">
+            Ambassador Application
+          </h2>
+          <button
+            onClick={() => setShowApplicationForm(false)}
+            className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+          >
+            ×
+          </button>
         </div>
+
+        <div className="space-y-6">
+
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-semibold mb-2">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              className="input"
+              placeholder="Aditya Rai"
+            />
+          </div>
+
+          {/* Email + Phone */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold mb-2">
+                Email *
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="input"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-2">
+                Mobile Number *
+              </label>
+              <input
+                type="tel"
+                name="mobileNumber"
+                value={formData.mobileNumber}
+                onChange={handleInputChange}
+                className="input"
+              />
+            </div>
+          </div>
+
+          {/* Academic Details */}
+          <h3 className="text-lg font-semibold pt-4 border-t">
+            Academic Details
+          </h3>
+
+          <input
+            type="text"
+            name="academicDetails.institutionName"
+            value={formData.academicDetails.institutionName}
+            onChange={handleInputChange}
+            placeholder="Institution Name"
+            className="input"
+          />
+
+          <div className="grid md:grid-cols-3 gap-4">
+            <input
+              type="text"
+              name="academicDetails.course"
+              value={formData.academicDetails.course}
+              onChange={handleInputChange}
+              placeholder="Course"
+              className="input"
+            />
+
+            <input
+              type="text"
+              name="academicDetails.branch"
+              value={formData.academicDetails.branch}
+              onChange={handleInputChange}
+              placeholder="Branch"
+              className="input"
+            />
+
+            <input
+              type="text"
+              name="academicDetails.year"
+              value={formData.academicDetails.year}
+              onChange={handleInputChange}
+              placeholder="Year"
+              className="input"
+            />
+          </div>
+
+          {/* Graduation + Availability */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <input
+              type="number"
+              name="graduationYear"
+              value={formData.graduationYear}
+              onChange={handleInputChange}
+              placeholder="Graduation Year"
+              className="input"
+            />
+
+            <input
+              type="number"
+              name="weeklyAvailabilityHours"
+              value={formData.weeklyAvailabilityHours}
+              onChange={handleInputChange}
+              placeholder="Weekly Hours"
+              className="input"
+            />
+          </div>
+
+          {/* Social Media */}
+          <h3 className="text-lg font-semibold pt-4 border-t">
+            Social Media
+          </h3>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            <input
+              type="text"
+              name="socialMediaHandles.linkedin"
+              value={formData.socialMediaHandles.linkedin}
+              onChange={handleInputChange}
+              placeholder="LinkedIn"
+              className="input"
+            />
+
+            <input
+              type="text"
+              name="socialMediaHandles.instagram"
+              value={formData.socialMediaHandles.instagram}
+              onChange={handleInputChange}
+              placeholder="Instagram"
+              className="input"
+            />
+
+            <input
+              type="text"
+              name="socialMediaHandles.twitter"
+              value={formData.socialMediaHandles.twitter}
+              onChange={handleInputChange}
+              placeholder="Twitter"
+              className="input"
+            />
+          </div>
+
+          {/* Motivation */}
+          <div>
+            <label className="block text-sm font-semibold mb-2">
+              Motivation *
+            </label>
+            <textarea
+              name="motivation"
+              value={formData.motivation}
+              onChange={handleInputChange}
+              rows="4"
+              className="input"
+              placeholder="Why do you want to become campus ambassador..."
+            />
+          </div>
+
+          {/* Submit */}
+          <button
+            onClick={handleSubmit}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg font-bold text-lg hover:scale-105 transition"
+          >
+            Submit Application
+          </button>
+        </div>  
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-white">
@@ -295,7 +349,11 @@ function AmbassadorsPage() {
           Apply Now <ArrowRight size={20} />
         </button>
 
-        <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition flex items-center gap-2">
+              <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition flex items-center gap-2"
+                onClick={() => {
+                  toast.info("Demo coming soon! Stay tuned.");
+                }}
+              >
           <Play size={20} /> Watch Demo
         </button>
       </div>
@@ -402,49 +460,7 @@ function AmbassadorsPage() {
           </div>
         </div>
       </div>
-{/* 
-      <div className="bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white py-20">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Ready to Start Your Ambassador Journey?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Join 100+ students already earning with CampusConnect's AI-powered
-            platform
-          </p>
-          <button
-            onClick={() => setShowApplicationForm(true)}
-            className="px-10 py-5 bg-white text-blue-600 rounded-lg font-bold text-xl hover:bg-blue-50 transition transform hover:scale-105 shadow-2xl inline-flex items-center gap-3"
-          >
-            Submit Application <ArrowRight size={24} />
-          </button>
-        </div>
-      </div>
 
-      <div className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-blue-400 mb-2">100+</div>
-              <div className="text-gray-400">Active Ambassadors</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-blue-400 mb-2">
-                $1,200
-              </div>
-              <div className="text-gray-400">Average Monthly Earnings</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-blue-400 mb-2">50+</div>
-              <div className="text-gray-400">Partner Universities</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-blue-400 mb-2">24/7</div>
-              <div className="text-gray-400">AI Support</div>
-            </div>
-          </div>
-        </div>
-      </div> */}
     </div>
   );
 }

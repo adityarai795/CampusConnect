@@ -10,12 +10,21 @@ const {
   showalluser,
   googleLogin,
   approveAmbassador,
+  rejectAmbassador,
+  updateAmbassador,
   createAmbassador,
   getAmbassadors,
+  updateUser,
+  deleteUser,
+  deleteAmbassador,
+  createUser,
 } = require("../controllers/authControllers");
 
 router.get("/getuser", authMiddleware, getuser);
 router.get("/showalluser", showalluser);
+router.post("/user", createUser);
+router.put("/user/:id", updateUser);
+router.delete("/user/:id", deleteUser);
 
 router.post("/signup", signUp);
 
@@ -31,5 +40,8 @@ router
   .get(authMiddleware, getAmbassadors)
   .post(createAmbassador);
 router.patch("/ambassadors/:id", approveAmbassador);
+router.put("/ambassadors/:id", updateAmbassador);
+router.patch("/ambassadors/:id/reject", rejectAmbassador);
+router.delete("/ambassadors/:id", deleteAmbassador);
 
 module.exports = router;

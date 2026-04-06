@@ -1,374 +1,254 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Plus, Search, Download } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { toast } from "react-toastify";
 import adminAPI from "../../api/adminAPI";
 import DataTable from "../../component/shared/DataTable";
 import Pagination from "../../component/shared/Pagination";
-import Alert from "../../component/shared/Alert";
-import { PageLoader } from "../../component/shared/LoadingSpinner";
 import AdminModal from "../../component/shared/AdminModal";
-import {
-  fetchResultsRequest,
-  fetchResultsSuccess,
-  fetchResultsFailure,
-  setResultSearchFilter,
-  setResultPage,
-} from "../../redux/reducers/resultReducer";
+import { PageLoader } from "../../component/shared/LoadingSpinner";
 
-const ResultManagement = () => {
-  const dispatch = useDispatch();
-  const { items, loading, error, pagination, filters } = useSelector(
-    (state) => state.results,
-  );
+const initialFormState = {
+  University: "",
+  link: "",
+};
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertData, setAlertData] = useState({ type: "success", message: "" });
-  const [formData, setFormData] = useState({
-    studentId: "",
-    semester: "",
-    gpa: "",
-    totalMarks: "",
-    remarks: "",
-    file: null,
-  });
+function ResultManagement() {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingResult, setEditingResult] = useState(null);
+  const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
     loadResults();
-  }, [pagination.page, filters.search]);
+  }, [page]);
 
   const loadResults = async () => {
-    dispatch(fetchResultsRequest());
     try {
-      const response = await adminAPI.results.getAll(
-        pagination.page,
-        pagination.limit,
-      );
-      dispatch(
-        fetchResultsSuccess({
-          results: response.data.data || [],
-          pagination: {
-            page: pagination.page,
-            limit: pagination.limit,
-            total: response.data.total || 0,
-          },
-        }),
-      );
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || "Failed to load results";
-      dispatch(fetchResultsFailure(errorMsg));
-      showErrorAlert(errorMsg);
+      setLoading(true);
+      const response = await adminAPI.results.getAll(page, limit);
+      const data =
+        response.data?.showall ||
+        response.data?.results ||
+        response.data?.data ||
+        [];
+      setResults(Array.isArray(data) ? data : []);
+      setTotal(response.data?.total || data.length || 0);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to load results");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const showErrorAlert = (message) => {
-    setAlertData({ type: "error", message });
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 5000);
+  const openCreateModal = () => {
+    setEditingResult(null);
+    setFormData(initialFormState);
+    setModalOpen(true);
   };
 
-  const showSuccessAlert = (message) => {
-    setAlertData({ type: "success", message });
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 5000);
+  const openEditModal = (result) => {
+    setEditingResult(result);
+    setFormData({
+      University: result.University || "",
+      link: result.link || "",
+    });
+    setModalOpen(true);
   };
 
-  const handleOpenModal = (result = null) => {
-    if (result) {
-      setEditingItem(result);
-      setFormData({
-        studentId: result.studentId || "",
-        semester: result.semester || "",
-        gpa: result.gpa || "",
-        totalMarks: result.totalMarks || "",
-        remarks: result.remarks || "",
-      });
-    } else {
-      setEditingItem(null);
-      setFormData({
-        studentId: "",
-        semester: "",
-        gpa: "",
-        totalMarks: "",
-        remarks: "",
-        file: null,
-      });
-    }
-    setIsModalOpen(true);
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditingResult(null);
+    setFormData(initialFormState);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingItem(null);
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
-  const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
-    if (files) {
-      setFormData({ ...formData, [name]: files[0] });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
     try {
-      const data = new FormData();
-      Object.keys(formData).forEach((key) => {
-        if (formData[key] !== null) {
-          data.append(key, formData[key]);
-        }
-      });
-
-      if (editingItem) {
-        await adminAPI.results.update(editingItem._id, data);
-        showSuccessAlert("Result updated successfully");
+      if (editingResult) {
+        await adminAPI.results.update(editingResult._id, formData);
+        toast.success("Result updated successfully");
       } else {
-        await adminAPI.results.upload(data);
-        showSuccessAlert("Result uploaded successfully");
+        await adminAPI.results.create(formData);
+        toast.success("Result created successfully");
       }
 
-      handleCloseModal();
+      closeModal();
       loadResults();
-    } catch (err) {
-      showErrorAlert(err.response?.data?.message || "Failed to save result");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to save result");
     }
   };
 
   const handleDelete = async (result) => {
-    if (!window.confirm("Are you sure you want to delete this result?")) return;
+    if (!window.confirm("Delete this result link?")) return;
+
     try {
       await adminAPI.results.delete(result._id);
-      showSuccessAlert("Result deleted successfully");
+      toast.success("Result deleted successfully");
       loadResults();
-    } catch (err) {
-      showErrorAlert(err.response?.data?.message || "Failed to delete result");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete result");
     }
   };
 
+  const filteredResults = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return results;
+    return results.filter((result) => {
+      const searchableText = [result.University, result.link]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return searchableText.includes(query);
+    });
+  }, [results, search]);
+
   const columns = [
+    { key: "University", label: "University" },
     {
-      key: "studentId",
-      label: "Student ID",
-      render: (id) => id || "-",
-    },
-    { key: "semester", label: "Semester" },
-    {
-      key: "gpa",
-      label: "GPA",
-      render: (gpa) => (gpa ? gpa.toFixed(2) : "-"),
-    },
-    {
-      key: "totalMarks",
-      label: "Total Marks",
-      render: (marks) => marks || "-",
-    },
-    {
-      key: "remarks",
-      label: "Remarks",
-      render: (remark) => remark || "-",
+      key: "link",
+      label: "Result Link",
+      render: (link) => (
+        <a
+          href={link}
+          target="_blank"
+          rel="noreferrer"
+          className="text-indigo-600 underline"
+        >
+          View Result
+        </a>
+      ),
     },
     {
       key: "createdAt",
-      label: "Uploaded",
-      render: (date) => new Date(date).toLocaleDateString(),
+      label: "Created",
+      render: (date) => (date ? new Date(date).toLocaleDateString() : "-"),
     },
   ];
 
-  if (loading && items.length === 0) {
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  if (loading && results.length === 0) {
     return <PageLoader />;
   }
 
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Result Management
-          </h1>
+    <div className="space-y-6">
+      <div className="rounded-2xl bg-white p-6 shadow-sm border border-slate-200">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Result Management
+            </h1>
+            <p className="text-slate-500">Manage result links by university.</p>
+          </div>
           <button
-            onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700"
           >
-            <Plus size={20} />
-            Upload Result
+            <Plus size={18} />
+            Add Result
           </button>
         </div>
 
-        {/* Alerts */}
-        {showAlert && (
-          <Alert
-            type={alertData.type}
-            message={alertData.message}
-            onClose={() => setShowAlert(false)}
+        <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <Search size={18} className="text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search university or link"
+            className="w-full bg-transparent outline-none"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
           />
-        )}
-
-        {/* Search */}
-        <div className="mb-6 flex gap-2">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search results..."
-              value={filters.search}
-              onChange={(e) => dispatch(setResultSearchFilter(e.target.value))}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
         </div>
+      </div>
 
-        {/* Table */}
+      <div className="rounded-2xl bg-white shadow-sm border border-slate-200">
         <DataTable
           columns={columns}
-          data={items}
+          data={filteredResults}
           loading={loading}
-          onEdit={handleOpenModal}
+          onEdit={openEditModal}
           onDelete={handleDelete}
-          noDataMessage="No results found"
-        />
-
-        {/* Pagination */}
-        <Pagination
-          page={pagination.page}
-          totalPages={totalPages}
-          onPageChange={(page) => dispatch(setResultPage(page))}
-          loading={loading}
+          onView={(result) =>
+            result.link && window.open(result.link, "_blank", "noreferrer")
+          }
+          noDataMessage="No result links found"
         />
       </div>
 
-      {/* Modal */}
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        loading={loading}
+      />
+
       <AdminModal
-        isOpen={isModalOpen}
-        title={editingItem ? "Edit Result" : "Upload New Result"}
-        onClose={handleCloseModal}
-        size="lg"
+        isOpen={modalOpen}
+        title={editingResult ? "Edit Result" : "Add Result"}
+        onClose={closeModal}
         footer={
           <>
             <button
-              onClick={handleCloseModal}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              type="button"
+              onClick={closeModal}
+              className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleSubmit}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
             >
-              <Download size={18} />
-              {editingItem ? "Update" : "Upload"}
+              {editingResult ? "Update" : "Create"}
             </button>
           </>
         }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Student ID *
-              </label>
-              <input
-                type="text"
-                name="studentId"
-                value={formData.studentId}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Student ID"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Semester *
-              </label>
-              <select
-                name="semester"
-                value={formData.semester}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Semester</option>
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-                  <option key={sem} value={sem}>
-                    Semester {sem}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                GPA
-              </label>
-              <input
-                type="number"
-                name="gpa"
-                value={formData.gpa}
-                onChange={handleInputChange}
-                step="0.01"
-                min="0"
-                max="10"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., 8.5"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Total Marks
-              </label>
-              <input
-                type="number"
-                name="totalMarks"
-                value={formData.totalMarks}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., 850"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Remarks
-            </label>
-            <textarea
-              name="remarks"
-              value={formData.remarks}
-              onChange={handleInputChange}
-              rows="2"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Any additional remarks"
-            />
-          </div>
-
-          {!editingItem && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Result File
-              </label>
-              <input
-                type="file"
-                name="file"
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                accept=".pdf,.xls,.xlsx,.csv"
-              />
-            </div>
-          )}
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <Field
+            label="University"
+            name="University"
+            value={formData.University}
+            onChange={handleChange}
+            required
+          />
+          <Field
+            label="Result Link"
+            name="link"
+            value={formData.link}
+            onChange={handleChange}
+            required
+          />
         </form>
       </AdminModal>
     </div>
   );
-};
+}
+
+const Field = ({ label, ...props }) => (
+  <div>
+    <label className="mb-1 block text-sm font-medium text-slate-700">
+      {label}
+    </label>
+    <input
+      {...props}
+      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-indigo-500"
+    />
+  </div>
+);
 
 export default ResultManagement;

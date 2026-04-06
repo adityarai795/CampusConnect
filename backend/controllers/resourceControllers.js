@@ -47,12 +47,53 @@ module.exports.viewResource = async (req, res) => {
 
 module.exports.viewAll = async (req, res) => {
   try {
-    const page= parseInt(req.query.page) || 1;
-    const limit= parseInt(req.query.limit) || 20;
-    const skip= (page - 1) * limit;
-    const data = await Resource.find({}).skip(skip).limit(limit).sort({ createdAt: -1 });
-      res.status(201).json({ message: data });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    const data = await Resource.find({})
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+    res.status(201).json({ message: data });
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+module.exports.updateResource = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedResource = await Resource.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedResource) {
+      return res.status(404).json({ message: "Resource not found" });
+    }
+
+    res
+      .status(200)
+      .json({
+        message: "Resource updated successfully",
+        resource: updatedResource,
+      });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports.deleteResource = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedResource = await Resource.findByIdAndDelete(id);
+
+    if (!deletedResource) {
+      return res.status(404).json({ message: "Resource not found" });
+    }
+
+    res.status(200).json({ message: "Resource deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

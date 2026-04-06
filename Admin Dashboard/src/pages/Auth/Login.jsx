@@ -18,7 +18,7 @@ function Login() {
         console.log("this is result", result);
         if (result) {
           toast.success("Login successful");
-          // navigator("/");
+          navigator("/");
         } else {
           toast.error("Invalid credentials or login failed");
         }

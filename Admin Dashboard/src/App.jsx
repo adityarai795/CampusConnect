@@ -8,25 +8,20 @@ import Home from "./pages/Home/Home";
 
 // Resource Pages
 import ResourceTableManagement from "./pages/Notes/ResourceTableManagement";
-import UploadResource from "./pages/Notes/UploadResource";
 
 // Job Pages
 import JobManagement from "./pages/Jobs/JobManagement";
-import CreateJob from "./pages/Jobs/CreateJob";
 
 // Result Pages
 import ResultManagement from "./pages/Result/ResultManagement";
-import CreateResult from "./pages/Result/CreateResult";
 
 // Community Pages
 import CommunityManagement from "./pages/Community/CommunityManagement";
 
 // Coding Problem Pages
 import ProblemManagement from "./pages/coding/ProblemManagement";
-import AddProblem from "./pages/coding/AddProblem";
 
 // Practice Pages
-import PracticeManagement from "./pages/Practice/PracticeManagement";
 
 // Roadmap Pages
 import RoadmapManagement from "./pages/Roadmap/RoadmapManagement";
@@ -39,6 +34,10 @@ import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import ForgetPassword from "./pages/Auth/ForgetPassword";
 
+
+// User Management
+import UserManagement from "./pages/Users/UserManagement";
+import Ambasdor from "./pages/Users/Ambasdor";
 // Other Pages
 import PageNotFound from "./component/PageNotFound";
 
@@ -60,32 +59,27 @@ const App = () => (
           <Route path="/forget" element={<ForgetPassword />} />
 
           {/* Users & Staff */}
+          <Route path="/users" element={<UserManagement />} />  
+          <Route path="/ambassadors" element={<Ambasdor />} />
 
           {/* Resources/Notes */}
-          <Route path="/notes" element={<ResourceTableManagement />} />
-          <Route path="/uploadnotes" element={<UploadResource />} />
           <Route path="/showallNotes" element={<ResourceTableManagement />} />
 
           {/* Jobs */}
           <Route path="/jobs" element={<JobManagement />} />
-          <Route path="/viewalljobs" element={<JobManagement />} />
-          <Route path="/createJob" element={<CreateJob />} />
 
           {/* Results */}
           <Route path="/result" element={<ResultManagement />} />
-          <Route path="/createResult" element={<CreateResult />} />
           <Route path="/showallResult" element={<ResultManagement />} />
 
           {/* Community */}
           <Route path="/community" element={<CommunityManagement />} />
-          <Route path="/showallPost" element={<CommunityManagement />} />
 
           {/* Coding Problems */}
           <Route path="/showallProblems" element={<ProblemManagement />} />
           <Route path="/addProblems" element={<ProblemManagement />} />
 
           {/* Practice */}
-          <Route path="/practice" element={<PracticeManagement />} />
 
           {/* Roadmaps */}
           <Route path="/roadmaps" element={<RoadmapManagement />} />
