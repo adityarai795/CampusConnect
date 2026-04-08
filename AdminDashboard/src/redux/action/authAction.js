@@ -6,10 +6,13 @@ export const loginUser = createAsyncThunk(
   "user/login",
   async ({ email, password }, thunkAPI) => {
     try {
-      const res = await axios.post("http://localhost:3000/auth/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        "https://api.collegeconnect.me/auth/login",
+        {
+          email,
+          password,
+        },
+      );
       console.log(res.data)
       if (res.data.token) {
         localStorage.setItem("token", res.data.token);
