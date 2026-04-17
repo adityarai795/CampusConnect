@@ -46,7 +46,7 @@ app.use("/roadmap", roadmapRouter);
 app.use("/api/otp", otpRouter);
 
 app.get("/", (req, res) => {
-  res.send("This is home last backend update is 08-04-26");
+  res.send("This is home last backend update is 17-04-26");
 });
 
 app.get("/health", (req, res) => {
