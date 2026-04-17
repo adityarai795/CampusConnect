@@ -10,7 +10,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
+import asyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 interface DrawerContentProps {
   navigation: DrawerNavigationProp<any>;
 }
@@ -31,6 +32,10 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
     { icon: "frequently-asked-questions", label: "FAQ", route: "faq" },
   ];
 
+  const logout = () => {
+    asyncStorage.removeItem("userToken");
+    router.push("/(auth)/login");
+  }
   return (
     <SafeAreaView style={styles.container}>
       {/* Header Section */}
@@ -116,7 +121,9 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
 
       {/* Logout Button */}
       <View style={styles.footerSection}>
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => {
+          logout()
+        }}>
           <MaterialCommunityIcons name="logout" size={20} color="#FF3B30" />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>

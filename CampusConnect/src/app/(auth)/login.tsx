@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   StyleSheet,
   Text,
@@ -48,15 +49,21 @@ const [request, response, promptAsync] = Google.useAuthRequest({
         Alert.alert("Error", "Please enter both email and password");
         return;
       }
-        router.push("/(main)");
+        // router.push("/(main)");
 
-      // const response = await api.post("/auth/login", { email, password });
-      // if (response.status === 200) {
-      //   Alert.alert("Login Successful", `Welcome back, ${email}!`);
-      //   router.push("/(main)");
-      // } else {
-      //   Alert.alert("Login Failed", "Invalid email or password");
-      // } 
+      const response = await api.post("/auth/login", { email, password });
+      console.log("Login request payload:", { email, password });
+      console.log("Login response:", response);
+      if (response.status === 200) {
+              console.log("Login response:", response);
+
+        Alert.alert("Login Successful", `Welcome back, ${email}!`);
+          await AsyncStorage.setItem("token", response.data.token);
+
+        router.push("/(main)"); 
+      } else {
+        Alert.alert("Login Failed", "Invalid email or password");
+      } 
     } catch (error) {
       console.log(error);
       Alert.alert("Login Failed", "An error occurred during login");

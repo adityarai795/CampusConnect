@@ -11,7 +11,7 @@ const resourceRouter = require("./routers/resourceRouters");
 const postRouter = require("./routers/communityRouters");
 const profileRouter = require("./routers/profileRouter");
 const jobRouter = require("./routers/jobRouters");
-const problemRouter = require("./routers/problemRouters.js");
+// const problemRouter = require("./routers/problemRouters.js");
 const cookieParser = require("cookie-parser");
 const organizationRouter = require("./routers/orginazationRouter");
 const teacherRouter = require("./routers/teacherRouter");
@@ -38,15 +38,15 @@ app.use("/community", postRouter);
 app.use("/profile", profileRouter);
 app.use("/job", jobRouter);
 app.use("/home", homeRouter);
-app.use("/problem", problemRouter);
 app.use("/teacher", teacherRouter);
 app.use("/organization", organizationRouter);
 app.use("/marketPlace", marketPlaceProductRouters);
 app.use("/practice", practiceRouter);
+app.use("/roadmap", roadmapRouter);
 app.use("/api/otp", otpRouter);
 
 app.get("/", (req, res) => {
-  res.send("This is home ");
+  res.send("This is home last backend update is 08-04-26");
 });
 
 app.get("/health", (req, res) => {

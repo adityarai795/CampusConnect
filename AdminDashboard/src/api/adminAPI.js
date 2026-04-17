@@ -3,6 +3,8 @@ import api from "./api";
 // Create axios instance with default config
 const axiosInstance = axios.create({
   baseURL: "https://api.collegeconnect.me/",
+  // baseURL: "http://localhost:3000/",
+
   timeout: api.timeout || 10000,
   headers: {
     "Content-Type": "application/json",

@@ -1,25 +1,68 @@
 const mongoose = require("mongoose");
-const quizSchema = new mongoose.Schema(
+const quizQuestionSchema = new mongoose.Schema(
   {
-    topic: {
+    question: {
       type: String,
       required: true,
     },
-    level: {
+
+    topic: {
       type: String,
-      enum: ["Beginner", "Intermediate", "Advanced"],
-      default: "Beginner",
+      enum: [
+        "DSA",
+        "Operating System",
+        "DBMS",
+        "Computer Networks",
+        "JavaScript",
+        "React",
+        "Node.js",
+      ],
+      required: true,
     },
-    questions: [
+
+    subTopic: {
+      type: String, // e.g. "Arrays", "Scheduling", "Indexing"
+    },
+
+    options: [
       {
-        question: String,
-        options: [String],
-        correctAnswer: Number,
+        text: String,
+        isCorrect: Boolean,
       },
     ],
-    tags: [String],
+
+    explanation: {
+      type: String, // why answer is correct
+    },
+
+    difficulty: {
+      type: String,
+      enum: ["Easy", "Medium", "Hard"],
+      default: "Easy",
+    },
+
+    marks: {
+      type: Number,
+      default: 1,
+    },
+
+    tags: [
+      {
+        type: String, // e.g. ["array", "sorting"]
+      },
+    ],
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true },
 );
-
-module.exports = mongoose.model("Quiz", quizSchema);
+const QuizQuestion = mongoose.model("QuizQuestion", quizQuestionSchema);
+module.exports = QuizQuestion;

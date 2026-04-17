@@ -22,22 +22,27 @@ const {
   searchRoadMaps,
   getMyProgress,
   updateMyProgress,
+  createQuestion,
+  getAllQuestions,
+  getQuestionById,
+  updateQuestion,
+  deleteQuestion,
 } = require("../controllers/practiceController");
 
 // Coding Problem Routes
-router.post("/AddCodingProblem", authMiddleware, addCodingProblem);
+router.post("/AddCodingProblem", addCodingProblem);
 router.patch("/UpdateCodingProblem/:id", authMiddleware, updateCodingProblem);
 router.delete("/DeleteCodingProblem/:id", authMiddleware, deleteCodingProblem);
 router.get("/GetCodingProblem", getCodingProblem);
 
 // Quiz Question Routes
-router.post("/AddQuizQuestion", authMiddleware, addQuizQuestion);
+router.post("/AddQuizQuestion", addQuizQuestion);
 router.patch("/UpdateQuizQuestion/:id", authMiddleware, updateQuizQuestion);
 router.delete("/DeleteQuizQuestion/:id", authMiddleware, deleteQuizQuestion);
 router.get("/GetQuizQuestions", getQuizQuestions);
 
 // Project Idea Routes
-router.post("/AddProjectIdea", authMiddleware, addProjectIdea);
+router.post("/AddProjectIdea", addProjectIdea);
 router.get("/GetProjectIdeas", getProjectIdeas);
 router.put("/UpdateProjectIdea/:id", authMiddleware, updateProjectIdea);
 router.delete("/DeleteProjectIdea/:id", authMiddleware, deleteProjectIdea);
@@ -57,4 +62,19 @@ router
   .get(authMiddleware, getMyProgress)
   .patch(authMiddleware, updateMyProgress);
 
+
+  // CREATE
+  router.post("/createQuestion", createQuestion);
+
+  // READ ALL + FILTER
+  router.get("/getAllQuestions", getAllQuestions);
+
+  // READ SINGLE
+  router.get("/getQuestionById/:id", getQuestionById);
+
+  // UPDATE
+  router.put("/updateQuestion/:id", updateQuestion);
+
+  // DELETE
+  router.delete("/deleteQuestion/:id", deleteQuestion);
 module.exports = router;

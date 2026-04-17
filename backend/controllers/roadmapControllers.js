@@ -1,4 +1,4 @@
-const Roadmap = require("../models/RoadmapSchema");
+const Roadmap = require("../models/RoadmapSchema.js");
 
 module.exports.getAllRoadmaps = async (req, res) => {
   try {
@@ -12,7 +12,6 @@ module.exports.getAllRoadmaps = async (req, res) => {
 module.exports.getRoadmapById = async (req, res) => {
   try {
     const { id } = req.params;
-
     // Validate Mongo ID
     if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({ message: "Invalid roadmap ID" });
@@ -20,9 +19,6 @@ module.exports.getRoadmapById = async (req, res) => {
 
     const roadmap = await Roadmap.findById(id)
       .populate("createdBy", "name email")
-      .populate("steps.quiz")
-      .populate("steps.project")
-      .populate("steps.coding");
 
     // If not found
     if (!roadmap) {

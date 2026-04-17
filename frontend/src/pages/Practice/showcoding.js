@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { showallProblem } from "../../api/codingProblem.js";
+import { showallProblem, getprojectIdea,interview } from "../../api/codingProblem.js";
 import {
   Code,
   CheckCircle2,
@@ -21,8 +21,8 @@ function PlacementPrep() {
   const [selectedDifficulty, setSelectedDifficulty] = useState("All");
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
-
-
+  const [projectIdeas, setProjectIdeas] = useState([]);
+  const [interviewQuestions, setInterviewQuestions] = useState([]);
   // Sample quizzes data
   const quizzes = [
     {
@@ -63,7 +63,11 @@ function PlacementPrep() {
     try {
       setLoading(true);
       const response = await showallProblem();
+      const projectResponse = await getprojectIdea();
+      const interviewResponse = await interview();
+      setInterviewQuestions(interviewResponse.data.data || []);
       setProblems(response.data.problem || []);
+      setProjectIdeas(projectResponse.data.projects || []);
     } catch (error) {
       console.error("Error fetching problems:", error);
     } finally {
@@ -389,6 +393,154 @@ function PlacementPrep() {
           </div>
         )}
 
+        {/* Project tab */}
+        {activeTab === "projects" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {projectIdeas.length > 0 ? (
+              projectIdeas.map((idea) => (
+                <div
+                  key={idea._id}
+                  className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border"
+                >
+                  {/* Title + Level */}
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {idea.title}
+                    </h3>
+                    <span className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-600 font-medium">
+                      {idea.level}
+                    </span>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-gray-600 text-sm mb-4">
+                    {idea.description}
+                  </p>
+
+                  {/* Tech Stack */}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-gray-800 mb-2">
+                      Tech Stack
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {idea.techStack?.map((tech, index) => (
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-md"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Features */}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-gray-800 mb-2">
+                      Key Features
+                    </h4>
+                    <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
+                      {idea.features?.map((feature, index) => (
+                        <li key={index}>{feature}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {idea.tags?.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex justify-between items-center mt-4">
+                    <a
+                      href={idea.githubSample}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm font-medium text-blue-600 hover:underline"
+                    >
+                      View GitHub →
+                    </a>
+
+                    <button className="bg-black text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-800 transition">
+                      Start Project
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-lg">
+                No project ideas available.
+              </p>
+            )}
+          </div>
+        )}
+        {/* interview tab */}
+
+        {activeTab === "interviews" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {interviewQuestions.map((q, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition-all duration-300 border border-gray-100"
+              >
+                {/* Header */}
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-xs font-medium px-3 py-1 bg-blue-100 text-blue-600 rounded-full">
+                    {q.role}
+                  </span>
+
+                  <span
+                    className={`text-xs font-medium px-3 py-1 rounded-full ${
+                      q.difficulty === "Hard"
+                        ? "bg-red-100 text-red-600"
+                        : q.difficulty === "Medium"
+                          ? "bg-yellow-100 text-yellow-600"
+                          : "bg-green-100 text-green-600"
+                    }`}
+                  >
+                    {q.difficulty}
+                  </span>
+                </div>
+
+                {/* Question */}
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {q.question}
+                </h3>
+
+                {/* Answer */}
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                  {q.answer}
+                </p>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {q.tags.map((tag, i) => (
+                    <span
+                      key={i}
+                      className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-between items-center text-sm text-gray-500">
+                  <span>{q.company}</span>
+                  <span>{q.experienceLevel}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}  
         {/* Progress Tab */}
         {activeTab === "progress" && (
           <div className="space-y-6">

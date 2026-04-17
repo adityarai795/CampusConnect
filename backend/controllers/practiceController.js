@@ -1,16 +1,15 @@
 const CodingProblem = require("../models/CodingProblemSchema.js");
-const Quiz = require("../models/quizQuestionSchema.js");
 const Project = require("../models/ProjectIdeaSchema.js");
+const QuizQuestion = require("../models/quizQuestionSchema.js");
+const InterviewQuestion = require("../models/interviewQuestionSchema.js");
 
 module.exports.addCodingProblem = async (req, res) => {
   try {
     const createdProblem = await CodingProblem.create(req.body);
-    res
-      .status(201)
-      .json({
-        message: "Coding problem created successfully",
-        problem: createdProblem,
-      });
+    res.status(201).json({
+      message: "Coding problem created successfully",
+      problem: createdProblem,
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -37,12 +36,10 @@ module.exports.updateCodingProblem = async (req, res) => {
       return res.status(404).json({ message: "Coding problem not found" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Coding problem updated successfully",
-        problem: updatedProblem,
-      });
+    res.status(200).json({
+      message: "Coding problem updated successfully",
+      problem: updatedProblem,
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -64,15 +61,14 @@ module.exports.deleteCodingProblem = async (req, res) => {
 };
 
 // Quiz Question Controllers
+
 module.exports.addQuizQuestion = async (req, res) => {
   try {
-    const createdQuiz = await Quiz.create(req.body);
-    res
-      .status(201)
-      .json({
-        message: "Quiz question created successfully",
-        quiz: createdQuiz,
-      });
+    const createdQuiz = await QuizQuestion.create(req.body);
+    res.status(201).json({
+      message: "Quiz question created successfully",
+      quiz: createdQuiz,
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -80,7 +76,7 @@ module.exports.addQuizQuestion = async (req, res) => {
 
 module.exports.getQuizQuestions = async (req, res) => {
   try {
-    const quizQuestions = await Quiz.find().sort({ _id: -1 });
+    const quizQuestions = await QuizQuestion.find().sort({ _id: -1 });
     res.status(200).json({ quizQuestions });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -90,7 +86,7 @@ module.exports.getQuizQuestions = async (req, res) => {
 module.exports.updateQuizQuestion = async (req, res) => {
   try {
     const { id } = req.params;
-    const updatedQuiz = await Quiz.findByIdAndUpdate(id, req.body, {
+    const updatedQuiz = await QuizQuestion.findByIdAndUpdate(id, req.body, {
       new: true,
       runValidators: true,
     });
@@ -99,12 +95,10 @@ module.exports.updateQuizQuestion = async (req, res) => {
       return res.status(404).json({ message: "Quiz question not found" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Quiz question updated successfully",
-        quiz: updatedQuiz,
-      });
+    res.status(200).json({
+      message: "Quiz question updated successfully",
+      quiz: updatedQuiz,
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -113,7 +107,7 @@ module.exports.updateQuizQuestion = async (req, res) => {
 module.exports.deleteQuizQuestion = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedQuiz = await Quiz.findByIdAndDelete(id);
+    const deletedQuiz = await QuizQuestion.findByIdAndDelete(id);
 
     if (!deletedQuiz) {
       return res.status(404).json({ message: "Quiz question not found" });
@@ -129,12 +123,10 @@ module.exports.deleteQuizQuestion = async (req, res) => {
 module.exports.addProjectIdea = async (req, res) => {
   try {
     const createdProject = await Project.create(req.body);
-    res
-      .status(201)
-      .json({
-        message: "Project idea created successfully",
-        project: createdProject,
-      });
+    res.status(201).json({
+      message: "Project idea created successfully",
+      project: createdProject,
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -161,12 +153,10 @@ module.exports.updateProjectIdea = async (req, res) => {
       return res.status(404).json({ message: "Project idea not found" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Project idea updated successfully",
-        project: updatedProject,
-      });
+    res.status(200).json({
+      message: "Project idea updated successfully",
+      project: updatedProject,
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -251,12 +241,132 @@ module.exports.getMyProgress = async (req, res) => {
 
 module.exports.updateMyProgress = async (req, res) => {
   try {
-    res
-      .status(200)
-      .json({
-        message: "Progress updates are not stored in this admin module",
-      });
+    res.status(200).json({
+      message: "Progress updates are not stored in this admin module",
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+
+// ✅ CREATE
+module.exports.createQuestion = async (req, res) => {
+  try {
+    const question = await InterviewQuestion.create(req.body);
+    res.status(201).json({
+      success: true,
+      data: question,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ✅ GET ALL (with filters)
+module.exports.getAllQuestions = async (req, res) => {
+  try {
+    const { role, round, difficulty, category } = req.query;
+
+    let filter = {};
+
+    if (role) filter.role = role;
+    if (round) filter.round = round;
+    if (difficulty) filter.difficulty = difficulty;
+    if (category) filter.category = category;
+
+    const questions = await InterviewQuestion.find(filter).sort({
+      createdAt: -1,
+    });
+
+    res.status(200).json({
+      success: true,
+      count: questions.length,
+      data: questions,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ✅ GET SINGLE
+module.exports.getQuestionById = async (req, res) => {
+  try {
+    const question = await InterviewQuestion.findById(req.params.id);
+
+    if (!question) {
+      return res.status(404).json({
+        success: false,
+        message: "Question not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: question,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ✅ UPDATE
+module.exports.updateQuestion = async (req, res) => {
+  try {
+    const question = await InterviewQuestion.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true },
+    );
+
+    if (!question) {
+      return res.status(404).json({
+        success: false,
+        message: "Question not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: question,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ✅ DELETE
+module.exports.deleteQuestion = async (req, res) => {
+  try {
+    const question = await InterviewQuestion.findByIdAndDelete(req.params.id);
+
+    if (!question) {
+      return res.status(404).json({
+        success: false,
+        message: "Question not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Question deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

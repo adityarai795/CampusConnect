@@ -9,7 +9,8 @@ export const BASE_URL =
 const API = axios.create({
   // baseURL: DEV_BASE_URL,
 
-  baseURL: "https://api.collegeconnect.me/",
+  // baseURL: "https://api.collegeconnect.me/",
+  baseURL:"http://localhost:3000/",
   headers: {
     "Content-Type": "application/json",
   },

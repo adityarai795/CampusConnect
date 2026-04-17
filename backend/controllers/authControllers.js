@@ -365,6 +365,7 @@ module.exports.rejectAmbassador = async (req, res) => {
 
 module.exports.updateUser = async (req, res) => {
   try {
+    console.log(req.body);
     const { id } = req.params;
     const updateData = { ...req.body };
 
