@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,32 +9,26 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "@/src/services/api";
 
-const mockMyPosts = [
-  {
-    _id: "my-post-1",
-    title: "How I fixed my React Native navigation issue",
-    description: "Using route params with a typed stack made navigation clean.",
-    likes: 14,
-    comments: 3,
-    tags: ["react-native", "navigation"],
-    author: "You",
-  },
-  {
-    _id: "my-post-2",
-    title: "Internship prep roadmap",
-    description: "Sharing my 6-week DSA + CS fundamentals plan.",
-    likes: 21,
-    comments: 8,
-    tags: ["career", "dsa"],
-    author: "You",
-  },
-];
+
 
 const CommunityMyPosts = () => {
   const navigation = useNavigation<any>();
-  const posts = useMemo(() => mockMyPosts, []);
-
+  const [posts, setPosts] = React.useState<any[]>([]);
+  const fetchMyPosts = async () => {
+    const token = await AsyncStorage.getItem("token");
+    const response = await api.get("/community/post/myposts", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    setPosts(response.data.posts);
+  };
+  useEffect(() => {
+    fetchMyPosts();;
+  },[posts.length]);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>

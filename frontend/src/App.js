@@ -32,6 +32,7 @@ import MyNotes from "./pages/Profile/MyNotes.js";
 import MyJobs from "./pages/Profile/MyJobs.js";
 // import JobApplay from "./pages/Job/JobApplay.js";
 import LearnTopic from "./pages/LearnTopic/learning.js";
+import QuizQuestion from "./pages/Practice/openQuize.js";
 import { AppProvider } from "./context";
 
 function App() {
@@ -76,6 +77,7 @@ function App() {
             <Route path="/profile/myjobs" element={<MyJobs />} />
             <Route path="/cc/faq" element={<FAQ />} />
             <Route path="/learntopic/:id" element={<LearnTopic />} />
+              <Route path="/quiz/:topic" element={<QuizQuestion />} />
             <Route path="*" element={<PageNotFound />} />
           </Routes>
           <Footer />

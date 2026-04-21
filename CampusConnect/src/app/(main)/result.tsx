@@ -111,34 +111,6 @@ const Result = () => {
                 Track your assessment progress
               </Text>
             </View>
-
-            <View style={styles.filterSection}>
-              <Text style={styles.filterLabel}>Filter by Category</Text>
-
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {categories.map((category) => (
-                  <TouchableOpacity
-                    key={category}
-                    style={[
-                      styles.categoryButton,
-                      selectedCategory === category &&
-                        styles.activeCategoryButton,
-                    ]}
-                    onPress={() => setSelectedCategory(category)}
-                  >
-                    <Text
-                      style={[
-                        styles.categoryButtonText,
-                        selectedCategory === category &&
-                          styles.activeCategoryText,
-                      ]}
-                    >
-                      {category}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
           </>
         }
         ListEmptyComponent={

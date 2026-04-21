@@ -34,12 +34,15 @@ import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import ForgetPassword from "./pages/Auth/ForgetPassword";
 
-
+import ManageQuiz from "./pages/Quize/manageQuize";
 // User Management
 import UserManagement from "./pages/Users/UserManagement";
 import Ambasdor from "./pages/Users/Ambasdor";
+import ManageProjects from "./pages/Projects/manageProjects";
 // Other Pages
 import PageNotFound from "./component/PageNotFound";
+import ManageInterview from "./pages/Interview/manageInterview";
+import Contactqueries from "./pages/Contact/contactqueries";
 
 const App = () => (
   <Router>
@@ -80,6 +83,7 @@ const App = () => (
           <Route path="/addProblems" element={<ProblemManagement />} />
 
           {/* Practice */}
+          <Route path="/quizquestions" element={<ManageQuiz />} />
 
           {/* Roadmaps */}
           <Route path="/roadmaps" element={<RoadmapManagement />} />
@@ -88,7 +92,9 @@ const App = () => (
           <Route path="/marketplace" element={<MarketplaceManagement />} />
 
           {/* College Management */}
-
+          <Route path="/projects" element={<ManageProjects />} />
+          <Route path="/interviewquestions" element={<ManageInterview />} />
+            <Route path="/contactqueries" element={<Contactqueries />} />
           {/* 404 */}
           <Route path="*" element={<PageNotFound />} />
         </Routes>

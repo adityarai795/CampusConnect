@@ -11,21 +11,36 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { api } from "@/src/services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CommunityCreatePost = () => {
   const navigation = useNavigation<any>();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [tags, setTags] = useState("");
+  const [college, setCollege] = useState("");
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title.trim() || !description.trim()) {
       Alert.alert("Validation", "Title and description are required.");
       return;
     }
-
+    const token = await AsyncStorage.getItem("token");
+    const response = await api.post(
+      "/community/post/addPost",
+      {
+        title,
+        description,
+        college,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
     Alert.alert("Post Created", "Your post has been added to community.");
-    navigation.goBack();
+    navigation.navigate("community");
   };
 
   return (
@@ -60,12 +75,12 @@ const CommunityCreatePost = () => {
           textAlignVertical="top"
         />
 
-        <Text style={styles.label}>Tags (comma separated)</Text>
+        <Text style={styles.label}>College</Text>
         <TextInput
           style={styles.input}
-          placeholder="react-native, jobs, dsa"
-          value={tags}
-          onChangeText={setTags}
+          placeholder="Enter your college"
+          value={college}
+          onChangeText={setCollege}
         />
 
         <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>

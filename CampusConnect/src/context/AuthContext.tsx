@@ -1,41 +1,29 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import { User, AuthResponse } from "../types";
+// src/context/AuthContext.tsx
+
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { authStorage } from "../utils/storage";
+import api from "../services/api";
 
 interface AuthContextType {
-  user: User | null;
+  user: any;
   token: string | null;
-  isLoading: boolean;
+  loading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string,
-  ) => Promise<void>;
   logout: () => Promise<void>;
-  updateUser: (user: User) => void;
+  signup: (name: string, email: string, password: string) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const [user, setUser] = useState<User | null>(null);
+export const AuthProvider = ({ children }: any) => {
+  const [user, setUser] = useState<any>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  // Initialize auth state from storage
+  // 🔹 Load stored auth
   useEffect(() => {
-    const initializeAuth = async () => {
+    const loadAuth = async () => {
       try {
         const storedToken = await authStorage.getToken();
         const storedUser = await authStorage.getUser();
@@ -44,119 +32,71 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           setToken(storedToken);
           setUser(storedUser);
         }
-      } catch (error) {
-        console.error("Error initializing auth:", error);
+      } catch (err) {
+        console.log("Auth Load Error:", err);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
-    initializeAuth();
+    loadAuth();
   }, []);
 
+  // 🔹 Login
   const login = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      // API call would go here
-      // const response: AuthResponse = await loginAPI(email, password);
-      // Mock response for now
-      const response: AuthResponse = {
-        token: "mock-token",
-        user: {
-          _id: "1",
-          email,
-          firstName: "Mock",
-          lastName: "User",
-          role: "student",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      };
+    const res = await api.post("/auth/login", { email, password });
 
-      setToken(response.token);
-      setUser(response.user);
-      await authStorage.setToken(response.token);
-      await authStorage.setUser(response.user);
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    const { token, user } = res.data;
+
+    setToken(token);
+    setUser(user);
+
+    await authStorage.setToken(token);
+    await authStorage.setUser(user);
   };
+  // 🔹 Signup
+  const signup = async (name: string, email: string, password: string) => {
+    const res = await api.post("/auth/signup", {
+      name,
+      email,
+      password,
+    });
 
-  const signup = async (
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string,
-  ) => {
-    try {
-      setIsLoading(true);
-      // API call would go here
-      // const response: AuthResponse = await signupAPI(email, password, firstName, lastName);
-      // Mock response for now
-      const response: AuthResponse = {
-        token: "mock-token",
-        user: {
-          _id: "1",
-          email,
-          firstName,
-          lastName,
-          role: "student",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      };
+    const { token, user } = res.data;
 
-      setToken(response.token);
-      setUser(response.user);
-      await authStorage.setToken(response.token);
-      await authStorage.setUser(response.user);
-    } catch (error) {
-      console.error("Signup error:", error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    setToken(token);
+    setUser(user);
+
+    await authStorage.setToken(token);
+    await authStorage.setUser(user);
   };
-
+  // 🔹 Logout
   const logout = async () => {
-    try {
-      setIsLoading(true);
-      setToken(null);
-      setUser(null);
-      await authStorage.clearAuth();
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    setUser(null);
+    setToken(null);
+    await authStorage.clearAuth();
   };
 
-  const updateUser = (updatedUser: User) => {
-    setUser(updatedUser);
-    authStorage.setUser(updatedUser);
-  };
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        isAuthenticated: !!token,
+        login,
+        logout,
+        signup,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};;
 
-  const value: AuthContextType = {
-    user,
-    token,
-    isLoading,
-    isAuthenticated: !!user && !!token,
-    login,
-    signup,
-    logout,
-    updateUser,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = (): AuthContextType => {
+// 🔹 Hook
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used inside AuthProvider");
   return context;
 };

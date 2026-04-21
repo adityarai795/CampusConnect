@@ -21,25 +21,19 @@ const INITIAL_RESUMES = [
 ];
 
 const Resume = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   // ===== STATE =====
   const [resumes, setResumes] = useState(INITIAL_RESUMES);
 
   // ===== HANDLERS =====
-  const handleBackPress = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
+  // const handleBackPress = useCallback(() => {
+  //   navigation.goBack();
+  // }, [navigation]);
 
-  const handleCreateResume = useCallback(() => {
-    Alert.alert("Create Resume", "Start building your professional resume", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Create",
-        onPress: () => console.log("Creating new resume"),
-      },
-    ]);
-  }, []);
+  const handleCreateResume = async()=>{
+   navigation.navigate("createResume"); 
+  }
 
   const handleViewTemplates = useCallback(() => {
     console.log("Viewing resume templates");
@@ -53,7 +47,7 @@ const Resume = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <MaterialCommunityIcons name="chevron-left" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>Resume</Text>
@@ -82,7 +76,9 @@ const Resume = () => {
 
           <TouchableOpacity
             style={[styles.button, styles.buttonOutline]}
-            onPress={handleViewTemplates}
+            onPress={() => {
+              Alert.alert("Ats checker","assdd")
+            }}
           >
             <Text style={styles.buttonOutlineText}>View Templates</Text>
           </TouchableOpacity>

@@ -26,7 +26,9 @@ const {
   getAllQuestions,
   getQuestionById,
   updateQuestion,
+  addBulkQuizQuestions,
   deleteQuestion,
+  getQuizQuestionByCategory,
 } = require("../controllers/practiceController");
 
 // Coding Problem Routes
@@ -37,9 +39,11 @@ router.get("/GetCodingProblem", getCodingProblem);
 
 // Quiz Question Routes
 router.post("/AddQuizQuestion", addQuizQuestion);
+router.post("/AddBulkQuizQuestions", addBulkQuizQuestions);
 router.patch("/UpdateQuizQuestion/:id", authMiddleware, updateQuizQuestion);
 router.delete("/DeleteQuizQuestion/:id", authMiddleware, deleteQuizQuestion);
 router.get("/GetQuizQuestions", getQuizQuestions);
+router.get("/GetQuizQuestionByCategory/:topic", getQuizQuestionByCategory);
 
 // Project Idea Routes
 router.post("/AddProjectIdea", addProjectIdea);

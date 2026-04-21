@@ -107,39 +107,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
-        <div className="absolute top-1/2 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
-
-      {/* Header */}
-      <header className="relative z-20 border-b border-slate-700/50 backdrop-blur-xl bg-slate-950/50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">CollegeConnect</h1>
-              <p className="text-xs text-slate-400">Admin Dashboard</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-slate-800 rounded-lg transition-colors duration-200 text-slate-300 hover:text-white">
-              <Bell className="w-5 h-5" />
-            </button>
-            <button className="p-2 hover:bg-slate-800 rounded-lg transition-colors duration-200 text-slate-300 hover:text-white">
-              <Settings className="w-5 h-5" />
-            </button>
-            <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-              AD
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="relative z-10 max-w-7xl mx-auto px-6 py-12">
         {/* Welcome Section */}
@@ -267,41 +234,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Bottom Section - Quick Actions */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <button className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-700 p-6 text-left text-white hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-300 hover:scale-105">
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="relative z-10">
-              <Users className="w-8 h-8 mb-3 text-indigo-200" />
-              <h4 className="font-bold mb-2">Manage Users</h4>
-              <p className="text-sm text-indigo-100">
-                View and manage student & faculty accounts
-              </p>
-            </div>
-          </button>
-
-          <button className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 to-purple-700 p-6 text-left text-white hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 hover:scale-105">
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="relative z-10">
-              <BookOpen className="w-8 h-8 mb-3 text-purple-200" />
-              <h4 className="font-bold mb-2">Courses & Content</h4>
-              <p className="text-sm text-purple-100">
-                Create and manage course materials
-              </p>
-            </div>
-          </button>
-
-          <button className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-600 to-pink-700 p-6 text-left text-white hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-300 hover:scale-105">
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="relative z-10">
-              <Award className="w-8 h-8 mb-3 text-pink-200" />
-              <h4 className="font-bold mb-2">Analytics & Reports</h4>
-              <p className="text-sm text-pink-100">
-                View detailed engagement metrics
-              </p>
-            </div>
-          </button>
-        </div>
+      
       </main>
 
       <style jsx>{`

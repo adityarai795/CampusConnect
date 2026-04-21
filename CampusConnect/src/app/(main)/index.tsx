@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Header from "../../components/Header";
+import api from "@/src/services/api";
 
 const { width } = Dimensions.get("window");
 
@@ -73,7 +74,20 @@ const Home = () => {
       color: "#FF3B30",
     },
   ];
+  
+  const [homeData, setHomeData] = React.useState<any>(null);
+  const fetchHomeData = async () => {
+    try {
+      const response = await api.get("/home/homepagedata");
+      setHomeData(response.data);
+    } catch (error) {
+      console.error("Error fetching home data:", error);
+    }
+  }
 
+  useEffect(() => {
+    fetchHomeData();
+  },[])
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
@@ -87,36 +101,89 @@ const Home = () => {
         {/* Welcome Banner */}
         <View style={styles.bannerSection}>
           <View style={styles.banner}>
-            <View>
-              <Text style={styles.bannerTitle}>Welcome Back!👋</Text>
-              <Text style={styles.bannerSubtitle}>
-                Continue your learning journey
+            {/* LEFT CONTENT */}
+            <View style={{ flex: 1 }}>
+              <Text style={styles.badge}>🎓 Campus Platform</Text>
+
+              <Text style={styles.bannerTitle}>
+                One Stop Solution for{" "}
+                <Text style={styles.highlight}>Students</Text>
               </Text>
+
+              <Text style={styles.bannerSubtitle}>
+                Learn, grow and explore everything in one place.
+              </Text>
+
+              {/* CTA Buttons */}
+              <TouchableOpacity
+                style={styles.primaryBtn}
+                onPress={() => handleNavigate("result")}
+              >
+                <Text style={styles.primaryText}>Explore Results</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.secondaryBtn}
+                onPress={() => handleNavigate("jobs")}
+              >
+                <Text style={styles.secondaryText}>Browse Jobs</Text>
+              </TouchableOpacity>
             </View>
-            <MaterialCommunityIcons name="rocket" size={48} color="#007AFF" />
+
+            {/* RIGHT ICON */}
+            <MaterialCommunityIcons
+              name="rocket-launch"
+              size={60}
+              color="#fff"
+            />
           </View>
         </View>
 
-        {/* Quick Stats */}
         <View style={styles.statsSection}>
-          <View style={[styles.statBox, { backgroundColor: "#EBF5FF" }]}>
-            <MaterialCommunityIcons name="fire" size={24} color="#FF3B30" />
-            <Text style={styles.statValue}>7</Text>
-            <Text style={styles.statLabel}>Day Streak</Text>
+          {/* ROW 1 */}
+          <View style={styles.statsRow}>
+            <View style={[styles.statBox, { backgroundColor: "#EBF5FF" }]}>
+              <MaterialCommunityIcons
+                name="book-open-variant"
+                size={24}
+                color="#007AFF"
+              />
+              <Text style={styles.statValue}>
+                {homeData?.totalResources || 0}
+              </Text>
+              <Text style={styles.statLabel}>Resources</Text>
+            </View>
+
+            <View style={[styles.statBox, { backgroundColor: "#F0FEF3" }]}>
+              <MaterialCommunityIcons
+                name="briefcase"
+                size={24}
+                color="#34C759"
+              />
+              <Text style={styles.statValue}>{homeData?.totalJobs || 0}</Text>
+              <Text style={styles.statLabel}>Jobs</Text>
+            </View>
           </View>
-          <View style={[styles.statBox, { backgroundColor: "#F0FEF3" }]}>
-            <MaterialCommunityIcons name="trophy" size={24} color="#FFB800" />
-            <Text style={styles.statValue}>12</Text>
-            <Text style={styles.statLabel}>Badges</Text>
-          </View>
-          <View style={[styles.statBox, { backgroundColor: "#FDF2F8" }]}>
-            <MaterialCommunityIcons
-              name="progress-check"
-              size={24}
-              color="#FF3B30"
-            />
-            <Text style={styles.statValue}>68%</Text>
-            <Text style={styles.statLabel}>Progress</Text>
+
+          {/* ROW 2 */}
+          <View style={styles.statsRow}>
+            <View style={[styles.statBox, { backgroundColor: "#FFF4E5" }]}>
+              <MaterialCommunityIcons
+                name="account-group"
+                size={24}
+                color="#FF9500"
+              />
+              <Text style={styles.statValue}>{homeData?.totalUsers || 0}</Text>
+              <Text style={styles.statLabel}>Students</Text>
+            </View>
+
+            <View style={[styles.statBox, { backgroundColor: "#F3E8FF" }]}>
+              <MaterialCommunityIcons name="school" size={24} color="#AF52DE" />
+              <Text style={styles.statValue}>
+                {homeData?.totalResults || 0}
+              </Text>
+              <Text style={styles.statLabel}>Universities</Text>
+            </View>
           </View>
         </View>
 
@@ -206,6 +273,105 @@ const Home = () => {
 export default Home;
 
 const styles = StyleSheet.create({
+  statsSection: {
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+
+  statBox: {
+    width: "48%",
+    borderRadius: 14,
+    paddingVertical: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  statValue: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#000",
+    marginTop: 6,
+  },
+
+  statLabel: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 2,
+  },
+  bannerSection: {
+    padding: 20,
+  },
+
+  banner: {
+    backgroundColor: "#007AFF",
+    borderRadius: 20,
+    padding: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  badge: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    color: "#fff",
+    fontSize: 11,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    alignSelf: "flex-start",
+    marginBottom: 8,
+  },
+
+  bannerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+
+  highlight: {
+    color: "#FFD700",
+  },
+
+  bannerSubtitle: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.9)",
+    marginVertical: 8,
+  },
+
+  primaryBtn: {
+    backgroundColor: "#fff",
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+
+  primaryText: {
+    color: "#007AFF",
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 13,
+  },
+
+  secondaryBtn: {
+    borderWidth: 1,
+    borderColor: "#fff",
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginTop: 6,
+  },
+
+  secondaryText: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 13,
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
@@ -215,52 +381,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 30,
-  },
-  bannerSection: {
-    padding: 20,
-  },
-  banner: {
-    backgroundColor: "#007AFF",
-    borderRadius: 16,
-    padding: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  bannerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  bannerSubtitle: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.9)",
-  },
-  statsSection: {
-    flexDirection: "row",
-    paddingHorizontal: 20,
-    marginBottom: 24,
-    gap: 12,
-  },
-  statBox: {
-    flex: 1,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#000",
-    marginTop: 6,
-  },
-  statLabel: {
-    fontSize: 11,
-    color: "#666",
-    marginTop: 2,
-  },
+  },  
+  
   quickAccessSection: {
     marginBottom: 24,
   },

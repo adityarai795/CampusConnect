@@ -12,15 +12,17 @@ import { DrawerNavigationProp } from "@react-navigation/drawer";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import asyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { useAuth } from "@/src/context/AuthContext";
 interface DrawerContentProps {
   navigation: DrawerNavigationProp<any>;
 }
 
 const DrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
+  const { user } = useAuth();
   const mainFeatures = [
     { icon: "file-document", label: "Resume", route: "resume" },
     { icon: "shopping", label: "Market Place", route: "marketplace" },
-    { icon: "brain", label: "Quiz", route: "quiz" },
+    { icon: "brain", label: "Quiz", route: "viewTopics" },
     { icon: "star", label: "Ambassador", route: "ambassador" },
     { icon: "road", label: "Roadmap", route: "roadmap" },
     { icon: "book", label: "Resources", route: "resources" },
@@ -53,8 +55,8 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
               navigation.navigate("profile");
             }}
           >
-            <Text style={styles.name}>Aditya Rai</Text>
-            <Text style={styles.email}>adityarai@123.com</Text>
+            <Text style={styles.name}>{user?.name || "Unknown"}</Text>
+            <Text style={styles.email}>{user?.email || "unknown@123.com"}</Text>
           </TouchableOpacity> 
         </View>
       </View>

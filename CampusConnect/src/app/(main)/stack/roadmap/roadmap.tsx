@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,7 +11,8 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
+import api from "@/src/services/api";
+import { useRouter } from "expo-router";
 const INITIAL_STAGES = [
   {
     id: 1,
@@ -44,15 +45,31 @@ const INITIAL_STAGES = [
 ];
 
 const Roadmap = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
+const router = useRouter();
 
   // ===== STATE =====
-  const [roadmapStages, setRoadmapStages] = useState(INITIAL_STAGES);
+  const [roadmapStages, setRoadmapStages] = useState<any[]>([]);
 
   // ===== HANDLERS =====
   const handleBackPress = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
+
+  const fetchRoadmap = async () => {
+    try {
+      const response = await api.get("/roadmap/getAll");
+      const data = Array.isArray(response?.data)
+        ? response.data
+        : [];
+      setRoadmapStages(data);
+    } catch (error) {
+      console.error("Error fetching roadmap:", error);
+    }
+  }
+  useEffect(() => {
+    fetchRoadmap();
+  }, []);
 
   const handleStagePress = useCallback(
     (id: number, stageName: string) => {
@@ -111,7 +128,9 @@ const Roadmap = () => {
           {roadmapStages.map((stage, index) => (
             <TouchableOpacity
               key={stage.id}
-              onPress={() => handleStagePress(stage.id, stage.stage)}
+              // onPress={() => handleStagePress(stage.id, stage.title)}
+              onPress={() => {
+navigation.navigate("openRoadmap", { id: stage._id });              }}
             >
               <View style={styles.stageCard}>
                 <View
@@ -125,8 +144,8 @@ const Roadmap = () => {
                   </Text>
                 </View>
                 <View style={styles.stageInfo}>
-                  <Text style={styles.stageName}>{stage.stage}</Text>
-                  <Text style={styles.stageTopics}>{stage.topics}</Text>
+                  <Text style={styles.stageName}>{stage.title}</Text>
+                  <Text style={styles.stageTopics}>{stage.category}</Text>
                 </View>
                 <Text style={styles.stageIcon}>{stage.icon}</Text>
               </View>

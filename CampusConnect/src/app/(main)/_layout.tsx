@@ -17,9 +17,9 @@ import Resume from "./stack/resume/resume";
 import MarketPlace from "./stack/marketplace/marketplace";
 import ProductDetails from "./stack/marketplace/productDetails";
 import MarketplaceUploadProduct from "./stack/marketplace/marketplaceUploadProduct";
-import Quiz from "./stack/placementkit/quiz";
+import ViewTopics from "./stack/Quize/ViewTopics";
 import Ambassador from "./stack/ambassador/ambassador";
-import Roadmap from "./stack/roadmap";
+import Roadmap from "./stack/roadmap/roadmap";
 import Resources from "./stack/placementkit/resources";
 import Help from "./stack/supports/help";
 import About from "./stack/supports/about";
@@ -28,7 +28,11 @@ import Profile from "./stack/profile/profile";
 import CommunityPostDetails from "./community/communityPostDetails";
 import CommunityMyPosts from "./community/communityMyPosts";
 import CommunityCreatePost from "./community/communityCreatePost";
-
+import myJobs from "./stack/profile/myJobs";
+import applyAmbassador from "./stack/ambassador/applyAmbassador";
+import openRoadmap from "./stack/roadmap/openRoadmap";
+import OpenQuize from "./stack/Quize/OpenQuize";
+import CreateResume from "./stack/resume/createResume";
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -128,9 +132,14 @@ export default function MainLayout() {
         name="marketplaceUploadProduct"
         component={MarketplaceUploadProduct}
       />
-      <Drawer.Screen name="PlacementKit" component={Quiz} />
+      <Drawer.Screen name="myJobs" component={myJobs} />
+      <Drawer.Screen name="viewTopics" component={ViewTopics} />
+      <Drawer.Screen name="openquize" component={OpenQuize} />
+      <Drawer.Screen name="createResume" component={CreateResume} />
       <Drawer.Screen name="ambassador" component={Ambassador} />
+      <Drawer.Screen name="applyAmbassdor" component={applyAmbassador}/>
       <Drawer.Screen name="roadmap" component={Roadmap} />
+      <Drawer.Screen name="openRoadmap" component={openRoadmap} />
       <Drawer.Screen name="resources" component={Resources} />
       <Drawer.Screen
         name="communityPostDetails"

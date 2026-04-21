@@ -61,7 +61,18 @@ module.exports.deleteCodingProblem = async (req, res) => {
 };
 
 // Quiz Question Controllers
-
+module.exports.addBulkQuizQuestions = async (req, res) => {
+  try {
+    const quizQuestions = req.body; // Expecting an array of quiz questions
+    const createdQuizQuestions = await QuizQuestion.insertMany(quizQuestions);
+    res.status(201).json({
+      message: "Bulk quiz questions created successfully",
+      quizQuestions: createdQuizQuestions,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+}
 module.exports.addQuizQuestion = async (req, res) => {
   try {
     const createdQuiz = await QuizQuestion.create(req.body);
@@ -118,7 +129,42 @@ module.exports.deleteQuizQuestion = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+module.exports.getQuizQuestionByCategory = async (req, res) => {
+  try {
+    const { topic } = req.params;
 
+    if (!topic) {
+      return res.status(400).json({
+        success: false,
+        message: "Topic is required",
+      });
+    }
+
+    // Case-insensitive match
+    const quizQuestions = await QuizQuestion.find({
+      topic: { $regex: new RegExp(`^${topic}$`, "i") },
+      isActive: true,
+    });
+
+    if (quizQuestions.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No questions found for this topic",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: quizQuestions.length,
+      quizQuestions,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 // Project Idea Controllers
 module.exports.addProjectIdea = async (req, res) => {
   try {

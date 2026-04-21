@@ -16,10 +16,15 @@ function Sidebar() {
     { name: "Coding Problems", path: "/showallProblems", icon: "💻" },
     { name: "Roadmaps", path: "/roadmaps", icon: "🗺️" },
     { name: "Marketplace", path: "/marketplace", icon: "🛒" },
+    { name: "Quiz Questions", path: "/quizquestions", icon: "❓" },
+    { name: "Projects", path: "/projects", icon: "📁" },
+    { name: "Interview questions", path: "/interviewquestions", icon: "🎤" },
+    {name :"Contact Queries", path:"/contactqueries", icon:"📞"},
+    { name: "Logout", path: "/logout", icon: "🚪" },
   ];
 
   return (
-    <aside className="w-64 h-screen bg-slate-900 text-white p-5">
+    <aside className="w-64  bg-slate-900 text-white p-5">
       <h2 className="text-xl font-bold mb-6">Admin Panel</h2>
 
       <ul className="space-y-2">

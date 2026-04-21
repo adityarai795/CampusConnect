@@ -22,39 +22,9 @@ const Job = () => {
   const [searchText, setSearchText] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
-
-  // const handleApplyJob = useCallback((jobId: number) => {
-  //   setJobs((prevJobs) =>
-  //     prevJobs.map((job) => {
-  //       if (job.id === jobId) {
-  //         const newApplied = !job.applied;
-  //         if (newApplied) {
-  //           Alert.alert("Success", "You have applied for this job!");
-  //         }
-  //         return { ...job, applied: newApplied };
-  //       }
-  //       return job;
-  //     }),
-  //   );
-  // }, []);
-
-  // const filteredJobs = useMemo(() => {
-  //   return jobs.filter((job) => {
-  //     const matchesSearch =
-  //       job.position.toLowerCase().includes(searchText.toLowerCase()) ||
-  //       job.company.toLowerCase().includes(searchText.toLowerCase());
-  //     const matchesLevel =
-  //       selectedLevel === "All" || job.level === selectedLevel;
-  //     const matchesType = selectedType === "All" || job.type === selectedType;
-  //     return matchesSearch && matchesLevel && matchesType;
-  //   });
-  // }, [jobs, searchText, selectedLevel, selectedType]);
-
-
   const fetchJobs = useCallback(async () => {
     try {
-      // const response = await api.get("/job/showall");
-      const response = await axios.get("http://13.203.2.23:3000/job/showall");
+      const response =await api.get("/job/showall");
       setJobs(response.data.message);
     } catch (error) {
       Alert.alert("Error", "Failed to fetch jobs. Please try again later.");

@@ -15,6 +15,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Header from "../../../components/Header";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
+import api from "@/src/services/api";
 
 const Community = () => {
   const navigation = useNavigation<any>();
@@ -25,9 +26,7 @@ const Community = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get(
-        "http://13.203.2.23:3000/community/post/viewall",
-      );
+      const response = await api.get("/community/post/viewall");
       console.log("Fetched posts:", response);
       setPosts(response.data.posts);
     } catch (error) {
@@ -62,31 +61,6 @@ const Community = () => {
               onChangeText={setSearchText}
             />
           </View>
-        </View>
-
-        {/* Filter Tabs */}
-        <View style={styles.filterSection}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {["All", "React", "Tips", "WebDev", "JavaScript"].map((filter) => (
-              <TouchableOpacity
-                key={filter}
-                style={[
-                  styles.filterButton,
-                  activeFilter === filter && styles.activeFilterButton,
-                ]}
-                onPress={() => setActiveFilter(filter)}
-              >
-                <Text
-                  style={[
-                    styles.filterButtonText,
-                    activeFilter === filter && styles.activeFilterText,
-                  ]}
-                >
-                  {filter}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
         </View>
 
         {/* Create Post Button */}

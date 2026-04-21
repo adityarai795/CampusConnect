@@ -1,5 +1,6 @@
+// app/(auth)/login.tsx
+
 import React, { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   StyleSheet,
   Text,
@@ -10,74 +11,40 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import * as WebBrowser from "expo-web-browser";
-import * as Google from "expo-auth-session/providers/google";
-import { useEffect } from "react";
-import api from "@/src/services/api";
-
-WebBrowser.maybeCompleteAuthSession();
+import { useAuth } from "@/src/context/AuthContext";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const { login } = useAuth();
 
-const [request, response, promptAsync] = Google.useAuthRequest({
-  clientId: "YOUR_WEB_CLIENT_ID",
-  androidClientId: "YOUR_ANDROID_CLIENT_ID",
-  iosClientId: "YOUR_IOS_CLIENT_ID",
-});
-
-  useEffect(() => {
-    if (response?.type === "success") {
-      const { authentication } = response;
-      Alert.alert("Google Login Success");
-      router.push("/(main)");
-    }
-  }, [response]);
-
-  const handleLinkedInLogin = () => {
-    Alert.alert(
-      "LinkedIn Login",
-      "Currently, LinkedIn login is not implemented. Please use Google login or email/password to continue."
-    );
-  };
-
-  const login = async () => {
+  const handleLogin = async () => {
     try {
       if (!email || !password) {
-        Alert.alert("Error", "Please enter both email and password");
+        Alert.alert("Error", "Please enter email and password");
         return;
       }
-        // router.push("/(main)");
 
-      const response = await api.post("/auth/login", { email, password });
-      console.log("Login request payload:", { email, password });
-      console.log("Login response:", response);
-      if (response.status === 200) {
-              console.log("Login response:", response);
+      await login(email, password);
 
-        Alert.alert("Login Successful", `Welcome back, ${email}!`);
-          await AsyncStorage.setItem("token", response.data.token);
-
-        router.push("/(main)"); 
-      } else {
-        Alert.alert("Login Failed", "Invalid email or password");
-      } 
+      Alert.alert("Success", "Login successful!");
+      router.push("/(main)");
     } catch (error) {
-      console.log(error);
-      Alert.alert("Login Failed", "An error occurred during login");
+      Alert.alert("Login Failed", "Invalid credentials or server error");
     }
+  };
 
-  }
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <MaterialCommunityIcons name="school" size={48} color="#007AFF" />
-        <Text style={styles.title}>CampusConnect</Text>
+        <Text style={styles.title}>CollegeConnect</Text>
         <Text style={styles.subtitle}>Welcome Back</Text>
       </View>
 
+      {/* Form */}
       <View style={styles.form}>
         <Text style={styles.label}>Email</Text>
         <TextInput
@@ -99,40 +66,9 @@ const [request, response, promptAsync] = Google.useAuthRequest({
           secureTextEntry
         />
 
-        {/* Normal Login */}
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => {
-            Alert.alert("Login Successful", `Welcome back, ${email}!`);
-            login();
-          }}
-        >
+        {/* Login Button */}
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.loginButtonText}>Login</Text>
-        </TouchableOpacity>
-
-        {/* Divider */}
-        <View style={styles.divider}>
-          <View style={styles.line} />
-          <Text style={styles.dividerText}>OR</Text>
-          <View style={styles.line} />
-        </View>
-
-        {/* Google Login */}
-        <TouchableOpacity
-          style={styles.googleButton}
-          onPress={() => promptAsync()}
-        >
-          <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
-          <Text style={styles.socialText}>Continue with Google</Text>
-        </TouchableOpacity>
-
-        {/* LinkedIn Login */}
-        <TouchableOpacity
-          style={styles.linkedinButton}
-          onPress={handleLinkedInLogin}
-        >
-          <MaterialCommunityIcons name="linkedin" size={20} color="#fff" />
-          <Text style={styles.linkedinText}>Continue with LinkedIn</Text>
         </TouchableOpacity>
 
         {/* Signup */}
@@ -146,6 +82,8 @@ const [request, response, promptAsync] = Google.useAuthRequest({
     </View>
   );
 }
+
+// 🎨 Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -157,75 +95,23 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: "bold", color: "#000", marginTop: 12 },
   subtitle: { fontSize: 16, color: "#666", marginTop: 4 },
   form: { marginBottom: 20 },
-  label: { fontSize: 14, fontWeight: "600", color: "#000", marginBottom: 8 },
+  label: { fontSize: 14, fontWeight: "600", marginBottom: 8 },
   input: {
     borderColor: "#E5E5EA",
     borderWidth: 1,
     borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 14,
+    padding: 12,
     marginBottom: 16,
-    color: "#000",
   },
   loginButton: {
     backgroundColor: "#007AFF",
-    paddingVertical: 14,
+    padding: 14,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 10,
   },
   loginButtonText: { color: "#fff", fontWeight: "600", fontSize: 16 },
   footer: { flexDirection: "row", justifyContent: "center", marginTop: 20 },
-  footerText: { fontSize: 14, color: "#666" },
-  signupLink: { fontSize: 14, color: "#007AFF", fontWeight: "600" },
-  divider: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginVertical: 20,
-},
-
-line: {
-  flex: 1,
-  height: 1,
-  backgroundColor: "#E5E5EA",
-},
-
-dividerText: {
-  marginHorizontal: 10,
-  color: "#666",
-},
-
-googleButton: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "center",
-  borderWidth: 1,
-  borderColor: "#E5E5EA",
-  padding: 12,
-  borderRadius: 8,
-  marginBottom: 12,
-  gap: 10,
-},
-
-linkedinButton: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "center",
-  backgroundColor: "#0A66C2",
-  padding: 12,
-  borderRadius: 8,
-  gap: 10,
-},
-
-socialText: {
-  fontSize: 14,
-  fontWeight: "500",
-},
-
-linkedinText: {
-  color: "#fff",
-  fontSize: 14,
-  fontWeight: "600",
-},
+  footerText: { color: "#666" },
+  signupLink: { color: "#007AFF", fontWeight: "600" },
 });

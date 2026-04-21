@@ -34,7 +34,7 @@ export default function StackLayout() {
         name="placementkit/project"
         options={{ title: "Projects" }}
       />
-      <Stack.Screen name="placementkit/quiz" options={{ title: "Quizzes" }} />
+      <Stack.Screen name="viewTopics" options={{ title: "Quizzes" }} />
 
       <Stack.Screen name="job/jobs-list" options={{ title: "Jobs" }} />
       <Stack.Screen name="job/job-details" options={{ title: "Job Details" }} />
@@ -44,17 +44,19 @@ export default function StackLayout() {
         name="marketplace/marketplaceUploadProduct"
         options={{ title: "Upload Product" }}
       />
-
       <Stack.Screen name="profile" options={{ title: "Profile" }} />
+      <Stack.Screen name="profile/myJobs" options={{ title: "myJobs" }} />
 
       <Stack.Screen name="resources" options={{ title: "Resources" }} />
 
       <Stack.Screen name="roadmap" options={{ title: "Roadmap" }} />
-
+      <Stack.Screen name="openRoadmap" options={{ title: "Open Roadmap" }} />
       <Stack.Screen
         name="resume/resume"
         options={{ title: "Resume Builder" }}
       />
+      <Stack.Screen name="resume/createResume" options={{ title: "Create Resume" }} />
+      <Stack.Screen name="openquize" options={{title:"Open quize"}} />
       <Stack.Screen name="resume/checkats" options={{ title: "Resume Chat" }} />
 
       <Stack.Screen

@@ -2,10 +2,12 @@ import React from "react";
 import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { useNavigation, DrawerActions } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useAuth } from "@/src/context/AuthContext";
 
 const Header: React.FC = () => {
   const navigation = useNavigation<any>();
-
+  const { user } = useAuth();
+  
   return (
     <View style={styles.header}>
       {/* Left section - Menu button */}
@@ -26,8 +28,8 @@ const Header: React.FC = () => {
           />
         </View>
         <View style={styles.textInfo}>
-          <Text style={styles.name}>Aditya Rai</Text>
-          <Text style={styles.email}>aditya@123.com</Text>
+          <Text style={styles.name}>{user?.name || "Unknown"}</Text>
+          <Text style={styles.email}>{user?.email || "unknown@123.com"}</Text>
         </View>
       </View>
 

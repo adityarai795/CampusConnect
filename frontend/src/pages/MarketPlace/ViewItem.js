@@ -91,17 +91,17 @@ const fetchItem = async (id) => {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <User size={16} className="text-gray-600" />
-              <span>{item.owner.username ? item.owner.username : "NA"}</span>
+              <span>{item.owner?.username ? item.owner?.username : "NA"}</span>
             </div>
 
             <div className="flex items-center gap-2">
               <Phone size={16} className="text-gray-600" />
-              <span>{item.owner.contact ? item.owner.contact : "NA"}</span>
+              <span>{item.owner?.contact ? item.owner?.contact : "NA"}</span>
             </div>
 
             <div className="flex items-center gap-2">
               <Mail size={16} className="text-gray-600" />
-              <span>{item.owner.email}</span>
+              <span>{item.owner?.email ? item.owner?.email : "NA"}</span>
             </div>
 
             <div className="flex items-center gap-2">
